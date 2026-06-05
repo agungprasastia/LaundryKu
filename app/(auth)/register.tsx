@@ -11,10 +11,14 @@ import {
   Animated,
   Dimensions,
   StatusBar,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { LaundryColors } from '@/constants/colors';
+import { useAuth } from '@/contexts/AuthContext';
+import { ROLE_MAP, FrontendRole, UserRole } from '@/types/user';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -23,6 +27,7 @@ type RoleType = 'pelanggan' | 'mitra' | 'kurir';
 export default function RegisterScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ role?: string }>();
+  const { register } = useAuth();
 
   const [namaLengkap, setNamaLengkap] = useState('');
   const [email, setEmail] = useState('');
@@ -35,6 +40,8 @@ export default function RegisterScreen() {
     (params.role as RoleType) || 'pelanggan'
   );
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -79,13 +86,118 @@ export default function RegisterScreen() {
     }).start();
   };
 
-  const handleRegister = () => {
-    // TODO: Implement register logic
-    console.log('Register:', { namaLengkap, email, noHp, password, selectedRole });
+  /**
+   * Validate email format
+   */
+  const isValidEmail = (value: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(value);
+  };
+
+  const handleRegister = async () => {
+    // Clear previous errors
+    setErrorMessage('');
+
+    // Validate
+    if (!namaLengkap.trim()) {
+      setErrorMessage('Nama lengkap wajib diisi');
+      return;
+    }
+    if (!email.trim()) {
+      setErrorMessage('Email wajib diisi');
+      return;
+    }
+    if (!isValidEmail(email.trim())) {
+      setErrorMessage('Format email tidak valid');
+      return;
+    }
+    if (password.length < 6) {
+      setErrorMessage('Password minimal 6 karakter');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setErrorMessage('Konfirmasi password tidak cocok');
+      return;
+    }
+    if (!agreeTerms) {
+      setErrorMessage('Anda harus menyetujui Syarat & Ketentuan');
+      return;
+    }
+
+    // Map frontend role to backend role
+    const backendRole: UserRole = ROLE_MAP[selectedRole as FrontendRole];
+
+    // Build payload
+    const payload: any = {
+      full_name: namaLengkap.trim(),
+      email: email.trim(),
+      password: password,
+      role: backendRole,
+      address: null,
+      lat: null,
+      lng: null,
+    };
+
+    // Add courier-specific fields
+    if (backendRole === 'courier') {
+      payload.vehicle_name = null;
+      payload.vehicle_plate_number = null;
+    }
+
+    setLoading(true);
+    try {
+      const result = await register(payload);
+
+      if (result.success) {
+        if (backendRole === 'customer') {
+          // Customer → redirect to login with success message
+          Alert.alert(
+            'Registrasi Berhasil',
+            'Akun pelanggan Anda berhasil dibuat. Silakan login.',
+            [
+              {
+                text: 'Login Sekarang',
+                onPress: () => router.replace('/(auth)/login'),
+              },
+            ]
+          );
+        } else {
+          // Owner/Courier → show verification message
+          Alert.alert(
+            'Registrasi Berhasil',
+            `Akun ${backendRole === 'owner' ? 'Mitra Laundry' : 'Kurir'} Anda berhasil dibuat. Akun harus diverifikasi admin sebelum bisa menggunakan fitur utama.`,
+            [
+              {
+                text: 'OK',
+                onPress: () => router.replace('/(auth)/login'),
+              },
+            ]
+          );
+        }
+      } else {
+        setErrorMessage(result.message || 'Registrasi gagal');
+      }
+    } catch (error: any) {
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        'Registrasi gagal. Silakan coba lagi.';
+      setErrorMessage(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const navigateToLogin = () => {
     router.back();
+  };
+
+  const handleGoogleRegister = () => {
+    Alert.alert(
+      'Coming Soon',
+      'Daftar dengan Google belum tersedia saat ini. Silakan gunakan form pendaftaran.',
+      [{ text: 'OK' }]
+    );
   };
 
   const roles: { key: RoleType; label: string; icon: string; color: string; bg: string }[] = [
@@ -155,6 +267,14 @@ export default function RegisterScreen() {
               Lengkapi data diri untuk mulai menggunakan LaundryKu.
             </Text>
 
+            {/* Error Message */}
+            {errorMessage ? (
+              <View style={styles.errorContainer}>
+                <Ionicons name="alert-circle" size={18} color={LaundryColors.error} />
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              </View>
+            ) : null}
+
             {/* Nama Lengkap */}
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Nama Lengkap</Text>
@@ -165,8 +285,12 @@ export default function RegisterScreen() {
                   placeholder="Masukkan nama lengkap"
                   placeholderTextColor={LaundryColors.inputPlaceholder}
                   value={namaLengkap}
-                  onChangeText={setNamaLengkap}
+                  onChangeText={(text) => {
+                    setNamaLengkap(text);
+                    if (errorMessage) setErrorMessage('');
+                  }}
                   autoCapitalize="words"
+                  editable={!loading}
                 />
               </View>
             </View>
@@ -181,10 +305,14 @@ export default function RegisterScreen() {
                   placeholder="Masukkan email"
                   placeholderTextColor={LaundryColors.inputPlaceholder}
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={(text) => {
+                    setEmail(text);
+                    if (errorMessage) setErrorMessage('');
+                  }}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
+                  editable={!loading}
                 />
               </View>
             </View>
@@ -201,6 +329,7 @@ export default function RegisterScreen() {
                   value={noHp}
                   onChangeText={setNoHp}
                   keyboardType="phone-pad"
+                  editable={!loading}
                 />
               </View>
             </View>
@@ -212,11 +341,15 @@ export default function RegisterScreen() {
                 <Ionicons name="lock-closed-outline" size={20} color={LaundryColors.inputIcon} style={styles.inputIcon} />
                 <TextInput
                   style={styles.textInput}
-                  placeholder="Buat password"
+                  placeholder="Buat password (min. 6 karakter)"
                   placeholderTextColor={LaundryColors.inputPlaceholder}
                   value={password}
-                  onChangeText={setPassword}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    if (errorMessage) setErrorMessage('');
+                  }}
                   secureTextEntry={!showPassword}
+                  editable={!loading}
                 />
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
@@ -241,8 +374,12 @@ export default function RegisterScreen() {
                   placeholder="Ulangi password"
                   placeholderTextColor={LaundryColors.inputPlaceholder}
                   value={confirmPassword}
-                  onChangeText={setConfirmPassword}
+                  onChangeText={(text) => {
+                    setConfirmPassword(text);
+                    if (errorMessage) setErrorMessage('');
+                  }}
                   secureTextEntry={!showConfirmPassword}
+                  editable={!loading}
                 />
                 <TouchableOpacity
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -274,6 +411,7 @@ export default function RegisterScreen() {
                       ]}
                       onPress={() => setSelectedRole(role.key)}
                       activeOpacity={0.7}
+                      disabled={loading}
                     >
                       {isSelected && (
                         <View style={styles.roleCheckBadge}>
@@ -293,6 +431,7 @@ export default function RegisterScreen() {
               style={styles.termsCheckRow}
               onPress={() => setAgreeTerms(!agreeTerms)}
               activeOpacity={0.8}
+              disabled={loading}
             >
               <View style={[styles.checkbox, agreeTerms && styles.checkboxChecked]}>
                 {agreeTerms && <Ionicons name="checkmark" size={14} color={LaundryColors.textWhite} />}
@@ -310,16 +449,22 @@ export default function RegisterScreen() {
               <TouchableOpacity
                 style={[
                   styles.registerButton,
-                  !agreeTerms && styles.registerButtonDisabled,
+                  (!agreeTerms || loading) && styles.registerButtonDisabled,
                 ]}
                 onPress={handleRegister}
                 onPressIn={handlePressIn}
                 onPressOut={handlePressOut}
                 activeOpacity={0.9}
-                disabled={!agreeTerms}
+                disabled={!agreeTerms || loading}
               >
-                <Text style={styles.registerButtonText}>Daftar</Text>
-                <Ionicons name="arrow-forward" size={20} color={LaundryColors.textWhite} />
+                {loading ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <>
+                    <Text style={styles.registerButtonText}>Daftar</Text>
+                    <Ionicons name="arrow-forward" size={20} color={LaundryColors.textWhite} />
+                  </>
+                )}
               </TouchableOpacity>
             </Animated.View>
 
@@ -331,7 +476,11 @@ export default function RegisterScreen() {
             </View>
 
             {/* Google Button */}
-            <TouchableOpacity style={styles.googleButton} activeOpacity={0.8}>
+            <TouchableOpacity
+              style={styles.googleButton}
+              activeOpacity={0.8}
+              onPress={handleGoogleRegister}
+            >
               <FontAwesome name="google" size={20} color="#DB4437" />
               <Text style={styles.googleButtonText}>Daftar dengan Google</Text>
             </TouchableOpacity>
@@ -485,6 +634,26 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 19,
     marginBottom: 22,
+  },
+
+  // Error
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#FEF2F2',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+  },
+  errorText: {
+    flex: 1,
+    fontSize: 13,
+    color: LaundryColors.error,
+    fontWeight: '500',
+    lineHeight: 18,
   },
 
   // Input

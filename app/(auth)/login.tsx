@@ -11,10 +11,13 @@ import {
   Animated,
   Dimensions,
   StatusBar,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { LaundryColors } from '@/constants/colors';
+import { useAuth } from '@/contexts/AuthContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -22,9 +25,12 @@ type RoleType = 'pelanggan' | 'mitra' | 'kurir';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -69,13 +75,68 @@ export default function LoginScreen() {
     }).start();
   };
 
-  const handleLogin = () => {
-    // TODO: Implement login logic
-    console.log('Login with:', email, password);
+  const handleLogin = async () => {
+    // Clear previous errors
+    setErrorMessage('');
+
+    // Validate inputs
+    if (!email.trim()) {
+      setErrorMessage('Email wajib diisi');
+      return;
+    }
+    if (!password.trim()) {
+      setErrorMessage('Password wajib diisi');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { role, isVerified } = await login(email.trim(), password);
+
+      // Redirect based on role and verification status
+      if ((role === 'owner' || role === 'courier') && !isVerified) {
+        router.replace('/(auth)/waiting-verification');
+        return;
+      }
+
+      switch (role) {
+        case 'admin':
+          router.replace('/(admin)/beranda');
+          break;
+        case 'customer':
+          router.replace('/(customer)/beranda');
+          break;
+        case 'owner':
+          router.replace('/(owner)/beranda');
+          break;
+        case 'courier':
+          router.replace('/(courier)/beranda');
+          break;
+        default:
+          router.replace('/(auth)/login');
+      }
+    } catch (error: any) {
+      // Extract error message from backend or axios error
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        'Login gagal. Periksa email dan password Anda.';
+      setErrorMessage(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const navigateToRegister = () => {
     router.push('/(auth)/register');
+  };
+
+  const handleGoogleLogin = () => {
+    Alert.alert(
+      'Coming Soon',
+      'Login dengan Google belum tersedia saat ini. Silakan gunakan email dan password.',
+      [{ text: 'OK' }]
+    );
   };
 
   const roleCards: { key: RoleType; label: string; icon: string; color: string; bg: string }[] = [
@@ -141,6 +202,14 @@ export default function LoginScreen() {
               Masuk untuk memantau status laundry,{'\n'}jadwal pickup, dan status pesananmu.
             </Text>
 
+            {/* Error Message */}
+            {errorMessage ? (
+              <View style={styles.errorContainer}>
+                <Ionicons name="alert-circle" size={18} color={LaundryColors.error} />
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              </View>
+            ) : null}
+
             {/* Email Input */}
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Email</Text>
@@ -151,10 +220,14 @@ export default function LoginScreen() {
                   placeholder="Masukkan email"
                   placeholderTextColor={LaundryColors.inputPlaceholder}
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={(text) => {
+                    setEmail(text);
+                    if (errorMessage) setErrorMessage('');
+                  }}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
+                  editable={!loading}
                 />
               </View>
             </View>
@@ -169,8 +242,12 @@ export default function LoginScreen() {
                   placeholder="Masukkan password"
                   placeholderTextColor={LaundryColors.inputPlaceholder}
                   value={password}
-                  onChangeText={setPassword}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    if (errorMessage) setErrorMessage('');
+                  }}
                   secureTextEntry={!showPassword}
+                  editable={!loading}
                 />
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
@@ -191,14 +268,21 @@ export default function LoginScreen() {
             {/* Login Button */}
             <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
               <TouchableOpacity
-                style={styles.loginButton}
+                style={[styles.loginButton, loading && styles.loginButtonDisabled]}
                 onPress={handleLogin}
                 onPressIn={handlePressIn}
                 onPressOut={handlePressOut}
                 activeOpacity={0.9}
+                disabled={loading}
               >
-                <Ionicons name="log-in-outline" size={22} color={LaundryColors.textWhite} />
-                <Text style={styles.loginButtonText}>Masuk</Text>
+                {loading ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <>
+                    <Ionicons name="log-in-outline" size={22} color={LaundryColors.textWhite} />
+                    <Text style={styles.loginButtonText}>Masuk</Text>
+                  </>
+                )}
               </TouchableOpacity>
             </Animated.View>
 
@@ -210,7 +294,11 @@ export default function LoginScreen() {
             </View>
 
             {/* Google Button */}
-            <TouchableOpacity style={styles.googleButton} activeOpacity={0.8}>
+            <TouchableOpacity
+              style={styles.googleButton}
+              activeOpacity={0.8}
+              onPress={handleGoogleLogin}
+            >
               <FontAwesome name="google" size={20} color="#DB4437" />
               <Text style={styles.googleButtonText}>Masuk dengan Google</Text>
             </TouchableOpacity>
@@ -386,6 +474,26 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
 
+  // Error
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#FEF2F2',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+  },
+  errorText: {
+    flex: 1,
+    fontSize: 13,
+    color: LaundryColors.error,
+    fontWeight: '500',
+    lineHeight: 18,
+  },
+
   // Input
   inputGroup: {
     marginBottom: 16,
@@ -442,6 +550,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 12,
     elevation: 6,
+  },
+  loginButtonDisabled: {
+    backgroundColor: '#93C5FD',
+    shadowOpacity: 0.1,
   },
   loginButtonText: {
     fontSize: 16,
