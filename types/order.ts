@@ -13,6 +13,14 @@ export type OrderStatus =
   | 'COMPLETED';
 
 /**
+ * Status history entry from order_status_logs (returned by getOrderDetail)
+ */
+export interface StatusHistoryEntry {
+  status: OrderStatus;
+  at: string;
+}
+
+/**
  * Order object
  */
 export interface Order {
@@ -29,7 +37,11 @@ export interface Order {
   delivery_lat?: number;
   delivery_lng?: number;
   weight_kg?: number;
-  total_price?: number;
+  distance_km?: number;
+  service_fee?: number;
+  delivery_fee?: number;
+  total_amount?: number;
+  total_price?: number; // kept for backward compat
   platform_fee?: number;
   owner_earning?: number;
   courier_fee?: number;
@@ -41,6 +53,16 @@ export interface Order {
   customer_name?: string;
   owner_name?: string;
   courier_name?: string;
+  // Nested from getOrderDetail
+  service?: {
+    name?: string;
+    price_per_kg_customer?: number;
+  };
+  courier?: {
+    name?: string;
+    vehicle?: string;
+  } | null;
+  status_history?: StatusHistoryEntry[];
 }
 
 /**

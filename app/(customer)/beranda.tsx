@@ -244,7 +244,7 @@ export default function CustomerBerandaScreen() {
                   ) : null}
                 </View>
                 <View style={styles.servicePriceWrap}>
-                  <Text style={styles.servicePrice}>{formatPrice(svc.price_per_kg)}</Text>
+                  <Text style={styles.servicePrice}>{formatPrice(svc.price_per_kg_customer)}</Text>
                   <Text style={styles.servicePriceUnit}>/kg</Text>
                 </View>
               </TouchableOpacity>
@@ -301,8 +301,8 @@ export default function CustomerBerandaScreen() {
                   <View style={styles.orderDetailRow}>
                     <Ionicons name="calendar-outline" size={13} color={LaundryColors.textMuted} />
                     <Text style={styles.orderDetailText}>{formatDate(order.created_at)}</Text>
-                    {order.total_price != null ? (
-                      <Text style={styles.orderAmount}>{formatPrice(order.total_price)}</Text>
+                    {(order.total_amount ?? order.total_price) != null ? (
+                      <Text style={styles.orderAmount}>{formatPrice(order.total_amount ?? order.total_price)}</Text>
                     ) : null}
                   </View>
                 </View>

@@ -21,7 +21,7 @@ import {
 } from '@/constants/orderStatus';
 import * as orderService from '@/services/orderService';
 import * as paymentService from '@/services/paymentService';
-import { Order, OrderTracking, TrackingEntry } from '@/types/order';
+import { Order, OrderTracking } from '@/types/order';
 import { Invoice } from '@/types/payment';
 
 const IS_DUMMY_PAYMENT = process.env.EXPO_PUBLIC_USE_DUMMY_PAYMENT === 'true';
@@ -47,6 +47,7 @@ export default function CustomerOrdersScreen() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [completeLoading, setCompleteLoading] = useState(false);
   const [callbackLoading, setCallbackLoading] = useState(false);
+  const [lastPaymentId, setLastPaymentId] = useState<string | null>(null);
 
   // ─── Fetch ───
   const fetchOrders = useCallback(async () => {
@@ -148,6 +149,10 @@ export default function CustomerOrdersScreen() {
       });
       if (res.success) {
         const paymentData = res.data;
+        // Save payment_id for dummy callback
+        if (paymentData?.payment_id) {
+          setLastPaymentId(paymentData.payment_id);
+        }
         Alert.alert(
           'Payment Dibuat',
           `Payment berhasil dibuat.\n\n` +
@@ -160,9 +165,17 @@ export default function CustomerOrdersScreen() {
           await fetchInvoice(invoice.invoice_id);
         }
       } else {
+        // Handle 409 — existing pending payment
+        if (res.data?.payment_id) {
+          setLastPaymentId(res.data.payment_id);
+        }
         Alert.alert('Gagal', res.message || 'Gagal membuat payment');
       }
     } catch (err: any) {
+      // Handle 409 response with existing payment_id
+      if (err?.response?.status === 409 && err?.response?.data?.data?.payment_id) {
+        setLastPaymentId(err.response.data.data.payment_id);
+      }
       const msg = err?.response?.data?.message || err?.message || 'Gagal membuat payment';
       Alert.alert('Error', msg);
     } finally {
@@ -172,12 +185,15 @@ export default function CustomerOrdersScreen() {
 
   // ─── Simulate Payment Callback (Dummy) ───
   const handleDummyCallback = async () => {
-    if (!invoice) return;
+    if (!lastPaymentId) {
+      Alert.alert('Info', 'Belum ada payment. Tap "Bayar Sekarang" dulu untuk membuat payment.');
+      return;
+    }
     setCallbackLoading(true);
     try {
       const res = await paymentService.simulatePaymentCallback({
-        invoice_id: invoice.invoice_id,
-        status: 'paid',
+        payment_id: lastPaymentId,
+        status: 'success',
       });
       if (res.success) {
         Alert.alert('Berhasil', 'Simulasi pembayaran berhasil! Invoice sudah terbayar.');
@@ -356,8 +372,8 @@ export default function CustomerOrdersScreen() {
               <View style={styles.orderDetailRow}>
                 <Ionicons name="calendar-outline" size={14} color={LaundryColors.textMuted} />
                 <Text style={styles.orderDetailText}>{formatDate(order.created_at)}</Text>
-                {order.total_price != null ? (
-                  <Text style={styles.orderAmount}>{formatPrice(order.total_price)}</Text>
+                {(order.total_amount ?? order.total_price) != null ? (
+                  <Text style={styles.orderAmount}>{formatPrice(order.total_amount ?? order.total_price)}</Text>
                 ) : null}
               </View>
             </View>
@@ -397,10 +413,10 @@ export default function CustomerOrdersScreen() {
                     <Text style={styles.detailLabel}>Order ID</Text>
                     <Text style={styles.detailValue}>#{detailOrder.order_id}</Text>
                   </View>
-                  {detailOrder.service_name ? (
+                  {(detailOrder.service?.name || detailOrder.service_name) ? (
                     <View style={styles.detailRow}>
                       <Text style={styles.detailLabel}>Layanan</Text>
-                      <Text style={styles.detailValue}>{detailOrder.service_name}</Text>
+                      <Text style={styles.detailValue}>{detailOrder.service?.name || detailOrder.service_name}</Text>
                     </View>
                   ) : null}
                   <View style={styles.detailRow}>
@@ -425,18 +441,36 @@ export default function CustomerOrdersScreen() {
                       <Text style={styles.detailValue}>{detailOrder.weight_kg} kg</Text>
                     </View>
                   ) : null}
-                  {detailOrder.total_price != null ? (
+                  {detailOrder.distance_km != null ? (
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Jarak</Text>
+                      <Text style={styles.detailValue}>{detailOrder.distance_km} km</Text>
+                    </View>
+                  ) : null}
+                  {detailOrder.service_fee != null ? (
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Biaya Laundry</Text>
+                      <Text style={styles.detailValue}>{formatPrice(detailOrder.service_fee)}</Text>
+                    </View>
+                  ) : null}
+                  {detailOrder.delivery_fee != null ? (
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Biaya Pengiriman</Text>
+                      <Text style={styles.detailValue}>{formatPrice(detailOrder.delivery_fee)}</Text>
+                    </View>
+                  ) : null}
+                  {(detailOrder.total_amount ?? detailOrder.total_price) != null ? (
                     <View style={styles.detailRow}>
                       <Text style={styles.detailLabel}>Total</Text>
                       <Text style={[styles.detailValue, { fontWeight: '800', color: LaundryColors.primary }]}>
-                        {formatPrice(detailOrder.total_price)}
+                        {formatPrice(detailOrder.total_amount ?? detailOrder.total_price)}
                       </Text>
                     </View>
                   ) : null}
-                  {detailOrder.courier_name ? (
+                  {(detailOrder.courier?.name || detailOrder.courier_name) ? (
                     <View style={styles.detailRow}>
                       <Text style={styles.detailLabel}>Kurir</Text>
-                      <Text style={styles.detailValue}>{detailOrder.courier_name}</Text>
+                      <Text style={styles.detailValue}>{detailOrder.courier?.name || detailOrder.courier_name}</Text>
                     </View>
                   ) : null}
                   <View style={styles.detailRow}>
@@ -512,7 +546,7 @@ export default function CustomerOrdersScreen() {
                         ) : null}
 
                         {/* Dummy Payment Simulation */}
-                        {IS_DUMMY_PAYMENT && invoice.status === 'unpaid' ? (
+                        {IS_DUMMY_PAYMENT && invoice.status === 'unpaid' && lastPaymentId ? (
                           <TouchableOpacity
                             style={[styles.dummyButton, callbackLoading && styles.actionButtonDisabled]}
                             onPress={handleDummyCallback}
@@ -571,14 +605,15 @@ export default function CustomerOrdersScreen() {
 }
 
 // ─── Timeline Renderer ───
-function renderTimeline(order: Order, tracking: OrderTracking | null) {
+function renderTimeline(order: Order, _tracking: OrderTracking | null) {
   const currentStatusIndex = ALL_ORDER_STATUSES.indexOf(order.status);
 
-  // Build tracking map for timestamps
-  const trackingMap = new Map<string, TrackingEntry>();
-  if (tracking?.tracking_history) {
-    tracking.tracking_history.forEach((entry) => {
-      trackingMap.set(entry.status, entry);
+  // Build tracking map for timestamps from order.status_history
+  // Backend returns status_history: [{ status, at }, ...]
+  const trackingMap = new Map<string, { timestamp: string; description?: string }>();
+  if (order.status_history) {
+    order.status_history.forEach((entry) => {
+      trackingMap.set(entry.status, { timestamp: entry.at });
     });
   }
 
@@ -587,7 +622,7 @@ function renderTimeline(order: Order, tracking: OrderTracking | null) {
       {ALL_ORDER_STATUSES.map((status, index) => {
         const isCompleted = index <= currentStatusIndex;
         const isCurrent = index === currentStatusIndex;
-        const entry = trackingMap.get(status);
+        const entry: { timestamp?: string; description?: string } | undefined = trackingMap.get(status);
         const statusColor = isCompleted ? getStatusColor(status) : LaundryColors.textMuted;
 
         return (

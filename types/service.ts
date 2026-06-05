@@ -8,6 +8,7 @@ export interface LaundryService {
   description?: string;
   price_per_kg?: number;
   price_per_kg_owner?: number;
+  price_per_kg_customer?: number;
   is_active?: boolean | number;
   created_at?: string;
   updated_at?: string;

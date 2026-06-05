@@ -209,7 +209,7 @@ export default function CustomerProfileScreen() {
                     {notif.title ? (
                       <Text style={styles.notifTitle}>{notif.title}</Text>
                     ) : null}
-                    <Text style={styles.notifMessage}>{notif.message}</Text>
+                    <Text style={styles.notifMessage}>{notif.body || notif.message}</Text>
                     <Text style={styles.notifDate}>{formatDate(notif.created_at)}</Text>
                   </View>
                 </View>

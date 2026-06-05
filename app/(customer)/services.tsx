@@ -237,7 +237,7 @@ export default function CustomerServicesScreen() {
                 <Text style={styles.serviceId}>{svc.service_id}</Text>
               </View>
               <View style={styles.servicePriceTag}>
-                <Text style={styles.servicePrice}>{formatPrice(svc.price_per_kg)}</Text>
+                <Text style={styles.servicePrice}>{formatPrice(svc.price_per_kg_customer)}</Text>
                 <Text style={styles.servicePriceUnit}>/kg</Text>
               </View>
             </View>
@@ -299,7 +299,7 @@ export default function CustomerServicesScreen() {
                 <View style={styles.detailSection}>
                   <Text style={styles.detailLabel}>Harga per Kg</Text>
                   <Text style={styles.detailPriceValue}>
-                    {formatPrice(selectedService.price_per_kg)}
+                    {formatPrice(selectedService.price_per_kg_customer)}
                   </Text>
                 </View>
 
