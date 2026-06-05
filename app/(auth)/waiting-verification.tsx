@@ -14,7 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function WaitingVerificationScreen() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, refreshProfile } = useAuth();
 
   const handleLogout = async () => {
     await logout();
@@ -22,8 +22,6 @@ export default function WaitingVerificationScreen() {
   };
 
   const handleRefresh = async () => {
-    // Re-check by going back to login, which will re-evaluate verification
-    const { refreshProfile } = useAuth();
     await refreshProfile();
     // If now verified, the protected route will handle redirection
   };
