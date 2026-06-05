@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,132 +8,54 @@ import {
   Platform,
   Animated,
   StatusBar,
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons, MaterialIcons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { LaundryColors } from '@/constants/colors';
-
-// ─── Data ────────────────────────────────────────
-const statsData = [
-  {
-    icon: 'people',
-    iconLib: 'ion',
-    label: 'Total User',
-    value: '12.540',
-    change: '↑ 8,2%',
-    changeSub: 'vs kemarin',
-    color: '#2563EB',
-    bg: '#EBF5FF',
-  },
-  {
-    icon: 'cube',
-    iconLib: 'ion',
-    label: 'Total Order',
-    value: '1.248',
-    change: '↑ 12,4%',
-    changeSub: 'vs kemarin',
-    color: '#10B981',
-    bg: '#ECFDF5',
-  },
-  {
-    icon: 'bicycle',
-    iconLib: 'ion',
-    label: 'Active Couriers',
-    value: '320',
-    change: '↑ 5,6%',
-    changeSub: 'vs kemarin',
-    color: '#F97316',
-    bg: '#FFF7ED',
-  },
-  {
-    icon: 'cash',
-    iconLib: 'ion',
-    label: 'Revenue',
-    value: 'Rp 24.860.000',
-    change: '↑ 15,3%',
-    changeSub: 'vs kemarin',
-    color: '#EF4444',
-    bg: '#FEF2F2',
-  },
-];
-
-const quickActions = [
-  { icon: 'checkmark-circle', label: 'Verifikasi\nMitra', color: '#2563EB', bg: '#EBF5FF' },
-  { icon: 'checkmark-circle', label: 'Verifikasi\nKurir', color: '#2563EB', bg: '#EBF5FF' },
-  { icon: 'people', label: 'Kelola\nPengguna', color: '#2563EB', bg: '#EBF5FF' },
-  { icon: 'desktop', label: 'Monitoring\nSistem', color: '#2563EB', bg: '#EBF5FF' },
-  { icon: 'chatbubble-ellipses', label: 'Komplain', color: '#2563EB', bg: '#EBF5FF' },
-];
-
-const pendingVerifications = [
-  {
-    name: 'Laundry Bersih Depok',
-    role: 'Mitra Laundry',
-    date: 'Didaftarkan: 15 Mei 2024, 10:30',
-    avatar: '🏪',
-    avatarBg: '#EBF5FF',
-  },
-  {
-    name: 'Budi Santoso',
-    role: 'Kurir',
-    date: 'Didaftarkan: 15 Mei 2024, 09:45',
-    avatar: '👤',
-    avatarBg: '#FFF7ED',
-  },
-  {
-    name: 'Laundry Express',
-    role: 'Mitra Laundry',
-    date: 'Didaftarkan: 15 Mei 2024, 09:10',
-    avatar: '🏪',
-    avatarBg: '#ECFDF5',
-  },
-];
-
-const activities = [
-  {
-    icon: 'cash-outline',
-    iconColor: '#10B981',
-    iconBg: '#ECFDF5',
-    title: 'Pembayaran berhasil dari Order #ORD-20240515-1023',
-    sub: 'Oleh Budi Santoso',
-    time: '10:32',
-  },
-  {
-    icon: 'receipt-outline',
-    iconColor: '#2563EB',
-    iconBg: '#EBF5FF',
-    title: 'Order baru #ORD-20240515-1024',
-    sub: 'Oleh Siti Aisyah',
-    time: '10:18',
-  },
-  {
-    icon: 'warning-outline',
-    iconColor: '#EF4444',
-    iconBg: '#FEF2F2',
-    title: 'Laporan komplain baru diterima',
-    sub: 'Order #ORD-20240515-0987',
-    time: '09:56',
-  },
-  {
-    icon: 'person-add-outline',
-    iconColor: '#8B5CF6',
-    iconBg: '#F5F3FF',
-    title: 'Pengguna baru mendaftar',
-    sub: 'Rina Apriani sebagai Mitra Laundry',
-    time: '09:41',
-  },
-];
-
-const systemStatuses = [
-  { label: 'API', status: 'Normal', color: '#10B981' },
-  { label: 'Payment', status: 'Normal', color: '#10B981' },
-  { label: 'Maps', status: 'Normal', color: '#10B981' },
-  { label: 'Notification', status: 'Normal', color: '#10B981' },
-];
+import { useAuth } from '@/contexts/AuthContext';
+import * as adminService from '@/services/adminService';
+import { PendingUser } from '@/types/user';
 
 // ─── Component ───────────────────────────────────
 export default function AdminBerandaScreen() {
+  const { user } = useAuth();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
+
+  // State for API data
+  const [metrics, setMetrics] = useState<any>(null);
+  const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState('');
+
+  const fetchData = useCallback(async () => {
+    try {
+      setError('');
+      const [metricsRes, pendingRes] = await Promise.all([
+        adminService.getDashboardMetrics(),
+        adminService.getPendingUsers(),
+      ]);
+
+      if (metricsRes.success && metricsRes.data) {
+        setMetrics(metricsRes.data);
+      }
+      if (pendingRes.success && pendingRes.data) {
+        setPendingUsers(Array.isArray(pendingRes.data) ? pendingRes.data : []);
+      }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || 'Gagal memuat data dashboard';
+      setError(msg);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   useEffect(() => {
     Animated.parallel([
@@ -142,12 +64,86 @@ export default function AdminBerandaScreen() {
     ]).start();
   }, []);
 
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchData();
+  };
+
+  // Build stats from API data
+  const statsData = [
+    {
+      icon: 'people',
+      label: 'Total User',
+      value: metrics?.total_users?.toString() || '0',
+      change: metrics?.users_change || '',
+      changeSub: metrics?.users_change ? 'vs kemarin' : '',
+      color: '#2563EB',
+      bg: '#EBF5FF',
+    },
+    {
+      icon: 'cube',
+      label: 'Total Order',
+      value: metrics?.total_orders?.toString() || '0',
+      change: metrics?.orders_change || '',
+      changeSub: metrics?.orders_change ? 'vs kemarin' : '',
+      color: '#10B981',
+      bg: '#ECFDF5',
+    },
+    {
+      icon: 'bicycle',
+      label: 'Active Couriers',
+      value: metrics?.active_couriers?.toString() || '0',
+      change: metrics?.couriers_change || '',
+      changeSub: metrics?.couriers_change ? 'vs kemarin' : '',
+      color: '#F97316',
+      bg: '#FFF7ED',
+    },
+    {
+      icon: 'cash',
+      label: 'Revenue (GMV)',
+      value: metrics?.total_revenue != null
+        ? `Rp ${Number(metrics.total_revenue).toLocaleString('id-ID')}`
+        : (metrics?.gmv != null ? `Rp ${Number(metrics.gmv).toLocaleString('id-ID')}` : 'Rp 0'),
+      change: metrics?.revenue_change || '',
+      changeSub: metrics?.revenue_change ? 'vs kemarin' : '',
+      color: '#EF4444',
+      bg: '#FEF2F2',
+    },
+  ];
+
+  const quickActions = [
+    { icon: 'checkmark-circle', label: 'Verifikasi\nMitra', color: '#2563EB', bg: '#EBF5FF' },
+    { icon: 'checkmark-circle', label: 'Verifikasi\nKurir', color: '#2563EB', bg: '#EBF5FF' },
+    { icon: 'people', label: 'Kelola\nPengguna', color: '#2563EB', bg: '#EBF5FF' },
+    { icon: 'desktop', label: 'Monitoring\nSistem', color: '#2563EB', bg: '#EBF5FF' },
+    { icon: 'chatbubble-ellipses', label: 'Komplain', color: '#2563EB', bg: '#EBF5FF' },
+  ];
+
+  const systemStatuses = [
+    { label: 'API', status: 'Normal', color: '#10B981' },
+    { label: 'Payment', status: 'Normal', color: '#10B981' },
+    { label: 'Maps', status: 'Normal', color: '#10B981' },
+    { label: 'Notification', status: 'Normal', color: '#10B981' },
+  ];
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={LaundryColors.primary} />
+        <Text style={styles.loadingText}>Memuat dashboard...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[LaundryColors.primary]} />
+        }
       >
         {/* ─── HEADER ─── */}
         <View style={styles.header}>
@@ -156,7 +152,9 @@ export default function AdminBerandaScreen() {
               <Ionicons name="person" size={24} color="#FFFFFF" />
             </View>
             <View>
-              <Text style={styles.headerGreeting}>Halo, Admin 👋</Text>
+              <Text style={styles.headerGreeting}>
+                Halo, {user?.full_name || 'Admin'} 👋
+              </Text>
               <Text style={styles.headerSub}>Selamat datang di LaundryKu Admin</Text>
             </View>
           </View>
@@ -167,6 +165,17 @@ export default function AdminBerandaScreen() {
         </View>
 
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+          {/* Error Banner */}
+          {error ? (
+            <View style={styles.errorBanner}>
+              <Ionicons name="alert-circle" size={18} color={LaundryColors.error} />
+              <Text style={styles.errorBannerText}>{error}</Text>
+              <TouchableOpacity onPress={onRefresh}>
+                <Text style={styles.retryText}>Coba Lagi</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+
           {/* ─── RINGKASAN PLATFORM ─── */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Ringkasan Platform</Text>
@@ -184,11 +193,13 @@ export default function AdminBerandaScreen() {
                 </View>
                 <Text style={styles.statLabel}>{stat.label}</Text>
                 <Text style={styles.statValue}>{stat.value}</Text>
-                <Text style={styles.statChange}>
-                  <Text style={{ color: '#10B981' }}>{stat.change}</Text>
-                  {'  '}
-                  <Text style={{ color: LaundryColors.textMuted }}>{stat.changeSub}</Text>
-                </Text>
+                {stat.change ? (
+                  <Text style={styles.statChange}>
+                    <Text style={{ color: '#10B981' }}>{stat.change}</Text>
+                    {'  '}
+                    <Text style={{ color: LaundryColors.textMuted }}>{stat.changeSub}</Text>
+                  </Text>
+                ) : null}
               </View>
             ))}
           </View>
@@ -220,61 +231,47 @@ export default function AdminBerandaScreen() {
           </View>
 
           <View style={styles.pendingCard}>
-            {pendingVerifications.map((item, i) => (
-              <View
-                key={i}
-                style={[
-                  styles.pendingItem,
-                  i < pendingVerifications.length - 1 && styles.pendingItemBorder,
-                ]}
-              >
-                <View style={[styles.pendingAvatar, { backgroundColor: item.avatarBg }]}>
-                  <Text style={{ fontSize: 20 }}>{item.avatar}</Text>
-                </View>
-                <View style={styles.pendingInfo}>
-                  <Text style={styles.pendingName}>{item.name}</Text>
-                  <Text style={styles.pendingRole}>{item.role}</Text>
-                  <Text style={styles.pendingDate}>{item.date}</Text>
-                </View>
-                <View style={styles.pendingActions}>
-                  <View style={styles.pendingBadge}>
-                    <Text style={styles.pendingBadgeText}>Menunggu Verifikasi</Text>
+            {pendingUsers.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Ionicons name="checkmark-circle-outline" size={32} color={LaundryColors.success} />
+                <Text style={styles.emptyText}>Tidak ada verifikasi pending</Text>
+              </View>
+            ) : (
+              pendingUsers.slice(0, 3).map((item, i) => (
+                <View
+                  key={item.user_id || i}
+                  style={[
+                    styles.pendingItem,
+                    i < Math.min(pendingUsers.length, 3) - 1 && styles.pendingItemBorder,
+                  ]}
+                >
+                  <View style={[styles.pendingAvatar, {
+                    backgroundColor: item.role === 'owner' ? '#EBF5FF' : '#FFF7ED'
+                  }]}>
+                    <Text style={{ fontSize: 20 }}>
+                      {item.role === 'owner' ? '🏪' : '👤'}
+                    </Text>
                   </View>
-                  <TouchableOpacity style={styles.cekButton} activeOpacity={0.7}>
-                    <Text style={styles.cekButtonText}>Cek</Text>
-                  </TouchableOpacity>
+                  <View style={styles.pendingInfo}>
+                    <Text style={styles.pendingName}>{item.full_name}</Text>
+                    <Text style={styles.pendingRole}>
+                      {item.role === 'owner' ? 'Mitra Laundry' : 'Kurir'}
+                    </Text>
+                    <Text style={styles.pendingDate}>
+                      {item.created_at ? `Didaftarkan: ${item.created_at}` : item.email}
+                    </Text>
+                  </View>
+                  <View style={styles.pendingActions}>
+                    <View style={styles.pendingBadge}>
+                      <Text style={styles.pendingBadgeText}>Menunggu Verifikasi</Text>
+                    </View>
+                    <TouchableOpacity style={styles.cekButton} activeOpacity={0.7}>
+                      <Text style={styles.cekButtonText}>Cek</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </View>
-            ))}
-          </View>
-
-          {/* ─── AKTIVITAS PLATFORM ─── */}
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Aktivitas Platform</Text>
-            <TouchableOpacity>
-              <Text style={styles.linkText}>Lihat Semua {'>'}</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.activityCard}>
-            {activities.map((act, i) => (
-              <View
-                key={i}
-                style={[
-                  styles.activityItem,
-                  i < activities.length - 1 && styles.activityItemBorder,
-                ]}
-              >
-                <View style={[styles.activityIcon, { backgroundColor: act.iconBg }]}>
-                  <Ionicons name={act.icon as any} size={18} color={act.iconColor} />
-                </View>
-                <View style={styles.activityInfo}>
-                  <Text style={styles.activityTitle} numberOfLines={2}>{act.title}</Text>
-                  <Text style={styles.activitySub}>{act.sub}</Text>
-                </View>
-                <Text style={styles.activityTime}>{act.time}</Text>
-              </View>
-            ))}
+              ))
+            )}
           </View>
 
           {/* ─── STATUS SISTEM ─── */}
@@ -312,6 +309,55 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: LaundryColors.background,
+    gap: 12,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: LaundryColors.textSecondary,
+    fontWeight: '500',
+  },
+
+  /* Error */
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#FEF2F2',
+    marginHorizontal: 20,
+    marginTop: 12,
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+  },
+  errorBannerText: {
+    flex: 1,
+    fontSize: 12,
+    color: LaundryColors.error,
+    fontWeight: '500',
+  },
+  retryText: {
+    fontSize: 12,
+    color: LaundryColors.primary,
+    fontWeight: '700',
+  },
+
+  /* Empty state */
+  emptyState: {
+    padding: 24,
+    alignItems: 'center',
+    gap: 8,
+  },
+  emptyText: {
+    fontSize: 13,
+    color: LaundryColors.textSecondary,
+    fontWeight: '500',
   },
 
   /* Header */
@@ -543,53 +589,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: LaundryColors.primary,
     fontWeight: '700',
-  },
-
-  /* Activity */
-  activityCard: {
-    marginHorizontal: 20,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: LaundryColors.inputBorder,
-    overflow: 'hidden',
-  },
-  activityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-  },
-  activityItemBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: LaundryColors.inputBorder,
-  },
-  activityIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-  },
-  activityInfo: {
-    flex: 1,
-    marginRight: 8,
-  },
-  activityTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: LaundryColors.textPrimary,
-    lineHeight: 17,
-  },
-  activitySub: {
-    fontSize: 11,
-    color: LaundryColors.textMuted,
-    marginTop: 2,
-  },
-  activityTime: {
-    fontSize: 12,
-    color: LaundryColors.textSecondary,
-    fontWeight: '600',
   },
 
   /* System Status */
