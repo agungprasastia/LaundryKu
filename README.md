@@ -58,7 +58,7 @@ Aplikasi mendukung 4 role user:
 | Role | Deskripsi | Akses Setelah Login |
 |---|---|---|
 | **Admin** | Administrator platform | Dashboard, verifikasi user, analytics |
-| **Customer** | Pelanggan laundry | Pesan layanan, tracking order |
+| **Customer** | Pelanggan laundry | Pesan layanan, tracking order, pembayaran |
 | **Owner** | Mitra pemilik laundry | Kelola layanan & pesanan, wallet |
 | **Courier** | Kurir pengantaran | Kelola tugas pickup & delivery, wallet |
 
@@ -103,6 +103,65 @@ Aplikasi mendukung 4 role user:
 1. Tab "Profil" → tap "Keluar" → konfirmasi
 2. Token dihapus, redirect ke login
 
+## Cara Test Customer Flow (Phase 7)
+
+### 1. Login sebagai Customer
+1. Register customer baru atau gunakan akun customer yang sudah ada
+2. Login → masuk ke **Beranda Customer**
+
+### 2. Beranda
+- Melihat greeting "Halo, [nama]"
+- Melihat 3 layanan teratas dari backend
+- Melihat 3 pesanan terbaru (atau empty state jika belum ada)
+- Melihat badge jumlah notifikasi belum dibaca
+- Quick action: Lihat Layanan, Pesanan Saya, Notifikasi, Profil
+
+### 3. Lihat Layanan
+1. Tab **Layanan** → daftar layanan aktif dari `GET /services`
+2. Harga customer per kg ditampilkan (`price_per_kg`), **bukan** `price_per_kg_owner`
+3. Tap card → lihat detail layanan
+
+### 4. Buat Pesanan
+1. Di layanan → tap "Pesan Sekarang"
+2. Isi form:
+   - Alamat pickup
+   - Latitude (-90 s/d 90) & Longitude (-180 s/d 180)
+   - Jadwal pickup (format: `YYYY-MM-DD HH:mm:ss`)
+3. Tap "Buat Pesanan" → `POST /orders`
+4. Alert sukses dengan Order ID → bisa langsung ke tab Pesanan
+
+### 5. Lihat Pesanan
+1. Tab **Pesanan** → toggle Aktif / Riwayat
+2. Tap order card → detail order modal
+3. Lihat:
+   - Info order (ID, layanan, status, alamat, berat, total, kurir)
+   - Tracking timeline 9 tahap
+   - Invoice & pembayaran (jika invoice_id tersedia)
+
+### 6. Pembayaran
+1. Di detail order → jika invoice tersedia & status "unpaid"
+2. Tap "Bayar Sekarang" → `POST /payments` (method: e_wallet)
+3. Jika `EXPO_PUBLIC_USE_DUMMY_PAYMENT=true`:
+   - Muncul tombol "Simulasi Payment Success"
+   - Tap → `POST /payments/callback` dengan status "paid"
+   - Invoice otomatis terbayar
+
+### 7. Konfirmasi Selesai
+1. Jika status order = `DELIVERED`
+2. Muncul tombol "Konfirmasi Selesai"
+3. Tap → `PATCH /orders/:order_id/complete`
+4. Status berubah menjadi `COMPLETED`
+
+### 8. Notifikasi
+1. Tab **Profil** → section Notifikasi
+2. Daftar notifikasi dari `GET /notifications`
+3. Notifikasi unread ditandai dengan border biru
+4. Tap "Tandai Dibaca" → `PATCH /notifications/:notification_id/read`
+
+### 9. Logout
+1. Tab **Profil** → scroll ke bawah → "Keluar"
+2. Konfirmasi → token dihapus → redirect ke login
+
 ## Fitur yang Sudah Terhubung ke Backend
 
 ### Auth & Session
@@ -126,6 +185,23 @@ Aplikasi mendukung 4 role user:
 - ✅ Analytics / laporan (`GET /admin/analytics`)
 - ✅ Profil admin + logout
 
+### Customer (Phase 7)
+- ✅ Beranda: greeting, top services, recent orders, unread notif count
+- ✅ Daftar layanan aktif (`GET /services`)
+- ✅ Detail layanan (`GET /services/:service_id`)
+- ✅ Create order (`POST /orders`)
+- ✅ Active orders (`GET /orders/my-orders`)
+- ✅ Order history (`GET /orders/my-orders/history`)
+- ✅ Order detail (`GET /orders/:order_id`)
+- ✅ Order tracking timeline (`GET /orders/:order_id/tracking`)
+- ✅ Invoice (`GET /payments/invoice/:invoice_id`)
+- ✅ Create payment (`POST /payments`)
+- ✅ Dummy payment callback (`POST /payments/callback`)
+- ✅ Complete order (`PATCH /orders/:order_id/complete`)
+- ✅ Notifications list (`GET /notifications`)
+- ✅ Mark notification read (`PATCH /notifications/:notification_id/read`)
+- ✅ Customer profile + logout
+
 ### API Services (siap pakai, belum semua terhubung ke UI)
 - ✅ Service CRUD (`/services/*`)
 - ✅ Order CRUD (`/orders/*`)
@@ -135,18 +211,17 @@ Aplikasi mendukung 4 role user:
 - ✅ Notifications (`/notifications/*`)
 - ✅ Owner orders & reports (`/owner/*`)
 
-## Fitur Placeholder (Phase 7–9)
+## Fitur Placeholder (Phase 8–9)
 
 | Phase | Scope | Status |
 |---|---|---|
-| Phase 7 | Customer: layanan, pesanan, tracking, payment | 📋 Placeholder |
 | Phase 8 | Owner: CRUD services, kelola orders, wallet | 📋 Placeholder |
 | Phase 9 | Courier: tasks, earnings, wallet | 📋 Placeholder |
 
 ## Catatan Development
 
 ### Dummy Payment
-`EXPO_PUBLIC_USE_DUMMY_PAYMENT=true` di `.env` akan menampilkan tombol "Simulasi Payment Success" di halaman pembayaran (Phase 7). **Jangan gunakan di production.** Set ke `false` untuk menyembunykan tombol simulasi.
+`EXPO_PUBLIC_USE_DUMMY_PAYMENT=true` di `.env` akan menampilkan tombol "Simulasi Payment Success" di halaman detail order customer. **Jangan gunakan di production.** Set ke `false` untuk menyembunyikan tombol simulasi.
 
 ### Google Login
 Tombol "Masuk dengan Google" saat ini menampilkan alert "Coming Soon". Backend belum mendukung OAuth — hanya email/password.
@@ -161,7 +236,12 @@ app/
 │   ├── register.tsx          # Register (connected)
 │   └── waiting-verification.tsx
 ├── (admin)/                  # Admin screens (connected)
-├── (customer)/               # Customer screens (placeholder)
+├── (customer)/
+│   ├── _layout.tsx           # Tab navigation + ProtectedRoute
+│   ├── beranda.tsx           # Beranda (connected Phase 7)
+│   ├── services.tsx          # Layanan + create order (connected Phase 7)
+│   ├── orders.tsx            # Pesanan + detail/tracking/payment (connected Phase 7)
+│   └── profile.tsx           # Profil + notifikasi (connected Phase 7)
 ├── (owner)/                  # Owner screens (placeholder)
 ├── (courier)/                # Courier screens (placeholder)
 └── (tabs)/                   # Default Expo tabs (tidak dipakai)
