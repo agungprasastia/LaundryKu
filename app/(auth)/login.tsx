@@ -12,8 +12,8 @@ import {
   Dimensions,
   StatusBar,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
+import { crossAlert } from '@/utils/crossAlert';
 import { useRouter } from 'expo-router';
 import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { LaundryColors } from '@/constants/colors';
@@ -132,7 +132,7 @@ export default function LoginScreen() {
   };
 
   const handleGoogleLogin = () => {
-    Alert.alert(
+    crossAlert(
       'Coming Soon',
       'Login dengan Google belum tersedia saat ini. Silakan gunakan email dan password.',
       [{ text: 'OK' }]

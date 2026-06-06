@@ -6,8 +6,8 @@ import {
   Platform,
   TouchableOpacity,
   ScrollView,
-  Alert,
 } from 'react-native';
+import { crossAlert } from '@/utils/crossAlert';
 import { useRouter } from 'expo-router';
 import { LaundryColors } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,7 +18,7 @@ export default function ProfilScreen() {
   const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    Alert.alert(
+    crossAlert(
       'Logout',
       'Yakin ingin keluar dari akun?',
       [

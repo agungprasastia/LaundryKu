@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, Platform, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native';
+import { crossAlert } from '@/utils/crossAlert';
 import { useRouter } from 'expo-router';
 import { LaundryColors } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,7 +10,7 @@ export default function CourierProfileScreen() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const handleLogout = () => {
-    Alert.alert('Logout', 'Yakin ingin keluar?', [
+    crossAlert('Logout', 'Yakin ingin keluar?', [
       { text: 'Batal', style: 'cancel' },
       { text: 'Keluar', style: 'destructive', onPress: async () => { await logout(); router.replace('/(auth)/login'); } },
     ]);

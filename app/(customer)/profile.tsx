@@ -7,9 +7,9 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   RefreshControl,
 } from 'react-native';
+import { crossAlert } from '@/utils/crossAlert';
 import { useRouter } from 'expo-router';
 import { LaundryColors } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
@@ -66,18 +66,18 @@ export default function CustomerProfileScreen() {
           )
         );
       } else {
-        Alert.alert('Gagal', res.message || 'Gagal menandai notifikasi');
+        crossAlert('Gagal', res.message || 'Gagal menandai notifikasi');
       }
     } catch (err: any) {
       const msg = err?.response?.data?.message || err?.message || 'Gagal menandai notifikasi';
-      Alert.alert('Error', msg);
+      crossAlert('Error', msg);
     } finally {
       setMarkingRead(null);
     }
   };
 
   const handleLogout = () => {
-    Alert.alert('Logout', 'Yakin ingin keluar?', [
+    crossAlert('Logout', 'Yakin ingin keluar?', [
       { text: 'Batal', style: 'cancel' },
       {
         text: 'Keluar',

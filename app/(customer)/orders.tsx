@@ -9,8 +9,8 @@ import {
   ActivityIndicator,
   RefreshControl,
   Modal,
-  Alert,
 } from 'react-native';
+import { crossAlert } from '@/utils/crossAlert';
 import { Ionicons } from '@expo/vector-icons';
 import { LaundryColors } from '@/constants/colors';
 import {
@@ -153,7 +153,7 @@ export default function CustomerOrdersScreen() {
         if (paymentData?.payment_id) {
           setLastPaymentId(paymentData.payment_id);
         }
-        Alert.alert(
+        crossAlert(
           'Payment Dibuat',
           `Payment berhasil dibuat.\n\n` +
           `Payment ID: ${paymentData?.payment_id || 'N/A'}\n` +
@@ -169,7 +169,7 @@ export default function CustomerOrdersScreen() {
         if (res.data?.payment_id) {
           setLastPaymentId(res.data.payment_id);
         }
-        Alert.alert('Gagal', res.message || 'Gagal membuat payment');
+        crossAlert('Gagal', res.message || 'Gagal membuat payment');
       }
     } catch (err: any) {
       // Handle 409 response with existing payment_id
@@ -177,7 +177,7 @@ export default function CustomerOrdersScreen() {
         setLastPaymentId(err.response.data.data.payment_id);
       }
       const msg = err?.response?.data?.message || err?.message || 'Gagal membuat payment';
-      Alert.alert('Error', msg);
+      crossAlert('Error', msg);
     } finally {
       setPaymentLoading(false);
     }
@@ -186,7 +186,7 @@ export default function CustomerOrdersScreen() {
   // ─── Simulate Payment Callback (Dummy) ───
   const handleDummyCallback = async () => {
     if (!lastPaymentId) {
-      Alert.alert('Info', 'Belum ada payment. Tap "Bayar Sekarang" dulu untuk membuat payment.');
+      crossAlert('Info', 'Belum ada payment. Tap "Bayar Sekarang" dulu untuk membuat payment.');
       return;
     }
     setCallbackLoading(true);
@@ -196,18 +196,18 @@ export default function CustomerOrdersScreen() {
         status: 'success',
       });
       if (res.success) {
-        Alert.alert('Berhasil', 'Simulasi pembayaran berhasil! Invoice sudah terbayar.');
+        crossAlert('Berhasil', 'Simulasi pembayaran berhasil! Invoice sudah terbayar.');
         // Refresh detail
         if (detailOrder) {
           await openDetail(detailOrder);
         }
         fetchOrders();
       } else {
-        Alert.alert('Gagal', res.message || 'Simulasi payment gagal');
+        crossAlert('Gagal', res.message || 'Simulasi payment gagal');
       }
     } catch (err: any) {
       const msg = err?.response?.data?.message || err?.message || 'Simulasi payment gagal';
-      Alert.alert('Error', msg);
+      crossAlert('Error', msg);
     } finally {
       setCallbackLoading(false);
     }
@@ -216,7 +216,7 @@ export default function CustomerOrdersScreen() {
   // ─── Complete Order ───
   const handleCompleteOrder = async () => {
     if (!detailOrder) return;
-    Alert.alert(
+    crossAlert(
       'Konfirmasi Selesai',
       'Apakah Anda yakin ingin menyelesaikan pesanan ini?',
       [
@@ -228,15 +228,15 @@ export default function CustomerOrdersScreen() {
             try {
               const res = await orderService.completeOrder(detailOrder.order_id);
               if (res.success) {
-                Alert.alert('Berhasil', 'Pesanan berhasil diselesaikan!');
+                crossAlert('Berhasil', 'Pesanan berhasil diselesaikan!');
                 setShowDetail(false);
                 fetchOrders();
               } else {
-                Alert.alert('Gagal', res.message || 'Gagal menyelesaikan pesanan');
+                crossAlert('Gagal', res.message || 'Gagal menyelesaikan pesanan');
               }
             } catch (err: any) {
               const msg = err?.response?.data?.message || err?.message || 'Gagal menyelesaikan pesanan';
-              Alert.alert('Error', msg);
+              crossAlert('Error', msg);
             } finally {
               setCompleteLoading(false);
             }

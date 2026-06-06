@@ -12,8 +12,8 @@ import {
   Dimensions,
   StatusBar,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
+import { crossAlert } from '@/utils/crossAlert';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { LaundryColors } from '@/constants/colors';
@@ -151,7 +151,7 @@ export default function RegisterScreen() {
       if (result.success) {
         if (backendRole === 'customer') {
           // Customer → redirect to login with success message
-          Alert.alert(
+          crossAlert(
             'Registrasi Berhasil',
             'Akun pelanggan Anda berhasil dibuat. Silakan login.',
             [
@@ -163,7 +163,7 @@ export default function RegisterScreen() {
           );
         } else {
           // Owner/Courier → show verification message
-          Alert.alert(
+          crossAlert(
             'Registrasi Berhasil',
             `Akun ${backendRole === 'owner' ? 'Mitra Laundry' : 'Kurir'} Anda berhasil dibuat. Akun harus diverifikasi admin sebelum bisa menggunakan fitur utama.`,
             [
@@ -193,7 +193,7 @@ export default function RegisterScreen() {
   };
 
   const handleGoogleRegister = () => {
-    Alert.alert(
+    crossAlert(
       'Coming Soon',
       'Daftar dengan Google belum tersedia saat ini. Silakan gunakan form pendaftaran.',
       [{ text: 'OK' }]

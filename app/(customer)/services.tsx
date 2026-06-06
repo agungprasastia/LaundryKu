@@ -10,9 +10,9 @@ import {
   RefreshControl,
   Modal,
   TextInput,
-  Alert,
   KeyboardAvoidingView,
 } from 'react-native';
+import { crossAlert } from '@/utils/crossAlert';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LaundryColors } from '@/constants/colors';
@@ -122,7 +122,7 @@ export default function CustomerServicesScreen() {
   const handleSubmitOrder = async () => {
     const validationError = validateOrderForm();
     if (validationError) {
-      Alert.alert('Validasi Gagal', validationError);
+      crossAlert('Validasi Gagal', validationError);
       return;
     }
 
@@ -139,7 +139,7 @@ export default function CustomerServicesScreen() {
       const response = await orderService.createOrder(payload);
       if (response.success) {
         const orderId = response.data?.order_id || 'N/A';
-        Alert.alert(
+        crossAlert(
           'Pesanan Berhasil',
           `Pesanan berhasil dibuat!\n\nOrder ID: ${orderId}`,
           [
@@ -157,11 +157,11 @@ export default function CustomerServicesScreen() {
           ]
         );
       } else {
-        Alert.alert('Gagal', response.message || 'Gagal membuat pesanan');
+        crossAlert('Gagal', response.message || 'Gagal membuat pesanan');
       }
     } catch (err: any) {
       const msg = err?.response?.data?.message || err?.message || 'Gagal membuat pesanan';
-      Alert.alert('Error', msg);
+      crossAlert('Error', msg);
     } finally {
       setSubmitting(false);
     }

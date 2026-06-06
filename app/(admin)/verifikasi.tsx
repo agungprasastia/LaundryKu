@@ -7,7 +7,6 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   RefreshControl,
 } from 'react-native';
 import { LaundryColors } from '@/constants/colors';
@@ -21,6 +20,8 @@ export default function VerifikasiScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [verifyingId, setVerifyingId] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   const fetchPendingUsers = useCallback(async () => {
     try {
@@ -49,34 +50,38 @@ export default function VerifikasiScreen() {
     fetchPendingUsers();
   };
 
-  const handleVerify = (userId: string, userName: string) => {
-    Alert.alert(
-      'Verifikasi Pengguna',
-      `Yakin ingin memverifikasi ${userName}?`,
-      [
-        { text: 'Batal', style: 'cancel' },
-        {
-          text: 'Verifikasi',
-          onPress: () => doVerify(userId),
-        },
-      ]
-    );
+  // Step 1: Show inline confirmation
+  const handleVerify = (userId: string) => {
+    setConfirmingId(userId);
   };
 
+  const cancelConfirm = () => {
+    setConfirmingId(null);
+  };
+
+  // Step 2: Actually verify
   const doVerify = async (userId: string) => {
+    setConfirmingId(null);
     setVerifyingId(userId);
+    setSuccessMsg('');
     try {
       const response = await adminService.verifyUser(userId, true);
       if (response.success) {
-        Alert.alert('Berhasil', 'Pengguna berhasil diverifikasi. Wallet otomatis dibuat oleh backend.');
-        // Refresh list
-        await fetchPendingUsers();
+        // Show inline success message
+        const verifiedUser = pendingUsers.find(u => u.user_id === userId);
+        setSuccessMsg(`✅ ${verifiedUser?.full_name || 'User'} berhasil diverifikasi!`);
+        // Remove from list immediately
+        setPendingUsers(prev => prev.filter(u => u.user_id !== userId));
+        // Auto-hide success after 4 seconds
+        setTimeout(() => setSuccessMsg(''), 4000);
       } else {
-        Alert.alert('Gagal', response.message || 'Gagal memverifikasi pengguna');
+        setError(response.message || 'Gagal memverifikasi pengguna');
+        setTimeout(() => setError(''), 4000);
       }
     } catch (err: any) {
       const msg = err?.response?.data?.message || err?.message || 'Gagal memverifikasi';
-      Alert.alert('Error', msg);
+      setError(msg);
+      setTimeout(() => setError(''), 4000);
     } finally {
       setVerifyingId(null);
     }
@@ -112,6 +117,14 @@ export default function VerifikasiScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[LaundryColors.primary]} />
         }
       >
+        {/* Success banner */}
+        {successMsg ? (
+          <View style={styles.successBanner}>
+            <Ionicons name="checkmark-circle" size={18} color="#10B981" />
+            <Text style={styles.successText}>{successMsg}</Text>
+          </View>
+        ) : null}
+
         {/* Error banner */}
         {error ? (
           <View style={styles.errorBanner}>
@@ -175,21 +188,50 @@ export default function VerifikasiScreen() {
               </View>
             </View>
 
-            <TouchableOpacity
-              style={[styles.verifyButton, verifyingId === user.user_id && styles.verifyButtonDisabled]}
-              onPress={() => handleVerify(user.user_id, user.full_name)}
-              disabled={verifyingId === user.user_id}
-              activeOpacity={0.8}
-            >
-              {verifyingId === user.user_id ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <>
-                  <Ionicons name="checkmark-circle" size={18} color="#FFFFFF" />
-                  <Text style={styles.verifyButtonText}>Verifikasi</Text>
-                </>
-              )}
-            </TouchableOpacity>
+            {/* Inline confirmation or verify button */}
+            {confirmingId === user.user_id ? (
+              <View style={styles.confirmContainer}>
+                <Text style={styles.confirmText}>
+                  Yakin verifikasi {user.full_name}?
+                </Text>
+                <View style={styles.confirmButtons}>
+                  <TouchableOpacity
+                    style={styles.cancelButton}
+                    onPress={cancelConfirm}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.cancelButtonText}>Batal</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.confirmVerifyButton}
+                    onPress={() => doVerify(user.user_id)}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="checkmark-circle" size={16} color="#FFFFFF" />
+                    <Text style={styles.confirmVerifyText}>Ya, Verifikasi</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={[styles.verifyButton, verifyingId === user.user_id && styles.verifyButtonDisabled]}
+                onPress={() => handleVerify(user.user_id)}
+                disabled={verifyingId === user.user_id}
+                activeOpacity={0.8}
+              >
+                {verifyingId === user.user_id ? (
+                  <>
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                    <Text style={styles.verifyButtonText}>Memverifikasi...</Text>
+                  </>
+                ) : (
+                  <>
+                    <Ionicons name="checkmark-circle" size={18} color="#FFFFFF" />
+                    <Text style={styles.verifyButtonText}>Verifikasi</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            )}
           </View>
         ))}
 
@@ -297,4 +339,61 @@ const styles = StyleSheet.create({
   },
   verifyButtonDisabled: { backgroundColor: '#86EFAC' },
   verifyButtonText: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
+
+  // Success banner
+  successBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#ECFDF5',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  successText: { flex: 1, fontSize: 13, color: '#059669', fontWeight: '600' },
+
+  // Inline confirmation
+  confirmContainer: {
+    marginTop: 14,
+    backgroundColor: '#FFF7ED',
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#FED7AA',
+  },
+  confirmText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#92400E',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  confirmButtons: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  cancelButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 10,
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+  },
+  cancelButtonText: { fontSize: 13, fontWeight: '600', color: '#6B7280' },
+  confirmVerifyButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: LaundryColors.success,
+    borderRadius: 10,
+    height: 40,
+    gap: 4,
+  },
+  confirmVerifyText: { fontSize: 13, fontWeight: '700', color: '#FFFFFF' },
 });
