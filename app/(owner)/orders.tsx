@@ -118,7 +118,7 @@ export default function OwnerOrdersScreen() {
     setBusy(true);
     try {
       await orderService.assignCourier(detail.order_id, {
-        courier_id: String(c.user_id),
+        courier_id: c.user_id,
       });
       crossAlert("Berhasil", "Kurir ditugaskan");
       setCourierModal(false);
@@ -202,7 +202,7 @@ export default function OwnerOrdersScreen() {
             </Text>
             <Text style={s.muted}>{o.pickup_address || "-"}</Text>
             <Text style={s.price}>
-              {money(o.total_amount || o.total_price)} • {date(o.created_at)}
+              {money(o.total_amount ?? o.total_price)} • {date(o.created_at)}
             </Text>
           </TouchableOpacity>
         ))
@@ -239,18 +239,24 @@ export default function OwnerOrdersScreen() {
                   <Info
                     k="Distance"
                     v={
-                      detail.distance_km ? num(detail.distance_km) + " km" : "-"
+                      detail.distance_km != null
+                        ? num(detail.distance_km) + " km"
+                        : "-"
                     }
                   />
                   <Info
                     k="Weight"
-                    v={detail.weight_kg ? num(detail.weight_kg) + " kg" : "-"}
+                    v={
+                      detail.weight_kg != null
+                        ? num(detail.weight_kg) + " kg"
+                        : "-"
+                    }
                   />
                   <Info k="Service fee" v={money(detail.service_fee)} />
                   <Info k="Delivery fee" v={money(detail.delivery_fee)} />
                   <Info
                     k="Total"
-                    v={money(detail.total_amount || detail.total_price)}
+                    v={money(detail.total_amount ?? detail.total_price)}
                   />
                   <Info k="Owner earning" v={money(detail.owner_earning)} />
                   <Info

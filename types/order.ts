@@ -2,15 +2,15 @@
  * All possible order statuses
  */
 export type OrderStatus =
-  | 'WAITING_OWNER_CONFIRMATION'
-  | 'CONFIRMED'
-  | 'PICKUP_ON_THE_WAY'
-  | 'LAUNDRY_PICKED'
-  | 'PROCESSING'
-  | 'READY_FOR_DELIVERY'
-  | 'DELIVERY_ON_THE_WAY'
-  | 'DELIVERED'
-  | 'COMPLETED';
+  | "WAITING_OWNER_CONFIRMATION"
+  | "CONFIRMED"
+  | "PICKUP_ON_THE_WAY"
+  | "LAUNDRY_PICKED"
+  | "PROCESSING"
+  | "READY_FOR_DELIVERY"
+  | "DELIVERY_ON_THE_WAY"
+  | "DELIVERED"
+  | "COMPLETED";
 
 /**
  * Status history entry from order_status_logs (returned by getOrderDetail)
@@ -103,7 +103,7 @@ export interface TrackingEntry {
  * Assign courier payload
  */
 export interface AssignCourierPayload {
-  courier_id: string;
+  courier_id: number;
 }
 
 /**
@@ -120,7 +120,7 @@ export interface CourierTask {
   assignment_id: string;
   order_id: string;
   courier_id?: string;
-  type?: 'pickup' | 'delivery';
+  type?: "pickup" | "delivery";
   status: string;
   pickup_address?: string;
   pickup_lat?: number;
@@ -149,7 +149,7 @@ export interface CourierEarnings {
  * Available courier
  */
 export interface AvailableCourier {
-  user_id: string;
+  user_id: number;
   full_name: string;
   vehicle_name?: string;
   vehicle_plate_number?: string;

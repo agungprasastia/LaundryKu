@@ -130,8 +130,7 @@ export default function OwnerServicesScreen() {
           name: form.name.trim(),
           description: form.description.trim(),
           price_per_kg_owner: price,
-          is_active: form.is_active,
-        } as any);
+        });
       } else {
         await serviceService.createService({
           service_id: form.service_id.trim(),
