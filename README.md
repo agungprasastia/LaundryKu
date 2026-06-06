@@ -118,7 +118,7 @@ Aplikasi mendukung 4 role user:
 
 ### 3. Lihat Layanan
 1. Tab **Layanan** → daftar layanan aktif dari `GET /services`
-2. Harga customer per kg ditampilkan (`price_per_kg`), **bukan** `price_per_kg_owner`
+2. Harga customer per kg ditampilkan (`price_per_kg_customer`), **bukan** `price_per_kg_owner`
 3. Tap card → lihat detail layanan
 
 ### 4. Buat Pesanan
@@ -142,8 +142,9 @@ Aplikasi mendukung 4 role user:
 1. Di detail order → jika invoice tersedia & status "unpaid"
 2. Tap "Bayar Sekarang" → `POST /payments` (method: e_wallet)
 3. Jika `EXPO_PUBLIC_USE_DUMMY_PAYMENT=true`:
+   - Setelah "Bayar Sekarang", `payment_id` disimpan dari response `POST /payments`
    - Muncul tombol "Simulasi Payment Success"
-   - Tap → `POST /payments/callback` dengan status "paid"
+   - Tap → `POST /payments/callback` dengan body `{ payment_id: "PAY...", status: "success" }`
    - Invoice otomatis terbayar
 
 ### 7. Konfirmasi Selesai
@@ -222,6 +223,13 @@ Aplikasi mendukung 4 role user:
 
 ### Dummy Payment
 `EXPO_PUBLIC_USE_DUMMY_PAYMENT=true` di `.env` akan menampilkan tombol "Simulasi Payment Success" di halaman detail order customer. **Jangan gunakan di production.** Set ke `false` untuk menyembunyikan tombol simulasi.
+
+Alur dummy payment:
+1. Customer tap "Bayar Sekarang" → `POST /payments` → response berisi `payment_id`
+2. `payment_id` disimpan di state frontend
+3. Tombol "Simulasi Payment Success" muncul (hanya jika `payment_id` sudah tersedia)
+4. Tap → `POST /payments/callback` dengan body: `{ payment_id: "PAY...", status: "success" }`
+5. Backend memproses callback → invoice jadi `paid`, order status naik ke `PROCESSING`
 
 ### Google Login
 Tombol "Masuk dengan Google" saat ini menampilkan alert "Coming Soon". Backend belum mendukung OAuth — hanya email/password.
