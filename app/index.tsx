@@ -11,7 +11,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LaundryColors } from '@/constants/colors';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -65,7 +65,7 @@ export default function WelcomeScreen() {
     float(bubble1, 2400);
     float(bubble2, 3000);
     float(bubble3, 2700);
-  }, []);
+  }, [bubble1, bubble2, bubble3, buttonFade, buttonSlide, contentFade, contentSlide, illustrationFade, logoOpacity, logoScale]);
 
   const animatePress = (anim: Animated.Value, down: boolean) => {
     Animated.spring(anim, { toValue: down ? 0.96 : 1, friction: 3, tension: 40, useNativeDriver: true }).start();
@@ -511,3 +511,4 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
 });
+

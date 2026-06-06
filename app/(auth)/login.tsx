@@ -9,7 +9,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   Animated,
-  Dimensions,
   StatusBar,
   ActivityIndicator,
 } from 'react-native';
@@ -18,8 +17,6 @@ import { useRouter } from 'expo-router';
 import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { LaundryColors } from '@/constants/colors';
 import { useAuth } from '@/contexts/AuthContext';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 type RoleType = 'pelanggan' | 'mitra' | 'kurir';
 
@@ -57,7 +54,7 @@ export default function LoginScreen() {
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+  }, [fadeAnim, headerScale, slideAnim]);
 
   const handlePressIn = () => {
     Animated.spring(buttonScale, {
@@ -669,3 +666,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+

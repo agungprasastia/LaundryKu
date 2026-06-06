@@ -1,4 +1,4 @@
-﻿import { Tabs } from "expo-router";
+import { Tabs } from "expo-router";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { LaundryColors } from "@/constants/colors";
@@ -72,3 +72,4 @@ export default function OwnerLayout() {
     </ProtectedRoute>
   );
 }
+

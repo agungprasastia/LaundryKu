@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
-import { useRouter, useSegments } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types/user';
 import { LaundryColors } from '@/constants/colors';
@@ -20,32 +20,7 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ allowedRoles, children }: ProtectedRouteProps) {
   const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
-  const segments = useSegments();
-
-  useEffect(() => {
-    if (isLoading) return;
-
-    if (!isAuthenticated || !user) {
-      // Not logged in → go to login
-      router.replace('/(auth)/login');
-      return;
-    }
-
-    // Check role
-    if (!allowedRoles.includes(user.role)) {
-      // Wrong role → redirect to correct role dashboard
-      redirectToRoleDashboard(user.role);
-      return;
-    }
-
-    // Check verification for owner/courier
-    if ((user.role === 'owner' || user.role === 'courier') && !user.is_verified) {
-      router.replace('/(auth)/waiting-verification');
-      return;
-    }
-  }, [isLoading, isAuthenticated, user]);
-
-  function redirectToRoleDashboard(role: UserRole) {
+const redirectToRoleDashboard = useCallback((role: UserRole) => {
     switch (role) {
       case 'admin':
         router.replace('/(admin)/beranda');
@@ -54,23 +29,33 @@ export default function ProtectedRoute({ allowedRoles, children }: ProtectedRout
         router.replace('/(customer)/beranda');
         break;
       case 'owner':
-        if (!user?.is_verified) {
-          router.replace('/(auth)/waiting-verification');
-        } else {
-          router.replace('/(owner)/beranda');
-        }
+        router.replace(user?.is_verified ? '/(owner)/beranda' : '/(auth)/waiting-verification');
         break;
       case 'courier':
-        if (!user?.is_verified) {
-          router.replace('/(auth)/waiting-verification');
-        } else {
-          router.replace('/(courier)/beranda');
-        }
+        router.replace(user?.is_verified ? '/(courier)/beranda' : '/(auth)/waiting-verification');
         break;
       default:
         router.replace('/(auth)/login');
     }
-  }
+  }, [router, user?.is_verified]);
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    if (!isAuthenticated || !user) {
+      router.replace('/(auth)/login');
+      return;
+    }
+
+    if (!allowedRoles.includes(user.role)) {
+      redirectToRoleDashboard(user.role);
+      return;
+    }
+
+    if ((user.role === 'owner' || user.role === 'courier') && !user.is_verified) {
+      router.replace('/(auth)/waiting-verification');
+    }
+  }, [allowedRoles, isAuthenticated, isLoading, redirectToRoleDashboard, router, user]);
 
   if (isLoading) {
     return (
@@ -106,3 +91,8 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
+
+
+
+
+

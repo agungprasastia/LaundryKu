@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -253,3 +253,4 @@ const s = StyleSheet.create({
   errT: { color: LaundryColors.error, fontWeight: "800" },
   link: { color: LaundryColors.primary, fontWeight: "800", paddingTop: 6 },
 });
+

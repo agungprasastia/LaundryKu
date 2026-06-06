@@ -3,11 +3,8 @@ import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
 import { LaundryColors } from '@/constants/colors';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
@@ -32,3 +29,6 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+
+

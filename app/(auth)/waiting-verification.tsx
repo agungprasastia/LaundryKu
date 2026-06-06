@@ -14,16 +14,11 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function WaitingVerificationScreen() {
   const router = useRouter();
-  const { user, logout, refreshProfile } = useAuth();
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
     router.replace('/(auth)/login');
-  };
-
-  const handleRefresh = async () => {
-    await refreshProfile();
-    // If now verified, the protected route will handle redirection
   };
 
   return (
@@ -226,3 +221,6 @@ const styles = StyleSheet.create({
     color: LaundryColors.textPrimary,
   },
 });
+
+
+

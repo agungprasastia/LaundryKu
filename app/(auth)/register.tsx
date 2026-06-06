@@ -9,7 +9,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   Animated,
-  Dimensions,
   StatusBar,
   ActivityIndicator,
 } from 'react-native';
@@ -19,8 +18,6 @@ import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { LaundryColors } from '@/constants/colors';
 import { useAuth } from '@/contexts/AuthContext';
 import { ROLE_MAP, FrontendRole, UserRole } from '@/types/user';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 type RoleType = 'pelanggan' | 'mitra' | 'kurir';
 
@@ -68,7 +65,7 @@ export default function RegisterScreen() {
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+  }, [fadeAnim, headerScale, slideAnim]);
 
   const handlePressIn = () => {
     Animated.spring(buttonScale, {
@@ -831,3 +828,4 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
+

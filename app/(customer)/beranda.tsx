@@ -81,7 +81,7 @@ export default function CustomerBerandaScreen() {
       Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
       Animated.timing(slideAnim, { toValue: 0, duration: 500, useNativeDriver: true }),
     ]).start();
-  }, []);
+  }, [fadeAnim, slideAnim]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -445,3 +445,8 @@ const styles = StyleSheet.create({
   orderDetailText: { fontSize: 11, color: LaundryColors.textSecondary, flex: 1 },
   orderAmount: { fontSize: 13, fontWeight: '700', color: LaundryColors.primary },
 });
+
+
+
+
+
