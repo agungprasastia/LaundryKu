@@ -285,7 +285,7 @@ function OrderCard({ order }: { order: Order }) {
       </Text>
       <Text style={styles.muted}>
         {date(order.created_at)} •{" "}
-        {money(order.total_amount || order.total_price)}
+        {money(order.total_amount ?? order.total_price)}
       </Text>
     </View>
   );
