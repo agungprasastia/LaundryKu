@@ -1,27 +1,24 @@
 # LaundryKu Frontend
 
-Aplikasi mobile laundry online dengan fitur pickup, tracking real-time, dan delivery. Dibangun dengan React Native Expo dan terhubung ke backend LaundryKu API.
+Aplikasi mobile laundry online untuk customer, owner laundry, kurir, dan admin. Frontend dibuat dengan React Native Expo, Expo Router, TypeScript, dan terhubung ke LaundryKu API.
 
 ## Tech Stack
 
-- **React Native** (Expo SDK 54)
-- **Expo Router** (file-based routing)
-- **TypeScript**
-- **Axios** (HTTP client)
-- **Expo SecureStore** (token storage di native) / **localStorage** (web)
-- **Expo Location** (GPS pickup location)
+- React Native + Expo SDK 54
+- Expo Router
+- TypeScript
+- Axios
+- Expo SecureStore / localStorage
+- Expo Location untuk GPS pickup
 
 ## Instalasi
 
 ```bash
-# Clone & masuk ke folder
 cd LaundryKu
-
-# Install dependencies
 npm install
 ```
 
-## Konfigurasi Environment
+## Environment
 
 Buat file `.env` di root project:
 
@@ -30,246 +27,240 @@ EXPO_PUBLIC_API_URL=http://localhost:3000
 EXPO_PUBLIC_USE_DUMMY_PAYMENT=true
 ```
 
-### Pengaturan API URL per Platform
+| Platform         | `EXPO_PUBLIC_API_URL`     | Catatan                  |
+| ---------------- | ------------------------- | ------------------------ |
+| Web browser      | `http://localhost:3000`   | Backend lokal            |
+| Android emulator | `http://10.0.2.2:3000`    | Alias localhost emulator |
+| HP fisik WiFi    | `http://192.168.x.x:3000` | Ganti dengan IP laptop   |
+| iOS simulator    | `http://localhost:3000`   | Sama seperti web         |
 
-| Platform | `EXPO_PUBLIC_API_URL` | Keterangan |
-|---|---|---|
-| Web browser | `http://localhost:3000` | Default, langsung ke backend |
-| Android Emulator | `http://10.0.2.2:3000` | `10.0.2.2` = alias localhost di emulator |
-| HP Fisik (WiFi) | `http://192.168.x.x:3000` | Ganti dengan IP laptop di jaringan lokal |
-| iOS Simulator | `http://localhost:3000` | Sama seperti web |
+Backend LaundryKu API harus berjalan sebelum frontend dipakai.
 
-> **Catatan:** Backend LaundryKu API harus sudah berjalan di port 3000 sebelum menjalankan frontend.
-
-## Menjalankan Aplikasi
+## Menjalankan App
 
 ```bash
-# Start Expo dev server
 npx expo start
-
-# Atau langsung ke platform tertentu:
-npx expo start --web        # Buka di browser
-npx expo start --android    # Buka di Android emulator/device
+npx expo start --web
+npx expo start --android
 ```
 
-## Role & Akun Login
+## Role dan Routing
 
-Aplikasi mendukung 4 role user:
+| Role     | Akses                                                           |
+| -------- | --------------------------------------------------------------- |
+| Admin    | Dashboard, verifikasi user, laporan                             |
+| Customer | Layanan, order, tracking, invoice/payment, profil               |
+| Owner    | Dashboard owner, service CRUD, order management, wallet, profil |
+| Courier  | Tugas pickup/delivery, earnings, wallet, profil                 |
 
-| Role | Deskripsi | Akses Setelah Login |
-|---|---|---|
-| **Admin** | Administrator platform | Dashboard, verifikasi user, analytics |
-| **Customer** | Pelanggan laundry | Pesan layanan, tracking order, pembayaran |
-| **Owner** | Mitra pemilik laundry | Kelola layanan & pesanan, wallet |
-| **Courier** | Kurir pengantaran | Kelola tugas pickup & delivery, wallet |
+Owner dan courier wajib diverifikasi admin sebelum memakai fitur utama. Jika belum verified, user diarahkan ke halaman waiting verification atau melihat pesan fitur belum aktif.
 
-### Akun Default (setelah seed)
+## Akun Seed
 
-| Role | Email | Password |
-|---|---|---|
+| Role  | Email                 | Password   |
+| ----- | --------------------- | ---------- |
 | Admin | `admin@laundryku.com` | `admin123` |
 
-### Register
+## Struktur Folder Utama
 
-- **Customer**: langsung bisa login setelah register
-- **Owner / Courier**: harus **diverifikasi admin** dulu sebelum bisa menggunakan fitur utama. Sebelum verified, akan melihat halaman "Menunggu Verifikasi".
+```text
+app/
+├── index.tsx
+├── _layout.tsx
+├── (auth)/
+├── (admin)/
+├── (customer)/
+├── (owner)/
+├── (courier)/
+└── (tabs)/
+components/
+contexts/
+constants/
+services/
+types/
+utils/
+```
 
-## Cara Test Auth (Phase 1–6)
+## Fitur Backend yang Sudah Terhubung
 
-### 1. Register Customer
-1. Buka app → Welcome Screen → tap "Daftar"
-2. Isi nama, email, password (min 6 karakter), confirm password
-3. Pilih role "Pelanggan" → centang terms → tap "Daftar"
-4. Alert "Registrasi Berhasil" → redirect ke login
+### Auth dan Session
 
-### 2. Register Owner/Courier
-1. Sama seperti di atas, tapi pilih role "Mitra Laundry" atau "Kurir"
-2. Alert: "Akun harus diverifikasi admin"
-
-### 3. Login
-1. Masukkan email + password
-2. Tap "Masuk"
-3. Redirect otomatis berdasarkan role:
-   - Admin → `/(admin)/beranda`
-   - Customer → `/(customer)/beranda`
-   - Owner (verified) → `/(owner)/beranda`
-   - Owner/Courier (belum verified) → `/(auth)/waiting-verification`
-
-### 4. Admin Verify User
-1. Login sebagai admin
-2. Tab "Verifikasi" → lihat daftar pending owner/courier
-3. Tap "Verifikasi" → konfirmasi → alert sukses
-
-### 5. Logout
-1. Tab "Profil" → tap "Keluar" → konfirmasi
-2. Token dihapus, redirect ke login
-
-## Cara Test Customer Flow (Phase 7)
-
-### 1. Login sebagai Customer
-1. Register customer baru atau gunakan akun customer yang sudah ada
-2. Login → masuk ke **Beranda Customer**
-
-### 2. Beranda
-- Melihat greeting "Halo, [nama]"
-- Melihat 3 layanan teratas dari backend
-- Melihat 3 pesanan terbaru (atau empty state jika belum ada)
-- Melihat badge jumlah notifikasi belum dibaca
-- Quick action: Lihat Layanan, Pesanan Saya, Notifikasi, Profil
-
-### 3. Lihat Layanan
-1. Tab **Layanan** → daftar layanan aktif dari `GET /services`
-2. Harga customer per kg ditampilkan (`price_per_kg_customer`), **bukan** `price_per_kg_owner`
-3. Tap card → lihat detail layanan
-
-### 4. Buat Pesanan
-1. Di layanan → tap "Pesan Sekarang"
-2. Isi form:
-   - **Alamat pickup** (wajib)
-   - **Lokasi pickup** → tap tombol **"Gunakan Lokasi Saya Saat Ini"**
-     - Aplikasi mengambil koordinat GPS dari HP via `expo-location`
-     - Customer **tidak perlu input latitude/longitude manual**
-     - Setelah berhasil: tampil ✅ "Lokasi berhasil diambil" + koordinat kecil
-   - **Jadwal pickup** (format: `YYYY-MM-DD HH:mm:ss`)
-3. Tap "Buat Pesanan" → `POST /orders`
-4. Alert sukses dengan Order ID → bisa langsung ke tab Pesanan
-
-> **Catatan:** Tidak menggunakan Google Maps API. Backend menghitung jarak menggunakan formula Haversine dari koordinat GPS customer dan koordinat owner.
-
-### 5. Lihat Pesanan
-1. Tab **Pesanan** → toggle Aktif / Riwayat
-2. Tap order card → detail order modal
-3. Lihat:
-   - Info order (ID, layanan, status, alamat, berat, total, kurir)
-   - Tracking timeline 9 tahap
-   - Invoice & pembayaran (jika invoice_id tersedia)
-
-### 6. Pembayaran
-1. Di detail order → jika invoice tersedia & status "unpaid"
-2. Tap "Bayar Sekarang" → `POST /payments` (method: e_wallet)
-3. Jika `EXPO_PUBLIC_USE_DUMMY_PAYMENT=true`:
-   - Setelah "Bayar Sekarang", `payment_id` disimpan dari response `POST /payments`
-   - Muncul tombol "Simulasi Payment Success"
-   - Tap → `POST /payments/callback` dengan body `{ payment_id: "PAY...", status: "success" }`
-   - Invoice otomatis terbayar
-
-### 7. Konfirmasi Selesai
-1. Jika status order = `DELIVERED`
-2. Muncul tombol "Konfirmasi Selesai"
-3. Tap → `PATCH /orders/:order_id/complete`
-4. Status berubah menjadi `COMPLETED`
-
-### 8. Notifikasi
-1. Tab **Profil** → section Notifikasi
-2. Daftar notifikasi dari `GET /notifications`
-3. Notifikasi unread ditandai dengan border biru
-4. Tap "Tandai Dibaca" → `PATCH /notifications/:notification_id/read`
-
-### 9. Logout
-1. Tab **Profil** → scroll ke bawah → "Keluar"
-2. Konfirmasi → token dihapus → redirect ke login
-
-## Fitur yang Sudah Terhubung ke Backend
-
-### Auth & Session
-- ✅ Login (`POST /auth/login`)
-- ✅ Register semua role (`POST /auth/register`)
-- ✅ Get Profile (`GET /auth/profile`)
-- ✅ Logout (`POST /auth/logout`)
-- ✅ Token tersimpan (SecureStore / localStorage)
-- ✅ Auto-load session saat app dibuka
-- ✅ 401 auto-logout
-
-### Protected Routes
-- ✅ Role-based routing (admin, customer, owner, courier)
-- ✅ Redirect jika role salah
-- ✅ Owner/courier verification check → waiting screen
+- `POST /auth/login`
+- `POST /auth/register`
+- `GET /auth/profile`
+- `PATCH /auth/profile`
+- `POST /auth/logout`
+- Token storage SecureStore/localStorage
+- Auto-load session
+- Auto-logout saat 401
+- ProtectedRoute berbasis role
 
 ### Admin
-- ✅ Dashboard metrics (`GET /admin/dashboard/metrics`)
-- ✅ Pending users list (`GET /admin/users/pending`)
-- ✅ Verify user (`PATCH /admin/users/:id/verify`)
-- ✅ Analytics / laporan (`GET /admin/analytics`)
-- ✅ Profil admin + logout
 
-### Customer (Phase 7)
-- ✅ Beranda: greeting, top services, recent orders, unread notif count
-- ✅ Daftar layanan aktif (`GET /services`)
-- ✅ Detail layanan (`GET /services/:service_id`)
-- ✅ Create order (`POST /orders`)
-- ✅ Active orders (`GET /orders/my-orders`)
-- ✅ Order history (`GET /orders/my-orders/history`)
-- ✅ Order detail (`GET /orders/:order_id`)
-- ✅ Order tracking timeline (`GET /orders/:order_id/tracking`)
-- ✅ Invoice (`GET /payments/invoice/:invoice_id`)
-- ✅ Create payment (`POST /payments`)
-- ✅ Dummy payment callback (`POST /payments/callback`)
-- ✅ Complete order (`PATCH /orders/:order_id/complete`)
-- ✅ Notifications list (`GET /notifications`)
-- ✅ Mark notification read (`PATCH /notifications/:notification_id/read`)
-- ✅ Customer profile + logout
+- `GET /admin/dashboard/metrics`
+- `GET /admin/users/pending`
+- `PATCH /admin/users/:id/verify`
+- `GET /admin/analytics`
 
-### API Services (siap pakai, belum semua terhubung ke UI)
-- ✅ Service CRUD (`/services/*`)
-- ✅ Order CRUD (`/orders/*`)
-- ✅ Courier tasks & earnings (`/couriers/*`)
-- ✅ Payment & invoice (`/payments/*`)
-- ✅ Wallet & withdraw (`/wallets/*`)
-- ✅ Notifications (`/notifications/*`)
-- ✅ Owner orders & reports (`/owner/*`)
+### Customer
 
-## Fitur Placeholder (Phase 8–9)
+- `GET /services`
+- `GET /services/:service_id`
+- `POST /orders`
+- `GET /orders/my-orders`
+- `GET /orders/my-orders/history`
+- `GET /orders/:order_id`
+- `GET /orders/:order_id/tracking`
+- `GET /payments/invoice/:invoice_id`
+- `POST /payments`
+- `POST /payments/callback` untuk dummy payment
+- `PATCH /orders/:order_id/complete`
+- `GET /notifications`
+- `PATCH /notifications/:notification_id/read`
 
-| Phase | Scope | Status |
-|---|---|---|
-| Phase 8 | Owner: CRUD services, kelola orders, wallet | 📋 Placeholder |
-| Phase 9 | Courier: tasks, earnings, wallet | 📋 Placeholder |
+### Owner
+
+- `GET /owner/reports/summary`
+- `GET /owner/orders`
+- `GET /services`
+- `POST /services`
+- `PATCH /services/:service_id`
+- `DELETE /services/:service_id`
+- `GET /orders/:order_id`
+- `PATCH /orders/:order_id/status`
+- `POST /orders/:order_id/assign-courier`
+- `PATCH /orders/:order_id/weight`
+- `PATCH /orders/:order_id/activate-delivery`
+- `GET /orders/:order_id/tracking`
+- `GET /couriers/available`
+- `GET /wallets/me`
+- `GET /wallets/me/transactions`
+- `POST /wallets/me/withdraw`
+- `GET /wallets/me/withdrawals`
+- `GET /notifications`
+- `PATCH /notifications/:notification_id/read`
+
+### Courier
+
+Service layer untuk courier sudah tersedia. UI courier masih tahap berikutnya bila belum disambungkan penuh.
+
+## Cara Test Auth
+
+### Register Customer
+
+1. Buka Welcome Screen.
+2. Tap **Daftar**.
+3. Isi nama, email, password, confirm password.
+4. Pilih role **Pelanggan**.
+5. Tap **Daftar**.
+6. Setelah sukses, login sebagai customer.
+
+### Register Owner atau Courier
+
+1. Register seperti customer.
+2. Pilih role **Mitra Laundry** atau **Kurir**.
+3. Akun masuk status pending verification.
+4. Admin harus verifikasi sebelum fitur utama aktif.
+
+### Admin Verify User
+
+1. Login sebagai admin.
+2. Buka tab **Verifikasi**.
+3. Pilih pending owner/courier.
+4. Tap **Verifikasi**.
+
+## Cara Test Customer Flow
+
+1. Login sebagai customer.
+2. Buka tab **Layanan**.
+3. Pilih layanan aktif dari backend.
+4. Tap **Pesan Sekarang**.
+5. Isi alamat pickup.
+6. Tap **Gunakan Lokasi Saya Saat Ini** untuk mengambil GPS via `expo-location`.
+7. Isi jadwal pickup.
+8. Submit order.
+9. Buka tab **Pesanan**.
+10. Tap order untuk melihat detail, status timeline, tracking, invoice, dan payment.
+11. Jika dummy payment aktif, tap **Bayar Sekarang**, lalu **Simulasi Payment Success**.
+12. Jika order sudah `DELIVERED`, tap **Konfirmasi Selesai**.
+13. Buka profil untuk melihat notifikasi dan logout.
+
+Catatan GPS:
+
+- Customer tidak perlu input latitude/longitude manual.
+- Backend menghitung jarak dengan Haversine dari koordinat customer dan owner.
+- Tidak menggunakan Google Maps API.
+
+## Cara Test Owner Flow
+
+### Owner Belum Verified
+
+1. Login sebagai owner belum verified.
+2. App menampilkan waiting verification atau pesan fitur belum aktif.
+3. Screen owner tidak memanggil endpoint owner yang berpotensi 403 berulang.
+
+### Owner Verified
+
+1. Login sebagai owner verified.
+2. Buka **Beranda**.
+3. Pastikan dashboard menampilkan summary, balance, order aktif, dan order terbaru.
+4. Buka **Layanan**.
+5. Create service dengan:
+   - `service_id`
+   - `name`
+   - `description`
+   - `price_per_kg_owner`
+6. Edit service dan pastikan harga customer ter-refresh dari backend.
+7. Nonaktifkan layanan melalui tombol **Nonaktifkan Layanan**.
+8. Customer membuat order dari service owner.
+9. Buka **Pesanan** sebagai owner.
+10. Tap order dan lakukan aksi sesuai status:
+    - `WAITING_OWNER_CONFIRMATION` → **Konfirmasi Order**
+    - `CONFIRMED` → **Assign Kurir**
+    - `LAUNDRY_PICKED` → **Input Berat Laundry**
+    - `PROCESSING` → **Selesai Diproses / Siap Diantar**
+    - `READY_FOR_DELIVERY` → **Aktifkan Delivery**
+11. Buka **Wallet**.
+12. Cek available balance, pending balance, transaksi, withdrawal history.
+13. Submit withdraw via bank atau e-wallet.
+14. Buka **Profil**.
+15. Cek data profile, notifikasi, mark read, lalu logout.
+
+## Dummy Payment
+
+Jika `EXPO_PUBLIC_USE_DUMMY_PAYMENT=true`, customer order detail menampilkan tombol simulasi payment.
+
+Alur:
+
+1. Customer tap **Bayar Sekarang**.
+2. Frontend memanggil `POST /payments`.
+3. Response menyimpan `payment_id`.
+4. Tombol **Simulasi Payment Success** muncul.
+5. Tap tombol tersebut untuk memanggil `POST /payments/callback`.
+6. Backend mengubah invoice menjadi paid dan order lanjut ke `PROCESSING`.
+
+Jangan aktifkan dummy payment di production.
+
+## Status Order
+
+Timeline order memakai 9 status:
+
+1. `WAITING_OWNER_CONFIRMATION`
+2. `CONFIRMED`
+3. `PICKUP_ON_THE_WAY`
+4. `LAUNDRY_PICKED`
+5. `PROCESSING`
+6. `READY_FOR_DELIVERY`
+7. `DELIVERY_ON_THE_WAY`
+8. `DELIVERED`
+9. `COMPLETED`
+
+Label dan warna badge memakai helper di `constants/orderStatus.ts`.
 
 ## Catatan Development
 
-### Dummy Payment
-`EXPO_PUBLIC_USE_DUMMY_PAYMENT=true` di `.env` akan menampilkan tombol "Simulasi Payment Success" di halaman detail order customer. **Jangan gunakan di production.** Set ke `false` untuk menyembunyikan tombol simulasi.
-
-Alur dummy payment:
-1. Customer tap "Bayar Sekarang" → `POST /payments` → response berisi `payment_id`
-2. `payment_id` disimpan di state frontend
-3. Tombol "Simulasi Payment Success" muncul (hanya jika `payment_id` sudah tersedia)
-4. Tap → `POST /payments/callback` dengan body: `{ payment_id: "PAY...", status: "success" }`
-5. Backend memproses callback → invoice jadi `paid`, order status naik ke `PROCESSING`
-
-### Lokasi Pickup (GPS)
-- Customer **tidak perlu input latitude/longitude manual**
-- Aplikasi menggunakan **GPS HP** via `expo-location` untuk menentukan lokasi pickup
-- Tombol "Gunakan Lokasi Saya Saat Ini" meminta izin lokasi → ambil koordinat otomatis
-- **Tidak menggunakan Google Maps API**
-- **Development/Testing:** Tersedia tombol "Input Koordinat Manual (Development)" yang hanya muncul jika `EXPO_PUBLIC_ALLOW_MANUAL_COORDS=true` di `.env`
-- Body request ke backend tetap sama: `{ service_id, pickup_address, pickup_lat, pickup_lng, pickup_scheduled_at }`
-
-### Google Login
-Tombol "Masuk dengan Google" saat ini menampilkan alert "Coming Soon". Backend belum mendukung OAuth — hanya email/password.
-
-### Struktur Folder
-```
-app/
-├── index.tsx                 # Welcome Screen
-├── _layout.tsx               # Root layout + AuthProvider
-├── (auth)/
-│   ├── login.tsx             # Login (connected)
-│   ├── register.tsx          # Register (connected)
-│   └── waiting-verification.tsx
-├── (admin)/                  # Admin screens (connected)
-├── (customer)/
-│   ├── _layout.tsx           # Tab navigation + ProtectedRoute
-│   ├── beranda.tsx           # Beranda (connected Phase 7)
-│   ├── services.tsx          # Layanan + create order (connected Phase 7)
-│   ├── orders.tsx            # Pesanan + detail/tracking/payment (connected Phase 7)
-│   └── profile.tsx           # Profil + notifikasi (connected Phase 7)
-├── (owner)/                  # Owner screens (placeholder)
-├── (courier)/                # Courier screens (placeholder)
-└── (tabs)/                   # Default Expo tabs (tidak dipakai)
-services/                     # API service modules
-types/                        # TypeScript interfaces
-contexts/                     # AuthContext
-components/                   # ProtectedRoute
-constants/                    # Colors, order status
-```
+- Design system warna ada di `constants/colors.ts`.
+- API client dan token handling ada di `services/api.ts`.
+- Auth state ada di `contexts/AuthContext.tsx`.
+- Role guard ada di `components/ProtectedRoute.tsx`.
+- Semua request UI sebaiknya lewat service layer di `services/`.
