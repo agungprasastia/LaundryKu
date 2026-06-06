@@ -142,7 +142,18 @@ utils/
 
 ### Courier
 
-Service layer untuk courier sudah tersedia. UI courier masih tahap berikutnya bila belum disambungkan penuh.
+- `GET /couriers/me/tasks`
+- `GET /couriers/me/tasks/history`
+- `PATCH /couriers/tasks/:assignment_id/status`
+- `PATCH /couriers/me/location`
+- `GET /couriers/me/earnings`
+- Wallet dan notifications memakai endpoint shared:
+  - `GET /wallets/me`
+  - `GET /wallets/me/transactions`
+  - `POST /wallets/me/withdraw`
+  - `GET /wallets/me/withdrawals`
+  - `GET /notifications`
+  - `PATCH /notifications/:notification_id/read`
 
 ## Cara Test Auth
 
@@ -225,6 +236,41 @@ Catatan GPS:
 13. Submit withdraw via bank atau e-wallet.
 14. Buka **Profil**.
 15. Cek data profile, notifikasi, mark read, lalu logout.
+
+## Cara Test Courier Flow
+
+### Courier Belum Verified
+
+1. Login sebagai courier belum verified.
+2. App menampilkan waiting verification atau pesan fitur belum aktif.
+3. Screen courier tidak memanggil endpoint courier/wallet yang berpotensi 403 berulang.
+
+### Courier Verified
+
+1. Register courier.
+2. Login admin.
+3. Admin verify courier.
+4. Login courier.
+5. Buka **Beranda** dan pastikan summary active task, earnings, available balance, pending balance tampil.
+6. Jika belum ada task, pastikan empty state tampil.
+7. Login owner dan assign courier ke order.
+8. Login courier lagi.
+9. Buka **Tugas**.
+10. Lihat active task dan task history.
+11. Tap task untuk membuka detail.
+12. Jalankan action pickup:
+    - `PICKUP_ON_THE_WAY`
+    - `LAUNDRY_PICKED`
+13. Owner input weight dan customer payment jika dibutuhkan flow.
+14. Owner activate delivery.
+15. Courier jalankan action delivery:
+    - `DELIVERY_ON_THE_WAY`
+    - `DELIVERED`
+    - `DONE`
+16. Tap **Update Lokasi Saya** untuk mengirim GPS via `expo-location`.
+17. Buka **Pendapatan** dan cek total/month/today/completed task.
+18. Buka **Wallet** dan request withdraw via bank atau e-wallet.
+19. Buka **Profil**, cek notifications, mark read, lalu logout.
 
 ## Dummy Payment
 
