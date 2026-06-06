@@ -122,6 +122,10 @@ export interface CourierTask {
   courier_id?: string;
   type?: "pickup" | "delivery";
   status: string;
+  current_phase?: "pickup" | "delivery" | string;
+  pickup_status?: string;
+  delivery_status?: string;
+  order_status?: OrderStatus | string;
   pickup_address?: string;
   pickup_lat?: number;
   pickup_lng?: number;

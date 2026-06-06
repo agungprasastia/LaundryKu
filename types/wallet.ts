@@ -17,7 +17,7 @@ export interface Wallet {
 export interface WalletTransaction {
   transaction_id: string;
   wallet_id?: string;
-  type: 'credit' | 'debit';
+  type: "credit" | "debit";
   amount: number;
   description?: string;
   reference_id?: string;
@@ -32,7 +32,7 @@ export interface Withdrawal {
   wallet_id?: string;
   user_id?: string;
   amount: number;
-  status: 'pending' | 'success' | 'failed' | 'approved' | 'rejected';
+  status: "pending" | "success" | "failed" | "approved" | "rejected";
   bank_name?: string;
   bank_account_number?: string;
   account_number?: string;
@@ -64,6 +64,6 @@ export interface WithdrawPayload {
  * Process withdrawal payload (admin)
  */
 export interface ProcessWithdrawalPayload {
-  status: 'success' | 'failed' | 'approved' | 'rejected';
+  status: "success" | "failed" | "approved" | "rejected";
   notes?: string;
 }
