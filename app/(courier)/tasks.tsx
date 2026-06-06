@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Modal,
   RefreshControl,
@@ -19,6 +19,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import * as courierService from "@/services/courierService";
 import { CourierTask } from "@/types/order";
+import TrackingMap from "@/components/TrackingMap";
 import {
   CourierScreen,
   EmptyState,
@@ -46,6 +47,9 @@ export default function CourierTasksScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [autoTaskId, setAutoTaskId] = useState<string | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const autoInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const [error, setError] = useState("");
 
   const loadTasks = useCallback(async () => {
@@ -82,6 +86,63 @@ export default function CourierTasksScreen() {
     loadTasks();
   }, [loadTasks]);
 
+
+  const stopAutoLocation = useCallback(() => {
+    if (autoInterval.current) clearInterval(autoInterval.current);
+    autoInterval.current = null;
+    setAutoTaskId(null);
+  }, []);
+
+  useEffect(() => stopAutoLocation, [stopAutoLocation]);
+
+  useEffect(() => {
+    if (autoTaskId && !activeTasks.some((task) => task.assignment_id === autoTaskId)) {
+      stopAutoLocation();
+    }
+  }, [activeTasks, autoTaskId, stopAutoLocation]);
+
+  const sendLocation = useCallback(async (task: CourierTask, silent = false) => {
+    const permission = await Location.requestForegroundPermissionsAsync();
+    if (permission.status !== "granted") {
+      crossAlert("Izin Lokasi", "Izin lokasi diperlukan untuk update posisi kurir.");
+      return false;
+    }
+    const current = await Location.getCurrentPositionAsync({});
+    const payload = {
+      assignment_id: task.assignment_id,
+      lat: current.coords.latitude,
+      lng: current.coords.longitude,
+    };
+    await courierService.updateMyLocation(payload);
+    setCurrentLocation({ lat: payload.lat, lng: payload.lng });
+    if (!silent) crossAlert("Berhasil", "Lokasi berhasil diperbarui.");
+    return true;
+  }, []);
+
+  const startAutoLocation = async (task: CourierTask) => {
+    if (activeTasks.length === 0) {
+      crossAlert("Info", "Tidak ada tugas aktif untuk update lokasi.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const ok = await sendLocation(task);
+      if (!ok) return;
+      if (autoInterval.current) clearInterval(autoInterval.current);
+      setAutoTaskId(task.assignment_id);
+      autoInterval.current = setInterval(async () => {
+        try {
+          await sendLocation(task, true);
+        } catch (err) {
+          console.warn("Auto location update failed:", err);
+        }
+      }, 12000);
+    } catch (err) {
+      crossAlert("Error", getErrorMessage(err, "Gagal update lokasi"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
   const refreshControl = useMemo(
     () => (
       <RefreshControl
@@ -114,21 +175,7 @@ export default function CourierTasksScreen() {
   const updateLocation = async (task: CourierTask) => {
     setSubmitting(true);
     try {
-      const permission = await Location.requestForegroundPermissionsAsync();
-      if (permission.status !== "granted") {
-        crossAlert(
-          "Izin Lokasi",
-          "Izin lokasi diperlukan untuk update lokasi kurir.",
-        );
-        return;
-      }
-      const current = await Location.getCurrentPositionAsync({});
-      await courierService.updateMyLocation({
-        assignment_id: task.assignment_id,
-        lat: current.coords.latitude,
-        lng: current.coords.longitude,
-      });
-      crossAlert("Berhasil", "Lokasi berhasil diperbarui.");
+      await sendLocation(task);
     } catch (err) {
       crossAlert("Error", getErrorMessage(err, "Gagal update lokasi"));
     } finally {
@@ -195,6 +242,10 @@ export default function CourierTasksScreen() {
         onClose={() => setSelectedTask(null)}
         onUpdateStatus={updateStatus}
         onUpdateLocation={updateLocation}
+        onStartAutoLocation={startAutoLocation}
+        onStopAutoLocation={stopAutoLocation}
+        autoTaskId={autoTaskId}
+        currentLocation={currentLocation}
       />
     </CourierScreen>
   );
@@ -259,12 +310,20 @@ function TaskDetailModal({
   onClose,
   onUpdateStatus,
   onUpdateLocation,
+  onStartAutoLocation,
+  onStopAutoLocation,
+  autoTaskId,
+  currentLocation,
 }: {
   task: CourierTask | null;
   submitting: boolean;
   onClose: () => void;
   onUpdateStatus: (task: CourierTask, status: string) => void;
   onUpdateLocation: (task: CourierTask) => void;
+  onStartAutoLocation: (task: CourierTask) => void;
+  onStopAutoLocation: () => void;
+  autoTaskId: string | null;
+  currentLocation: { lat: number; lng: number } | null;
 }) {
   if (!task) return null;
   const actions = getTaskActions(task);
@@ -303,8 +362,26 @@ function TaskDetailModal({
               value={task.delivery_address || "-"}
             />
             <PrimaryButton
-              text="Update Lokasi Saya"
+              text="Update Lokasi Sekarang"
               onPress={() => onUpdateLocation(task)}
+              disabled={submitting}
+            />
+            <View style={styles.mapBox}>
+              <Text style={courierStyles.sectionTitle}>Preview Lokasi</Text>
+              <TrackingMap
+                courierLat={currentLocation?.lat}
+                courierLng={currentLocation?.lng}
+                pickupLat={task.pickup_lat}
+                pickupLng={task.pickup_lng}
+                ownerLat={task.owner_lat}
+                ownerLng={task.owner_lng}
+                height={210}
+                showRouteLine
+              />
+            </View>
+            <PrimaryButton
+              text={autoTaskId === task.assignment_id ? "Matikan Update Lokasi" : "Aktifkan Auto Update Lokasi"}
+              onPress={() => autoTaskId === task.assignment_id ? onStopAutoLocation() : onStartAutoLocation(task)}
               disabled={submitting}
             />
             {actions.length === 0 ? (
@@ -410,4 +487,11 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   statusText: { fontSize: 11, fontWeight: "900" },
+  mapBox: { marginVertical: 12, gap: 8 },
 });
+
+
+
+
+
+

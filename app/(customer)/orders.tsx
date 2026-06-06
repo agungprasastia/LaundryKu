@@ -23,6 +23,7 @@ import * as orderService from '@/services/orderService';
 import * as paymentService from '@/services/paymentService';
 import { Order, OrderTracking } from '@/types/order';
 import { Invoice } from '@/types/payment';
+import TrackingMap, { normalizeCourierLocation } from '@/components/TrackingMap';
 
 const IS_DUMMY_PAYMENT = process.env.EXPO_PUBLIC_USE_DUMMY_PAYMENT === 'true';
 
@@ -81,6 +82,21 @@ export default function CustomerOrdersScreen() {
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+
+  useEffect(() => {
+    if (!showDetail || !detailOrder || detailOrder.status === 'COMPLETED') return;
+
+    const interval = setInterval(async () => {
+      try {
+        const response = await orderService.getOrderTracking(detailOrder.order_id);
+        if (response.success && response.data) setTrackingData(response.data);
+      } catch (err) {
+        console.warn('Tracking polling failed:', err);
+      }
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, [detailOrder, showDetail]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -481,6 +497,11 @@ export default function CustomerOrdersScreen() {
 
                 {/* ─── Tracking Timeline ─── */}
                 <View style={styles.detailSection}>
+                  <Text style={styles.detailSectionTitle}>Lokasi Kurir</Text>
+                  <OrderTrackingMap order={detailOrder} tracking={trackingData} />
+                </View>
+
+                <View style={styles.detailSection}>
                   <Text style={styles.detailSectionTitle}>Tracking Status</Text>
                   {renderTimeline(detailOrder, trackingData)}
                 </View>
@@ -673,6 +694,30 @@ function renderTimeline(order: Order, _tracking: OrderTracking | null) {
   );
 }
 
+function OrderTrackingMap({ order, tracking }: { order: Order; tracking: OrderTracking | null }) {
+  const courierLocation = normalizeCourierLocation(tracking);
+  const updatedText = courierLocation.updatedAt ? formatTimelineDate(courierLocation.updatedAt) : null;
+  return (
+    <View style={{ gap: 8 }}>
+      <TrackingMap
+        courierLat={courierLocation.lat}
+        courierLng={courierLocation.lng}
+        pickupLat={order.pickup_lat}
+        pickupLng={order.pickup_lng}
+        ownerLat={order.owner_lat}
+        ownerLng={order.owner_lng}
+        height={220}
+        showRouteLine
+      />
+      <Text style={styles.detailValue}>Status: {getStatusLabel(order.status)}</Text>
+      <Text style={styles.detailLabel}>
+        {courierLocation.lat != null && courierLocation.lng != null
+          ? `Lokasi kurir terakhir diperbarui${updatedText ? `: ${updatedText}` : '.'}`
+          : 'Kurir belum mengirim lokasi.'}
+      </Text>
+    </View>
+  );
+}
 function formatTimelineDate(dateStr: string): string {
   try {
     const d = new Date(dateStr);
@@ -842,3 +887,5 @@ const styles = StyleSheet.create({
   },
   completeButtonText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
 });
+
+

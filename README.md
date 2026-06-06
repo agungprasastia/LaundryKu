@@ -9,7 +9,8 @@ Aplikasi mobile laundry online untuk customer, owner laundry, kurir, dan admin. 
 - TypeScript
 - Axios
 - Expo SecureStore / localStorage
-- Expo Location untuk GPS pickup
+- Expo Location untuk GPS pickup dan update posisi kurir
+- React Native WebView + Leaflet + OpenStreetMap untuk peta tracking
 
 ## Instalasi
 
@@ -25,6 +26,7 @@ Buat file `.env` di root project:
 ```env
 EXPO_PUBLIC_API_URL=http://localhost:3000
 EXPO_PUBLIC_USE_DUMMY_PAYMENT=true
+EXPO_PUBLIC_ALLOW_MANUAL_COORDS=false
 ```
 
 | Platform         | `EXPO_PUBLIC_API_URL`     | Catatan                  |
@@ -43,6 +45,22 @@ npx expo start
 npx expo start --web
 npx expo start --android
 ```
+
+## Maps dan Tracking
+
+LaundryKu memakai peta gratis tanpa API key:
+
+- Peta: OpenStreetMap + Leaflet di `react-native-webview`.
+- GPS HP: `expo-location`.
+- Komponen peta: `components/TrackingMap.tsx`.
+- Customer dan owner tracking: polling `GET /orders/:order_id/tracking` setiap 8 detik saat detail order terbuka.
+- Courier update lokasi: `PATCH /couriers/me/location` manual atau otomatis setiap 12 detik saat tugas aktif.
+- Manual latitude/longitude hanya untuk development jika `EXPO_PUBLIC_ALLOW_MANUAL_COORDS=true`.
+
+Batasan saat ini:
+
+- Belum ada routing jalan/directions realtime seperti Gojek.
+- Garis route masih polyline lurus antara kurir dan pickup/laundry.
 
 ## Role dan Routing
 
@@ -191,10 +209,11 @@ utils/
 7. Isi jadwal pickup.
 8. Submit order.
 9. Buka tab **Pesanan**.
-10. Tap order untuk melihat detail, status timeline, tracking, invoice, dan payment.
+10. Tap order untuk melihat detail, peta tracking kurir, status timeline, invoice, dan payment.
 11. Jika dummy payment aktif, tap **Bayar Sekarang**, lalu **Simulasi Payment Success**.
 12. Jika order sudah `DELIVERED`, tap **Konfirmasi Selesai**.
-13. Buka profil untuk melihat notifikasi dan logout.
+13. Jika kurir sudah update lokasi, tunggu ±8 detik dan pastikan marker **Kurir** berubah di peta.
+14. Buka profil untuk melihat notifikasi dan logout.
 
 Catatan GPS:
 
@@ -225,17 +244,19 @@ Catatan GPS:
 7. Nonaktifkan layanan melalui tombol **Nonaktifkan Layanan**.
 8. Customer membuat order dari service owner.
 9. Buka **Pesanan** sebagai owner.
-10. Tap order dan lakukan aksi sesuai status:
+10. Tap order dan pastikan peta menampilkan **Lokasi Pickup**, **Kurir** jika tersedia, dan **Laundry** jika koordinat owner tersedia.
+11. Jika kurir update lokasi, tunggu ±8 detik dan pastikan posisi kurir berubah.
+12. Lakukan aksi sesuai status:
     - `WAITING_OWNER_CONFIRMATION` → **Konfirmasi Order**
     - `CONFIRMED` → **Assign Kurir**
     - `LAUNDRY_PICKED` → **Input Berat Laundry**
     - `PROCESSING` → **Selesai Diproses / Siap Diantar**
     - `READY_FOR_DELIVERY` → **Aktifkan Delivery**
-11. Buka **Wallet**.
-12. Cek available balance, pending balance, transaksi, withdrawal history.
-13. Submit withdraw via bank atau e-wallet.
-14. Buka **Profil**.
-15. Cek data profile, notifikasi, mark read, lalu logout.
+13. Buka **Wallet**.
+14. Cek available balance, pending balance, transaksi, withdrawal history.
+15. Submit withdraw via bank atau e-wallet.
+16. Buka **Profil**.
+17. Cek data profile, notifikasi, mark read, lalu logout.
 
 ## Cara Test Courier Flow
 
@@ -267,10 +288,12 @@ Catatan GPS:
     - `DELIVERY_ON_THE_WAY`
     - `DELIVERED`
     - `DONE`
-16. Tap **Update Lokasi Saya** untuk mengirim GPS via `expo-location`.
-17. Buka **Pendapatan** dan cek total/month/today/completed task.
-18. Buka **Wallet** dan request withdraw via bank atau e-wallet.
-19. Buka **Profil**, cek notifications, mark read, lalu logout.
+16. Tap **Update Lokasi Sekarang** untuk mengirim GPS sekali via `expo-location`.
+17. Tap **Aktifkan Auto Update Lokasi** untuk update otomatis setiap 12 detik.
+18. Tap **Matikan Update Lokasi** untuk menghentikan interval.
+19. Buka **Pendapatan** dan cek total/month/today/completed task.
+20. Buka **Wallet** dan request withdraw via bank atau e-wallet.
+21. Buka **Profil**, cek notifications, mark read, lalu logout.
 
 ## Dummy Payment
 
@@ -310,3 +333,5 @@ Label dan warna badge memakai helper di `constants/orderStatus.ts`.
 - Auth state ada di `contexts/AuthContext.tsx`.
 - Role guard ada di `components/ProtectedRoute.tsx`.
 - Semua request UI sebaiknya lewat service layer di `services/`.
+
+

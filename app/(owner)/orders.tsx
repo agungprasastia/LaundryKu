@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Modal,
@@ -24,6 +24,7 @@ import * as ownerService from "@/services/ownerService";
 import * as orderService from "@/services/orderService";
 import * as courierService from "@/services/courierService";
 import { AvailableCourier, Order, OrderTracking } from "@/types/order";
+import TrackingMap, { normalizeCourierLocation } from "@/components/TrackingMap";
 const money = (n?: number) =>
   n == null ? "-" : "Rp " + Number(n).toLocaleString("id-ID");
 const num = (n?: number) =>
@@ -263,6 +264,7 @@ export default function OwnerOrdersScreen() {
                     k="Courier"
                     v={detail.courier_name || detail.courier?.name || "-"}
                   />
+                  <OwnerTrackingPanel order={detail} tracking={tracking} />
                   <Text style={s.sec}>Timeline</Text>
                   {ALL_ORDER_STATUSES.map((st) => (
                     <Text
@@ -344,6 +346,33 @@ export default function OwnerOrdersScreen() {
         </View>
       </Modal>
     </Screen>
+  );
+}
+function OwnerTrackingPanel({ order, tracking }: { order: Order; tracking: OrderTracking | null }) {
+  const courierLocation = normalizeCourierLocation(tracking);
+  return (
+    <View style={s.mapBlock}>
+      <Text style={s.sec}>Lokasi Kurir</Text>
+      <TrackingMap
+        courierLat={courierLocation.lat}
+        courierLng={courierLocation.lng}
+        pickupLat={order.pickup_lat}
+        pickupLng={order.pickup_lng}
+        ownerLat={order.owner_lat}
+        ownerLng={order.owner_lng}
+        height={220}
+        showRouteLine
+      />
+      <Text style={s.muted}>Status order: {getStatusLabel(order.status)}</Text>
+      {tracking?.task_status || tracking?.current_phase ? (
+        <Text style={s.muted}>Assignment: {tracking.task_status || tracking.current_phase}</Text>
+      ) : null}
+      <Text style={s.muted}>
+        {courierLocation.lat != null && courierLocation.lng != null
+          ? `Lokasi kurir terakhir${courierLocation.updatedAt ? `: ${date(courierLocation.updatedAt)}` : ""}`
+          : "Kurir belum mengirim lokasi."}
+      </Text>
+    </View>
   );
 }
 function Action({ order, busy, status, showCouriers, weight, activate }: any) {
@@ -490,6 +519,7 @@ const s = StyleSheet.create({
   k: { fontSize: 11, color: LaundryColors.textMuted, fontWeight: "700" },
   v: { fontSize: 14, color: LaundryColors.textPrimary, fontWeight: "700" },
   sec: { fontSize: 15, fontWeight: "900", marginTop: 14, marginBottom: 6 },
+  mapBlock: { marginTop: 14, gap: 8 },
   timeline: { fontSize: 12, color: LaundryColors.textMuted, marginVertical: 3 },
   done: { color: LaundryColors.roleMitraIcon, fontWeight: "800" },
   primary: {
@@ -517,3 +547,6 @@ const s = StyleSheet.create({
   },
   errT: { color: LaundryColors.error, fontWeight: "800" },
 });
+
+
+

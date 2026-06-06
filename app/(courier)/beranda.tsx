@@ -24,7 +24,6 @@ import {
   InfoRow,
   isVerified,
   LoadingState,
-  PrimaryButton,
   StatusPill,
   VerificationGate,
   courierStyles,
@@ -97,6 +96,12 @@ export default function CourierBerandaScreen() {
   const updateLocation = async () => {
     if (tasks.length === 0) {
       crossAlert("Info", "Tidak ada tugas aktif untuk update lokasi.");
+      return;
+    }
+
+    if (tasks.length > 1) {
+      crossAlert("Pilih Tugas", "Ada lebih dari satu tugas aktif. Buka halaman Tugas lalu pilih tugas yang ingin diupdate.");
+      router.push("/(courier)/tasks");
       return;
     }
 
@@ -280,3 +285,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+
+
+
+

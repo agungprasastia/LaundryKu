@@ -32,6 +32,8 @@ export interface Order {
   pickup_address?: string;
   pickup_lat?: number;
   pickup_lng?: number;
+  owner_lat?: number;
+  owner_lng?: number;
   pickup_scheduled_at?: string;
   delivery_address?: string;
   delivery_lat?: number;
@@ -82,12 +84,29 @@ export interface CreateOrderPayload {
 export interface OrderTracking {
   order_id: string;
   status: OrderStatus;
+  order_status?: OrderStatus | string;
+  current_phase?: "pickup" | "delivery" | string;
+  task_status?: string;
+  courier?: {
+    name?: string;
+    vehicle?: string;
+  } | null;
   tracking_history?: TrackingEntry[];
   courier_location?: {
     lat: number;
     lng: number;
     updated_at: string;
   };
+  lat?: number;
+  lng?: number;
+  courier_lat?: number;
+  courier_lng?: number;
+  location?: {
+    lat?: number;
+    lng?: number;
+    updated_at?: string;
+  };
+  updated_at?: string;
 }
 
 /**
@@ -129,6 +148,8 @@ export interface CourierTask {
   pickup_address?: string;
   pickup_lat?: number;
   pickup_lng?: number;
+  owner_lat?: number;
+  owner_lng?: number;
   delivery_address?: string;
   delivery_lat?: number;
   delivery_lng?: number;
