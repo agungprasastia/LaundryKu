@@ -9,6 +9,7 @@ Aplikasi mobile laundry online dengan fitur pickup, tracking real-time, dan deli
 - **TypeScript**
 - **Axios** (HTTP client)
 - **Expo SecureStore** (token storage di native) / **localStorage** (web)
+- **Expo Location** (GPS pickup location)
 
 ## Instalasi
 
@@ -124,11 +125,16 @@ Aplikasi mendukung 4 role user:
 ### 4. Buat Pesanan
 1. Di layanan → tap "Pesan Sekarang"
 2. Isi form:
-   - Alamat pickup
-   - Latitude (-90 s/d 90) & Longitude (-180 s/d 180)
-   - Jadwal pickup (format: `YYYY-MM-DD HH:mm:ss`)
+   - **Alamat pickup** (wajib)
+   - **Lokasi pickup** → tap tombol **"Gunakan Lokasi Saya Saat Ini"**
+     - Aplikasi mengambil koordinat GPS dari HP via `expo-location`
+     - Customer **tidak perlu input latitude/longitude manual**
+     - Setelah berhasil: tampil ✅ "Lokasi berhasil diambil" + koordinat kecil
+   - **Jadwal pickup** (format: `YYYY-MM-DD HH:mm:ss`)
 3. Tap "Buat Pesanan" → `POST /orders`
 4. Alert sukses dengan Order ID → bisa langsung ke tab Pesanan
+
+> **Catatan:** Tidak menggunakan Google Maps API. Backend menghitung jarak menggunakan formula Haversine dari koordinat GPS customer dan koordinat owner.
 
 ### 5. Lihat Pesanan
 1. Tab **Pesanan** → toggle Aktif / Riwayat
@@ -230,6 +236,14 @@ Alur dummy payment:
 3. Tombol "Simulasi Payment Success" muncul (hanya jika `payment_id` sudah tersedia)
 4. Tap → `POST /payments/callback` dengan body: `{ payment_id: "PAY...", status: "success" }`
 5. Backend memproses callback → invoice jadi `paid`, order status naik ke `PROCESSING`
+
+### Lokasi Pickup (GPS)
+- Customer **tidak perlu input latitude/longitude manual**
+- Aplikasi menggunakan **GPS HP** via `expo-location` untuk menentukan lokasi pickup
+- Tombol "Gunakan Lokasi Saya Saat Ini" meminta izin lokasi → ambil koordinat otomatis
+- **Tidak menggunakan Google Maps API**
+- **Development/Testing:** Tersedia tombol "Input Koordinat Manual (Development)" yang hanya muncul di mode dev (`__DEV__`) atau jika `EXPO_PUBLIC_ALLOW_MANUAL_COORDS=true`
+- Body request ke backend tetap sama: `{ service_id, pickup_address, pickup_lat, pickup_lng, pickup_scheduled_at }`
 
 ### Google Login
 Tombol "Masuk dengan Google" saat ini menampilkan alert "Coming Soon". Backend belum mendukung OAuth — hanya email/password.

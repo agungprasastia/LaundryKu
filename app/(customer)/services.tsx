@@ -20,6 +20,14 @@ import * as serviceService from '@/services/serviceService';
 import * as orderService from '@/services/orderService';
 import { LaundryService } from '@/types/service';
 import { CreateOrderPayload } from '@/types/order';
+import * as Location from 'expo-location';
+import Constants from 'expo-constants';
+
+// Dev mode: allow manual coordinate input
+const ALLOW_MANUAL_COORDS =
+  __DEV__ ||
+  Constants.expoConfig?.extra?.EXPO_PUBLIC_ALLOW_MANUAL_COORDS === 'true' ||
+  process.env.EXPO_PUBLIC_ALLOW_MANUAL_COORDS === 'true';
 
 export default function CustomerServicesScreen() {
   const router = useRouter();
@@ -38,10 +46,17 @@ export default function CustomerServicesScreen() {
   const [orderServiceId, setOrderServiceId] = useState('');
   const [orderServiceName, setOrderServiceName] = useState('');
   const [pickupAddress, setPickupAddress] = useState('');
-  const [pickupLat, setPickupLat] = useState('');
-  const [pickupLng, setPickupLng] = useState('');
+  const [pickupLat, setPickupLat] = useState<number | null>(null);
+  const [pickupLng, setPickupLng] = useState<number | null>(null);
   const [pickupScheduledAt, setPickupScheduledAt] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // GPS location state
+  const [locationStatus, setLocationStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [locationError, setLocationError] = useState('');
+  const [showManualCoords, setShowManualCoords] = useState(false);
+  const [manualLat, setManualLat] = useState('');
+  const [manualLng, setManualLng] = useState('');
 
   const fetchServices = useCallback(async () => {
     try {
@@ -87,27 +102,77 @@ export default function CustomerServicesScreen() {
     setOrderServiceId(svc.service_id);
     setOrderServiceName(svc.name);
     setPickupAddress('');
-    setPickupLat('');
-    setPickupLng('');
+    setPickupLat(null);
+    setPickupLng(null);
     setPickupScheduledAt('');
+    setLocationStatus('idle');
+    setLocationError('');
+    setShowManualCoords(false);
+    setManualLat('');
+    setManualLng('');
     setShowDetail(false);
     setShowOrderModal(true);
   };
 
-  const validateOrderForm = (): string | null => {
-    if (!pickupAddress.trim()) return 'Alamat pickup harus diisi';
-    if (!pickupLat.trim()) return 'Latitude harus diisi';
-    if (!pickupLng.trim()) return 'Longitude harus diisi';
-    if (!pickupScheduledAt.trim()) return 'Jadwal pickup harus diisi';
+  // ─── GPS Location Handler ───
+  const handleGetLocation = async () => {
+    setLocationStatus('loading');
+    setLocationError('');
 
-    const lat = parseFloat(pickupLat);
-    const lng = parseFloat(pickupLng);
+    try {
+      // Request permission
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setLocationStatus('error');
+        setLocationError('Izin lokasi ditolak');
+        crossAlert(
+          'Izin Lokasi Diperlukan',
+          'Izin lokasi diperlukan untuk menentukan lokasi pickup. Silakan aktifkan izin lokasi di pengaturan.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
 
+      // Get current location
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+
+      setPickupLat(location.coords.latitude);
+      setPickupLng(location.coords.longitude);
+      setLocationStatus('success');
+    } catch (err: any) {
+      setLocationStatus('error');
+      const msg = err?.message || 'Gagal mengambil lokasi';
+      setLocationError(msg);
+      crossAlert('Gagal Mengambil Lokasi', msg, [{ text: 'OK' }]);
+    }
+  };
+
+  // ─── Apply Manual Coordinates (dev only) ───
+  const handleApplyManualCoords = () => {
+    const lat = parseFloat(manualLat);
+    const lng = parseFloat(manualLng);
     if (isNaN(lat) || lat < -90 || lat > 90) {
-      return 'Latitude harus antara -90 dan 90';
+      crossAlert('Error', 'Latitude harus antara -90 dan 90');
+      return;
     }
     if (isNaN(lng) || lng < -180 || lng > 180) {
-      return 'Longitude harus antara -180 dan 180';
+      crossAlert('Error', 'Longitude harus antara -180 dan 180');
+      return;
+    }
+    setPickupLat(lat);
+    setPickupLng(lng);
+    setLocationStatus('success');
+    setShowManualCoords(false);
+  };
+
+  const validateOrderForm = (): string | null => {
+    if (!pickupAddress.trim()) return 'Alamat pickup harus diisi';
+    if (!pickupScheduledAt.trim()) return 'Jadwal pickup harus diisi';
+
+    if (pickupLat == null || pickupLng == null) {
+      return 'Silakan tekan tombol Gunakan Lokasi Saya Saat Ini terlebih dahulu.';
     }
 
     // Basic date format validation (YYYY-MM-DD HH:mm:ss)
@@ -131,8 +196,8 @@ export default function CustomerServicesScreen() {
       const payload: CreateOrderPayload = {
         service_id: orderServiceId,
         pickup_address: pickupAddress.trim(),
-        pickup_lat: parseFloat(pickupLat),
-        pickup_lng: parseFloat(pickupLng),
+        pickup_lat: pickupLat!,
+        pickup_lng: pickupLng!,
         pickup_scheduled_at: pickupScheduledAt.trim(),
       };
 
@@ -348,36 +413,107 @@ export default function CustomerServicesScreen() {
                 editable={!submitting}
               />
 
-              <View style={styles.inputRow}>
-                <View style={styles.inputHalf}>
-                  <Text style={styles.inputLabel}>Latitude *</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={pickupLat}
-                    onChangeText={setPickupLat}
-                    placeholder="-6.2"
-                    placeholderTextColor={LaundryColors.inputPlaceholder}
-                    keyboardType="numeric"
-                    editable={!submitting}
-                  />
-                </View>
-                <View style={styles.inputHalf}>
-                  <Text style={styles.inputLabel}>Longitude *</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={pickupLng}
-                    onChangeText={setPickupLng}
-                    placeholder="106.8"
-                    placeholderTextColor={LaundryColors.inputPlaceholder}
-                    keyboardType="numeric"
-                    editable={!submitting}
-                  />
-                </View>
-              </View>
+              {/* ─── GPS Location Section ─── */}
+              <Text style={styles.inputLabel}>Lokasi Pickup *</Text>
 
-              <Text style={styles.inputHint}>
-                Latitude: -90 s/d 90 • Longitude: -180 s/d 180
-              </Text>
+              <TouchableOpacity
+                style={[
+                  styles.locationButton,
+                  locationStatus === 'success' && styles.locationButtonSuccess,
+                  locationStatus === 'loading' && styles.locationButtonLoading,
+                ]}
+                onPress={handleGetLocation}
+                disabled={submitting || locationStatus === 'loading'}
+                activeOpacity={0.7}
+              >
+                {locationStatus === 'loading' ? (
+                  <ActivityIndicator size="small" color={LaundryColors.primary} />
+                ) : locationStatus === 'success' ? (
+                  <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+                ) : (
+                  <Ionicons name="location" size={20} color={LaundryColors.primary} />
+                )}
+                <Text
+                  style={[
+                    styles.locationButtonText,
+                    locationStatus === 'success' && styles.locationButtonTextSuccess,
+                  ]}
+                >
+                  {locationStatus === 'loading'
+                    ? 'Mengambil lokasi...'
+                    : locationStatus === 'success'
+                    ? 'Lokasi berhasil diambil'
+                    : 'Gunakan Lokasi Saya Saat Ini'}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Show coordinates (small debug text) when location is obtained */}
+              {locationStatus === 'success' && pickupLat != null && pickupLng != null && (
+                <Text style={styles.locationCoords}>
+                  📍 {pickupLat.toFixed(6)}, {pickupLng.toFixed(6)}
+                </Text>
+              )}
+
+              {/* Location error */}
+              {locationStatus === 'error' && locationError ? (
+                <Text style={styles.locationErrorText}>⚠️ {locationError}</Text>
+              ) : null}
+
+              {/* ─── Dev Mode: Manual Coordinates Fallback ─── */}
+              {ALLOW_MANUAL_COORDS && (
+                <View style={styles.devSection}>
+                  {!showManualCoords ? (
+                    <TouchableOpacity
+                      style={styles.devToggleButton}
+                      onPress={() => setShowManualCoords(true)}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="code-slash" size={14} color="#9CA3AF" />
+                      <Text style={styles.devToggleText}>Input Koordinat Manual (Development)</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <View style={styles.devManualBox}>
+                      <View style={styles.devManualHeader}>
+                        <Text style={styles.devManualTitle}>🛠 Manual Coordinates</Text>
+                        <TouchableOpacity onPress={() => setShowManualCoords(false)}>
+                          <Ionicons name="close" size={18} color="#9CA3AF" />
+                        </TouchableOpacity>
+                      </View>
+                      <View style={styles.inputRow}>
+                        <View style={styles.inputHalf}>
+                          <Text style={styles.devLabel}>Latitude</Text>
+                          <TextInput
+                            style={styles.devInput}
+                            value={manualLat}
+                            onChangeText={setManualLat}
+                            placeholder="-6.2"
+                            placeholderTextColor="#9CA3AF"
+                            keyboardType="numeric"
+                          />
+                        </View>
+                        <View style={styles.inputHalf}>
+                          <Text style={styles.devLabel}>Longitude</Text>
+                          <TextInput
+                            style={styles.devInput}
+                            value={manualLng}
+                            onChangeText={setManualLng}
+                            placeholder="106.8"
+                            placeholderTextColor="#9CA3AF"
+                            keyboardType="numeric"
+                          />
+                        </View>
+                      </View>
+                      <TouchableOpacity
+                        style={styles.devApplyButton}
+                        onPress={handleApplyManualCoords}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={styles.devApplyButtonText}>Terapkan Koordinat</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              )}
 
               <Text style={styles.inputLabel}>Jadwal Pickup *</Text>
               <TextInput
@@ -548,6 +684,71 @@ const styles = StyleSheet.create({
   inputHalf: { flex: 1 },
   inputHint: {
     fontSize: 10, color: LaundryColors.textMuted, marginTop: 4, marginBottom: 4,
+  },
+
+  /* GPS Location */
+  locationButton: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 10, borderWidth: 1.5, borderColor: LaundryColors.primary,
+    borderRadius: 12, paddingVertical: 14, borderStyle: 'dashed',
+    backgroundColor: '#F0F7FF',
+  },
+  locationButtonSuccess: {
+    borderColor: '#10B981', borderStyle: 'solid', backgroundColor: '#ECFDF5',
+  },
+  locationButtonLoading: {
+    borderColor: LaundryColors.primaryLight, backgroundColor: '#F8FAFF',
+  },
+  locationButtonText: {
+    fontSize: 14, fontWeight: '600', color: LaundryColors.primary,
+  },
+  locationButtonTextSuccess: {
+    color: '#10B981',
+  },
+  locationCoords: {
+    fontSize: 11, color: LaundryColors.textMuted, textAlign: 'center',
+    marginTop: 6, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  },
+  locationErrorText: {
+    fontSize: 12, color: LaundryColors.error, marginTop: 6,
+  },
+
+  /* Dev Mode Manual Coords */
+  devSection: {
+    marginTop: 8,
+  },
+  devToggleButton: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 6, paddingVertical: 8,
+  },
+  devToggleText: {
+    fontSize: 11, color: '#9CA3AF', fontStyle: 'italic',
+  },
+  devManualBox: {
+    backgroundColor: '#FFF7ED', borderRadius: 10, padding: 12,
+    borderWidth: 1, borderColor: '#FDE68A',
+  },
+  devManualHeader: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    marginBottom: 8,
+  },
+  devManualTitle: {
+    fontSize: 12, fontWeight: '600', color: '#92400E',
+  },
+  devLabel: {
+    fontSize: 11, fontWeight: '600', color: '#92400E', marginBottom: 4,
+  },
+  devInput: {
+    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#FDE68A',
+    borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8,
+    fontSize: 13, color: '#92400E',
+  },
+  devApplyButton: {
+    backgroundColor: '#F59E0B', borderRadius: 8,
+    paddingVertical: 8, alignItems: 'center', marginTop: 8,
+  },
+  devApplyButtonText: {
+    fontSize: 12, fontWeight: '700', color: '#FFFFFF',
   },
 
   submitButton: {
