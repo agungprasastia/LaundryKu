@@ -242,7 +242,7 @@ Alur dummy payment:
 - Aplikasi menggunakan **GPS HP** via `expo-location` untuk menentukan lokasi pickup
 - Tombol "Gunakan Lokasi Saya Saat Ini" meminta izin lokasi → ambil koordinat otomatis
 - **Tidak menggunakan Google Maps API**
-- **Development/Testing:** Tersedia tombol "Input Koordinat Manual (Development)" yang hanya muncul di mode dev (`__DEV__`) atau jika `EXPO_PUBLIC_ALLOW_MANUAL_COORDS=true`
+- **Development/Testing:** Tersedia tombol "Input Koordinat Manual (Development)" yang hanya muncul jika `EXPO_PUBLIC_ALLOW_MANUAL_COORDS=true` di `.env`
 - Body request ke backend tetap sama: `{ service_id, pickup_address, pickup_lat, pickup_lng, pickup_scheduled_at }`
 
 ### Google Login

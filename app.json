@@ -9,7 +9,10 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "LaundryKu membutuhkan akses lokasi untuk menentukan titik pickup laundry Anda."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -39,7 +42,14 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "LaundryKu membutuhkan akses lokasi untuk menentukan titik pickup laundry Anda.",
+          "locationWhenInUsePermission": "LaundryKu membutuhkan akses lokasi untuk menentukan titik pickup laundry Anda."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

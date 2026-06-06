@@ -23,9 +23,8 @@ import { CreateOrderPayload } from '@/types/order';
 import * as Location from 'expo-location';
 import Constants from 'expo-constants';
 
-// Dev mode: allow manual coordinate input
+// Dev mode: allow manual coordinate input (only when explicitly enabled)
 const ALLOW_MANUAL_COORDS =
-  __DEV__ ||
   Constants.expoConfig?.extra?.EXPO_PUBLIC_ALLOW_MANUAL_COORDS === 'true' ||
   process.env.EXPO_PUBLIC_ALLOW_MANUAL_COORDS === 'true';
 
