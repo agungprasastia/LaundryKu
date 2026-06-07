@@ -147,11 +147,6 @@ export default function CourierProfileScreen() {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.8}>
-        <Ionicons name="log-out-outline" size={20} color={LaundryColors.error} />
-        <Text style={styles.logoutButtonText}>Keluar Akun</Text>
-      </TouchableOpacity>
-
       {/* NOTIFICATIONS SECTION */}
       <View style={styles.notificationsHeaderRow}>
         <Text style={courierStyles.sectionTitle}>Notifikasi Terbaru</Text>
@@ -198,6 +193,12 @@ export default function CourierProfileScreen() {
           </TouchableOpacity>
         ))
       )}
+
+      {/* LOGOUT */}
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.8}>
+        <Ionicons name="log-out-outline" size={20} color={LaundryColors.error} />
+        <Text style={styles.logoutButtonText}>Keluar Akun</Text>
+      </TouchableOpacity>
     </CourierScreen>
   );
 }
