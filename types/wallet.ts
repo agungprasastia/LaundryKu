@@ -23,6 +23,8 @@ export interface WalletTransaction {
   reference_id?: string;
   created_at?: string;
 }
+export type WithdrawalStatus = "pending" | "success" | "failed" | "approved" | "rejected";
+
 
 /**
  * Withdrawal request
@@ -32,7 +34,7 @@ export interface Withdrawal {
   wallet_id?: string;
   user_id?: string;
   amount: number;
-  status: "pending" | "success" | "failed" | "approved" | "rejected";
+  status: WithdrawalStatus;
   bank_name?: string;
   bank_account_number?: string;
   account_number?: string;
@@ -50,15 +52,21 @@ export interface Withdrawal {
 /**
  * Withdraw request payload
  */
-export interface WithdrawPayload {
+export type BankWithdrawPayload = {
   amount: number;
-  bank_account_number?: string;
-  bank_name?: string;
+  bank_account_number: string;
+  bank_name: string;
   account_number?: string;
   account_holder?: string;
-  e_wallet_number?: string;
-  e_wallet_provider?: string;
-}
+};
+
+export type EWalletWithdrawPayload = {
+  amount: number;
+  e_wallet_number: string;
+  e_wallet_provider: string;
+};
+
+export type WithdrawPayload = BankWithdrawPayload | EWalletWithdrawPayload;
 
 /**
  * Process withdrawal payload (admin)
@@ -67,3 +75,7 @@ export interface ProcessWithdrawalPayload {
   status: "success" | "failed" | "approved" | "rejected";
   notes?: string;
 }
+
+
+
+

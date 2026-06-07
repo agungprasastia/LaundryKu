@@ -17,13 +17,13 @@ import {
   getStatusLabel,
   getStatusColor,
   getStatusBgColor,
-  ALL_ORDER_STATUSES,
 } from '@/constants/orderStatus';
 import * as orderService from '@/services/orderService';
 import * as paymentService from '@/services/paymentService';
 import { Order, OrderTracking } from '@/types/order';
 import { Invoice } from '@/types/payment';
-import TrackingMap, { normalizeCourierLocation } from '@/components/TrackingMap';
+import { StatusTimeline } from './components/StatusTimeline';
+import { TrackingSection } from './components/TrackingSection';
 
 const IS_DUMMY_PAYMENT = process.env.EXPO_PUBLIC_USE_DUMMY_PAYMENT === 'true';
 
@@ -498,12 +498,12 @@ export default function CustomerOrdersScreen() {
                 {/* ─── Tracking Timeline ─── */}
                 <View style={styles.detailSection}>
                   <Text style={styles.detailSectionTitle}>Lokasi Kurir</Text>
-                  <OrderTrackingMap order={detailOrder} tracking={trackingData} />
+                  <TrackingSection order={detailOrder} tracking={trackingData} />
                 </View>
 
                 <View style={styles.detailSection}>
                   <Text style={styles.detailSectionTitle}>Tracking Status</Text>
-                  {renderTimeline(detailOrder, trackingData)}
+                  <StatusTimeline order={detailOrder} />
                 </View>
 
                 {/* ─── Invoice Section ─── */}
@@ -624,134 +624,6 @@ export default function CustomerOrdersScreen() {
     </View>
   );
 }
-
-// ─── Timeline Renderer ───
-function renderTimeline(order: Order, _tracking: OrderTracking | null) {
-  const currentStatusIndex = ALL_ORDER_STATUSES.indexOf(order.status);
-
-  // Build tracking map for timestamps from order.status_history
-  // Backend returns status_history: [{ status, at }, ...]
-  const trackingMap = new Map<string, { timestamp: string; description?: string }>();
-  if (order.status_history) {
-    order.status_history.forEach((entry) => {
-      trackingMap.set(entry.status, { timestamp: entry.at });
-    });
-  }
-
-  return (
-    <View style={timelineStyles.container}>
-      {ALL_ORDER_STATUSES.map((status, index) => {
-        const isCompleted = index <= currentStatusIndex;
-        const isCurrent = index === currentStatusIndex;
-        const entry: { timestamp?: string; description?: string } | undefined = trackingMap.get(status);
-        const statusColor = isCompleted ? getStatusColor(status) : LaundryColors.textMuted;
-
-        return (
-          <View key={status} style={timelineStyles.step}>
-            {/* Connector line (above) */}
-            {index > 0 && (
-              <View style={[
-                timelineStyles.connector,
-                { backgroundColor: isCompleted ? LaundryColors.primary : '#E2E8F0' }
-              ]} />
-            )}
-
-            <View style={timelineStyles.stepRow}>
-              {/* Dot */}
-              <View style={[
-                timelineStyles.dot,
-                isCompleted && { backgroundColor: statusColor, borderColor: statusColor },
-                isCurrent && timelineStyles.dotCurrent,
-              ]}>
-                {isCompleted && (
-                  <Ionicons name="checkmark" size={10} color="#FFFFFF" />
-                )}
-              </View>
-
-              {/* Label */}
-              <View style={timelineStyles.labelWrap}>
-                <Text style={[
-                  timelineStyles.label,
-                  isCompleted && { color: LaundryColors.textPrimary, fontWeight: '600' },
-                  isCurrent && { fontWeight: '700' },
-                ]}>
-                  {getStatusLabel(status)}
-                </Text>
-                {entry?.timestamp ? (
-                  <Text style={timelineStyles.timestamp}>
-                    {formatTimelineDate(entry.timestamp)}
-                  </Text>
-                ) : null}
-                {entry?.description ? (
-                  <Text style={timelineStyles.description}>{entry.description}</Text>
-                ) : null}
-              </View>
-            </View>
-          </View>
-        );
-      })}
-    </View>
-  );
-}
-
-function OrderTrackingMap({ order, tracking }: { order: Order; tracking: OrderTracking | null }) {
-  const courierLocation = normalizeCourierLocation(tracking);
-  const updatedText = courierLocation.updatedAt ? formatTimelineDate(courierLocation.updatedAt) : null;
-  return (
-    <View style={{ gap: 8 }}>
-      <TrackingMap
-        courierLat={courierLocation.lat}
-        courierLng={courierLocation.lng}
-        pickupLat={order.pickup_lat}
-        pickupLng={order.pickup_lng}
-        ownerLat={order.owner_lat}
-        ownerLng={order.owner_lng}
-        height={220}
-        showRouteLine
-      />
-      <Text style={styles.detailValue}>Status: {getStatusLabel(order.status)}</Text>
-      <Text style={styles.detailLabel}>
-        {courierLocation.lat != null && courierLocation.lng != null
-          ? `Lokasi kurir terakhir diperbarui${updatedText ? `: ${updatedText}` : '.'}`
-          : 'Kurir belum mengirim lokasi.'}
-      </Text>
-    </View>
-  );
-}
-function formatTimelineDate(dateStr: string): string {
-  try {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('id-ID', {
-      day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-    });
-  } catch {
-    return dateStr;
-  }
-}
-
-// ─── Timeline Styles ───
-const timelineStyles = StyleSheet.create({
-  container: { marginTop: 8, paddingLeft: 4 },
-  step: { position: 'relative' },
-  connector: {
-    position: 'absolute', left: 9, top: 0, width: 2, height: 12,
-  },
-  stepRow: {
-    flexDirection: 'row', alignItems: 'flex-start', paddingTop: 12, gap: 10,
-  },
-  dot: {
-    width: 20, height: 20, borderRadius: 10,
-    borderWidth: 2, borderColor: '#E2E8F0', backgroundColor: '#FFFFFF',
-    alignItems: 'center', justifyContent: 'center', marginTop: 1,
-  },
-  dotCurrent: {
-    width: 22, height: 22, borderRadius: 11, borderWidth: 3,
-  },
-  labelWrap: { flex: 1 },
-  label: { fontSize: 12, color: LaundryColors.textMuted },
-  timestamp: { fontSize: 10, color: LaundryColors.textMuted, marginTop: 1 },
-  description: { fontSize: 10, color: LaundryColors.textSecondary, marginTop: 1 },
-});
 
 // ─── Main Styles ───
 const styles = StyleSheet.create({
@@ -887,5 +759,6 @@ const styles = StyleSheet.create({
   },
   completeButtonText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
 });
+
 
 

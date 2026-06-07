@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { LaundryColors } from '@/constants/colors';
+import { OrderTracking } from '@/types/order';
 
 type TrackingMapProps = {
   courierLat?: number | string | null;
@@ -14,18 +15,34 @@ type TrackingMapProps = {
   showRouteLine?: boolean;
 };
 
+type TrackingLocationInput = Partial<OrderTracking> & {
+  courier_location?: Partial<NonNullable<OrderTracking['courier_location']>> & {
+    courier_lat?: number | string | null;
+    courier_lng?: number | string | null;
+    updatedAt?: string;
+  };
+  location?: {
+    lat?: number | string | null;
+    lng?: number | string | null;
+    courier_lat?: number | string | null;
+    courier_lng?: number | string | null;
+    updated_at?: string;
+    updatedAt?: string;
+  };
+  updatedAt?: string;
+};
 export type NormalizedCourierLocation = {
   lat?: number;
   lng?: number;
   updatedAt?: string;
 };
 
-export const toCoordinate = (value: unknown) =>{
+export const toCoordinate = (value: unknown) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : undefined;
 };
 
-export function normalizeCourierLocation(tracking: any): NormalizedCourierLocation {
+export function normalizeCourierLocation(tracking: TrackingLocationInput | null | undefined): NormalizedCourierLocation {
   const courierLocation = tracking?.courier_location;
   const location = tracking?.location;
   const lat = toCoordinate(
@@ -159,6 +176,10 @@ const styles = StyleSheet.create({
   emptyTitle: { fontSize: 13, fontWeight: '800', color: LaundryColors.textSecondary, textAlign: 'center' },
   emptyText: { fontSize: 11, color: LaundryColors.textMuted, textAlign: 'center', marginTop: 4 },
 });
+
+
+
+
 
 
 

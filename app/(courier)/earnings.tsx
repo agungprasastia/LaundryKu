@@ -71,10 +71,10 @@ export default function CourierEarningsScreen() {
       </CourierScreen>
     );
 
-  const taskEarnings = Array.isArray((earnings as any)?.items)
-    ? (earnings as any).items
-    : Array.isArray((earnings as any)?.tasks)
-      ? (earnings as any).tasks
+  const taskEarnings = Array.isArray(earnings?.items)
+    ? earnings.items
+    : Array.isArray(earnings?.tasks)
+      ? earnings.tasks
       : [];
 
   return (
@@ -108,7 +108,7 @@ export default function CourierEarningsScreen() {
           icon="cash-outline"
         />
       ) : (
-        taskEarnings.map((item: any, index: number) => (
+        taskEarnings.map((item, index) => (
           <View
             key={item.assignment_id || item.order_id || index}
             style={courierStyles.card}
@@ -126,3 +126,5 @@ export default function CourierEarningsScreen() {
     </CourierScreen>
   );
 }
+
+

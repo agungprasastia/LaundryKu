@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { getErrorMessage } from '@/utils/getErrorMessage';
 import {
   View,
   Text,
@@ -36,9 +37,8 @@ export default function CustomerProfileScreen() {
       } else {
         setNotifications([]);
       }
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || 'Gagal memuat notifikasi';
-      setNotifError(msg);
+    } catch (err) {
+      setNotifError(getErrorMessage(err, 'Gagal memuat notifikasi'));
     } finally {
       setNotifLoading(false);
       setRefreshing(false);
@@ -68,9 +68,8 @@ export default function CustomerProfileScreen() {
       } else {
         crossAlert('Gagal', res.message || 'Gagal menandai notifikasi');
       }
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || 'Gagal menandai notifikasi';
-      crossAlert('Error', msg);
+    } catch (err) {
+      crossAlert('Error', getErrorMessage(err, 'Gagal menandai notifikasi'));
     } finally {
       setMarkingRead(null);
     }
@@ -349,3 +348,5 @@ const styles = StyleSheet.create({
   },
   logoutText: { fontSize: 15, fontWeight: '700', color: LaundryColors.error },
 });
+
+

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { getErrorMessage } from '@/utils/getErrorMessage';
 import {
   View,
   Text,
@@ -63,9 +64,8 @@ export default function CustomerBerandaScreen() {
       if (notifsRes.status === 'fulfilled' && notifsRes.value?.success && notifsRes.value.data) {
         setNotifications(Array.isArray(notifsRes.value.data) ? notifsRes.value.data : []);
       }
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || 'Gagal memuat data';
-      setError(msg);
+    } catch (err) {
+      setError(getErrorMessage(err, 'Gagal memuat data'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -445,6 +445,7 @@ const styles = StyleSheet.create({
   orderDetailText: { fontSize: 11, color: LaundryColors.textSecondary, flex: 1 },
   orderAmount: { fontSize: 13, fontWeight: '700', color: LaundryColors.primary },
 });
+
 
 
 

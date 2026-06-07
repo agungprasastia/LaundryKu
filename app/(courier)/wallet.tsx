@@ -14,7 +14,7 @@ import { crossAlert } from "@/utils/crossAlert";
 import { useAuth } from "@/contexts/AuthContext";
 import * as walletService from "@/services/walletService";
 import { LaundryColors } from "@/constants/colors";
-import { Wallet, WalletTransaction, Withdrawal } from "@/types/wallet";
+import { Wallet, WalletTransaction, Withdrawal, WithdrawPayload } from "@/types/wallet";
 import {
   CourierScreen,
   EmptyState,
@@ -109,7 +109,7 @@ export default function CourierWalletScreen() {
         "amount tidak boleh lebih besar dari available_balance",
       );
 
-    const payload =
+    const payload: WithdrawPayload =
       method === "bank"
         ? {
             amount,
@@ -122,23 +122,10 @@ export default function CourierWalletScreen() {
             e_wallet_number: form.e_wallet_number.trim(),
           };
 
-    if (
-      method === "bank" &&
-      (!payload.bank_name || !payload.bank_account_number)
-    )
-      return crossAlert("Validasi", "Isi bank_name dan bank_account_number");
-    if (
-      method === "ewallet" &&
-      (!(payload as any).e_wallet_provider || !(payload as any).e_wallet_number)
-    )
-      return crossAlert(
-        "Validasi",
-        "Isi e_wallet_provider dan e_wallet_number",
-      );
 
     setSubmitting(true);
     try {
-      await walletService.requestWithdraw(payload as any);
+      await walletService.requestWithdraw(payload);
       crossAlert("Berhasil", "Withdraw diajukan");
       setModalOpen(false);
       setForm(emptyForm);
@@ -439,3 +426,5 @@ const styles = StyleSheet.create({
   },
   cancelButton: { padding: 12, alignItems: "center" },
 });
+
+

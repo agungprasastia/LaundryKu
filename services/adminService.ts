@@ -1,12 +1,12 @@
 import apiClient from './api';
-import { ApiResponse } from '@/types/api';
+import { AdminAnalytics, AdminDashboardMetrics, ApiResponse } from '@/types/api';
 import { PendingUser } from '@/types/user';
 import { ProcessWithdrawalPayload } from '@/types/wallet';
 
 /**
  * GET /admin/dashboard/metrics
  */
-export async function getDashboardMetrics(): Promise<ApiResponse> {
+export async function getDashboardMetrics(): Promise<ApiResponse<AdminDashboardMetrics>> {
   const response = await apiClient.get('/admin/dashboard/metrics');
   return response.data;
 }
@@ -65,7 +65,8 @@ export async function getAdminOrders(): Promise<ApiResponse> {
 /**
  * GET /admin/analytics
  */
-export async function getAnalytics(): Promise<ApiResponse> {
+export async function getAnalytics(): Promise<ApiResponse<AdminAnalytics>> {
   const response = await apiClient.get('/admin/analytics');
   return response.data;
 }
+

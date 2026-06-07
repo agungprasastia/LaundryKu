@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { getErrorMessage } from '@/utils/getErrorMessage';
 import {
   View,
   Text,
@@ -27,9 +28,8 @@ export default function PenggunaScreen() {
       if (response.success && response.data) {
         setUsers(Array.isArray(response.data) ? response.data : []);
       }
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || 'Gagal memuat data';
-      setError(msg);
+    } catch (err) {
+      setError(getErrorMessage(err, 'Gagal memuat data'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -195,3 +195,5 @@ const styles = StyleSheet.create({
   statusBadge: { backgroundColor: '#FFF7ED', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
   statusBadgeText: { fontSize: 10, fontWeight: '600', color: '#F97316' },
 });
+
+

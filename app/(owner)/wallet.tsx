@@ -13,7 +13,7 @@ import {
 import { crossAlert } from "@/utils/crossAlert";
 import * as walletService from "@/services/walletService";
 import { useAuth } from "@/contexts/AuthContext";
-import { Wallet, WalletTransaction, Withdrawal } from "@/types/wallet";
+import { Wallet, WalletTransaction, Withdrawal, WithdrawPayload } from "@/types/wallet";
 import { LaundryColors } from "@/constants/colors";
 import {
   EmptyState,
@@ -108,9 +108,9 @@ export default function OwnerWalletScreen() {
   }, [loadWallet]);
 
   const availableBalance = Number(
-    (wallet as any)?.available_balance ?? wallet?.balance ?? 0,
+    wallet?.available_balance ?? wallet?.balance ?? 0,
   );
-  const pendingBalance = Number((wallet as any)?.pending_balance ?? 0);
+  const pendingBalance = Number(wallet?.pending_balance ?? 0);
 
   const refreshControl = (
     <RefreshControl
@@ -137,7 +137,7 @@ export default function OwnerWalletScreen() {
     if (!hasBankInfo && !hasEWalletInfo)
       return crossAlert("Validasi", "Isi info bank atau e-wallet");
 
-    const payload = hasBankInfo
+    const payload: WithdrawPayload = hasBankInfo
       ? {
           amount,
           bank_account_number: form.bank_account_number,
@@ -151,7 +151,7 @@ export default function OwnerWalletScreen() {
 
     setSubmitting(true);
     try {
-      await walletService.requestWithdraw(payload as any);
+      await walletService.requestWithdraw(payload);
       crossAlert("Berhasil", "Withdraw diajukan");
       setWithdrawModalOpen(false);
       setForm(emptyForm);
@@ -422,3 +422,4 @@ const styles = StyleSheet.create({
   },
   cancelButton: { padding: 12, alignItems: "center" },
 });
+

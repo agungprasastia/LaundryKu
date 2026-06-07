@@ -163,11 +163,21 @@ export interface CourierTask {
 /**
  * Courier earnings
  */
+export interface CourierTaskEarning {
+  assignment_id?: string;
+  order_id?: string;
+  amount?: number;
+  earning?: number;
+  courier_earning?: number;
+}
+
 export interface CourierEarnings {
   total_earnings?: number;
   this_month?: number;
   today?: number;
   completed_tasks?: number;
+  items?: CourierTaskEarning[];
+  tasks?: CourierTaskEarning[];
 }
 
 /**
@@ -181,3 +191,5 @@ export interface AvailableCourier {
   lat?: number;
   lng?: number;
 }
+
+

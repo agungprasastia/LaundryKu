@@ -1,5 +1,6 @@
-﻿import apiClient from "./api";
+import apiClient from "./api";
 import { ApiResponse } from "@/types/api";
+import { Order } from "@/types/order";
 
 export interface OwnerReportSummary {
   total_orders?: number;
@@ -14,7 +15,7 @@ export interface OwnerReportSummary {
 }
 
 /** GET /owner/orders */
-export async function getOwnerOrders(): Promise<ApiResponse> {
+export async function getOwnerOrders(): Promise<ApiResponse<Order[]>> {
   const response = await apiClient.get("/owner/orders");
   return response.data;
 }
@@ -26,3 +27,4 @@ export async function getOwnerReportSummary(): Promise<
   const response = await apiClient.get("/owner/reports/summary");
   return response.data;
 }
+

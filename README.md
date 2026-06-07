@@ -99,6 +99,13 @@ types/
 utils/
 ```
 
+
+## Struktur Modular Baru
+
+- Shared error parsing ada di `utils/getErrorMessage.ts` dan menerima `unknown` error/AxiosError.
+- Test helper murni ada di `constants/__tests__/` dan `utils/__tests__/`.
+- Customer order detail mulai dipecah ke `app/(customer)/components/StatusTimeline.tsx` dan `TrackingSection.tsx`.
+- DTO wallet/earnings/tracking diperketat agar mengurangi `any/as any` tanpa mengubah endpoint backend.
 ## Fitur Backend yang Sudah Terhubung
 
 ### Auth dan Session
@@ -333,5 +340,6 @@ Label dan warna badge memakai helper di `constants/orderStatus.ts`.
 - Auth state ada di `contexts/AuthContext.tsx`.
 - Role guard ada di `components/ProtectedRoute.tsx`.
 - Semua request UI sebaiknya lewat service layer di `services/`.
+
 
 
