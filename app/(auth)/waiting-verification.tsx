@@ -9,12 +9,38 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { crossAlert } from '@/utils/crossAlert';
 import { LaundryColors } from '@/constants/colors';
 import { useAuth } from '@/contexts/AuthContext';
+import * as authService from '@/services/authService';
 
 export default function WaitingVerificationScreen() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, refreshProfile } = useAuth();
+
+  const handleCheckStatus = async () => {
+    await refreshProfile();
+    let latestUser = user;
+    try {
+      const response = await authService.getProfile();
+      latestUser = response.success && response.data ? response.data : user;
+    } catch {
+      latestUser = user;
+    }
+    if (latestUser?.is_verified) {
+      if (latestUser.role === 'owner') {
+        router.replace('/(owner)/beranda');
+        return;
+      }
+      if (latestUser.role === 'courier') {
+        router.replace('/(courier)/beranda');
+        return;
+      }
+    }
+    crossAlert('Status Verifikasi', 'Akun masih menunggu verifikasi admin.', [
+      { text: 'OK' },
+    ]);
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -65,6 +91,15 @@ export default function WaitingVerificationScreen() {
             Proses verifikasi biasanya memakan waktu 1x24 jam. Hubungi admin jika lebih dari itu.
           </Text>
         </View>
+
+        <TouchableOpacity
+          style={styles.checkButton}
+          onPress={handleCheckStatus}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="refresh-outline" size={20} color="#FFFFFF" />
+          <Text style={styles.checkText}>Cek Status Verifikasi</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.logoutButton}
@@ -202,6 +237,22 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: LaundryColors.textSecondary,
     lineHeight: 18,
+  },
+  checkButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: LaundryColors.primary,
+    borderRadius: 14,
+    height: 52,
+    gap: 8,
+    width: '100%',
+    marginBottom: 12,
+  },
+  checkText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   logoutButton: {
     flexDirection: 'row',

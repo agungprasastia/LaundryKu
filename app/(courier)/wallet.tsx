@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   Modal,
   RefreshControl,
   ScrollView,
@@ -101,6 +100,13 @@ export default function CourierWalletScreen() {
   const available = wallet?.available_balance ?? wallet?.balance ?? 0;
   const pending = wallet?.pending_balance ?? 0;
 
+  const closeWithdrawModal = () => {
+    setModalOpen(false);
+    setSubmitting(false);
+    setMethod("bank");
+    setForm(emptyForm);
+  };
+
   const submitWithdraw = async () => {
     const amount = Number(form.amount);
     
@@ -135,8 +141,7 @@ export default function CourierWalletScreen() {
     try {
       await walletService.requestWithdraw(payload);
       crossAlert("Berhasil", "Penarikan saldo berhasil diajukan");
-      setModalOpen(false);
-      setForm(emptyForm);
+      closeWithdrawModal();
       await loadWallet();
     } catch (err) {
       crossAlert("Error", getErrorMessage(err, "Gagal mengajukan penarikan"));
@@ -220,7 +225,7 @@ export default function CourierWalletScreen() {
         submitting={submitting}
         onMethodChange={setMethod}
         onFormChange={setForm}
-        onClose={() => setModalOpen(false)}
+        onClose={closeWithdrawModal}
         onSubmit={submitWithdraw}
         availableBalance={available}
       />

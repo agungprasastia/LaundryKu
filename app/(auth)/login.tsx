@@ -136,6 +136,12 @@ export default function LoginScreen() {
     );
   };
 
+  const handleForgotPassword = () => {
+    crossAlert('Lupa Password', 'Fitur lupa password belum tersedia. Silakan hubungi admin.', [
+      { text: 'OK' },
+    ]);
+  };
+
   const roleCards: { key: RoleType; label: string; icon: string; color: string; bg: string }[] = [
     { key: 'pelanggan', label: 'Pelanggan', icon: 'person', color: LaundryColors.rolePelangganIcon, bg: LaundryColors.rolePelangganBg },
     { key: 'mitra', label: 'Mitra Laundry', icon: 'storefront', color: LaundryColors.roleMitraIcon, bg: LaundryColors.roleMitraBg },
@@ -257,7 +263,7 @@ export default function LoginScreen() {
                   />
                 </TouchableOpacity>
               </View>
-              <TouchableOpacity style={styles.forgotButton}>
+              <TouchableOpacity style={styles.forgotButton} onPress={handleForgotPassword}>
                 <Text style={styles.forgotText}>Lupa password?</Text>
               </TouchableOpacity>
             </View>

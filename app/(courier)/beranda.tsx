@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import {
   RefreshControl,
   StyleSheet,
@@ -22,12 +22,10 @@ import * as walletService from "@/services/walletService";
 import { CourierEarnings, CourierTask } from "@/types/order";
 import { Wallet } from "@/types/wallet";
 import {
-  EmptyState,
   ErrorState,
   formatMoney,
   getErrorMessage,
   isVerified,
-  LoadingState,
   VerificationGate,
 } from "./_components";
 import { getStatusBgColor, getStatusColor, getStatusLabel } from "@/constants/orderStatus";
@@ -281,7 +279,7 @@ export default function CourierBerandaScreen() {
           </View>
           
           {activeTask ? (
-            <TaskPreview task={activeTask} />
+              <TaskPreview task={activeTask} onPress={() => router.push("/(courier)/tasks")} />
           ) : (
             <View style={styles.emptyContainer}>
               <Ionicons name="bicycle-outline" size={48} color={LaundryColors.textMuted} />
@@ -309,9 +307,9 @@ function MetricBox({ title, value, icon, color, bg }: { title: string; value: st
   );
 }
 
-function TaskPreview({ task }: { task: CourierTask }) {
+function TaskPreview({ task, onPress }: { task: CourierTask; onPress: () => void }) {
   return (
-    <View style={styles.taskCard}>
+    <TouchableOpacity style={styles.taskCard} onPress={onPress} activeOpacity={0.8}>
       <View style={styles.taskHeader}>
         <View style={styles.taskTitleContainer}>
           <Ionicons name={task.type === "pickup" ? "arrow-up-circle" : "arrow-down-circle"} size={22} color={LaundryColors.roleKurirIcon} />
@@ -341,7 +339,7 @@ function TaskPreview({ task }: { task: CourierTask }) {
           <Text style={[styles.typeBadgeText, { color: task.type === "pickup" ? "#D97706" : "#2563EB" }]}>{task.type === "pickup" ? "PICKUP" : "DELIVERY"}</Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

@@ -1,11 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Modal,
   RefreshControl,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   TouchableOpacity,
@@ -18,7 +16,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LaundryService } from "@/types/service";
 import { LaundryColors } from "@/constants/colors";
 import {
-  DangerButton,
   EmptyState,
   ErrorState,
   formatDate,
@@ -112,6 +109,13 @@ export default function OwnerServicesScreen() {
     setModalOpen(true);
   };
 
+  const closeServiceModal = () => {
+    setModalOpen(false);
+    setEditingService(null);
+    setForm(emptyForm);
+    setSubmitting(false);
+  };
+
   const saveService = async () => {
     const price = Number(form.price_per_kg_owner);
 
@@ -142,7 +146,7 @@ export default function OwnerServicesScreen() {
         "Berhasil",
         editingService ? "Layanan diperbarui" : "Layanan dibuat",
       );
-      setModalOpen(false);
+      closeServiceModal();
       loadServices();
     } catch (err) {
       crossAlert("Error", getErrorMessage(err, "Gagal menyimpan layanan"));
@@ -234,7 +238,7 @@ export default function OwnerServicesScreen() {
         editing={!!editingService}
         submitting={submitting}
         onChange={setForm}
-        onClose={() => setModalOpen(false)}
+        onClose={closeServiceModal}
         onSubmit={saveService}
       />
     </OwnerScreen>
@@ -371,25 +375,6 @@ function ServiceModal({
               }
               placeholder="Misal: 5000"
             />
-            {editing ? (
-              <View style={styles.switchRow}>
-                <View>
-                  <Text style={styles.switchLabel}>Status Layanan</Text>
-                  <Text style={styles.switchDesc}>
-                    {form.is_active ? "Aktif (Terlihat oleh customer)" : "Nonaktif (Disembunyikan dari customer)"}
-                  </Text>
-                </View>
-                <Switch
-                  value={form.is_active}
-                  onValueChange={(is_active) =>
-                    onChange({ ...form, is_active })
-                  }
-                  trackColor={{ false: "#CBD5E1", true: LaundryColors.roleMitraIcon }}
-                  thumbColor="#FFF"
-                />
-              </View>
-            ) : null}
-            
             <View style={{ marginTop: 12 }}>
               <PrimaryButton 
                 text={submitting ? "Menyimpan..." : "Simpan Layanan"} 

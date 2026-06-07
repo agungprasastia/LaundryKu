@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Modal,
   RefreshControl,
   ScrollView,
@@ -27,7 +26,6 @@ import {
   OwnerScreen,
   VerificationGate,
   PrimaryButton,
-  ownerStyles,
 } from "./_components";
 
 type WithdrawForm = {
@@ -127,6 +125,13 @@ export default function OwnerWalletScreen() {
     />
   );
 
+  const closeWithdrawModal = () => {
+    setWithdrawModalOpen(false);
+    setSubmitting(false);
+    setForm(emptyForm);
+    setWithdrawMethod("bank");
+  };
+
   const submitWithdraw = async () => {
     const amount = Number(form.amount);
     const hasBankInfo = !!form.bank_account_number && !!form.bank_name;
@@ -163,8 +168,7 @@ export default function OwnerWalletScreen() {
     try {
       await walletService.requestWithdraw(payload);
       crossAlert("Berhasil", "Withdraw diajukan");
-      setWithdrawModalOpen(false);
-      setForm(emptyForm);
+      closeWithdrawModal();
       loadWallet();
     } catch (err) {
       crossAlert("Error", getErrorMessage(err, "Gagal memproses penarikan"));
@@ -249,7 +253,7 @@ export default function OwnerWalletScreen() {
           <View style={styles.sheet}>
             <View style={styles.sheetHeaderRow}>
               <Text style={styles.sheetTitle}>Tarik Saldo</Text>
-              <TouchableOpacity onPress={() => setWithdrawModalOpen(false)}>
+              <TouchableOpacity onPress={closeWithdrawModal}>
                 <Ionicons name="close-circle" size={28} color={LaundryColors.textMuted} />
               </TouchableOpacity>
             </View>

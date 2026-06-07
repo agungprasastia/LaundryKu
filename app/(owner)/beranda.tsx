@@ -235,7 +235,7 @@ export default function OwnerBerandaScreen() {
               <Text style={styles.emptyText}>Order terbaru akan muncul di sini</Text>
             </View>
           ) : (
-            orders.slice(0, 5).map((order) => <OrderCard key={order.order_id} order={order} />)
+            orders.slice(0, 5).map((order) => <OrderCard key={order.order_id} order={order} onPress={() => router.push("/(owner)/orders")} />)
           )}
         </Animated.View>
       </ScrollView>
@@ -265,9 +265,9 @@ function Badge({ status }: { status: string }) {
   );
 }
 
-function OrderCard({ order }: { order: Order }) {
+function OrderCard({ order, onPress }: { order: Order; onPress: () => void }) {
   return (
-    <View style={styles.orderCard}>
+    <TouchableOpacity style={styles.orderCard} onPress={onPress} activeOpacity={0.8}>
       <View style={styles.orderHeader}>
         <View style={styles.orderTitleContainer}>
           <Ionicons name="basket" size={20} color={LaundryColors.roleMitraIcon} />
@@ -288,7 +288,7 @@ function OrderCard({ order }: { order: Order }) {
         <Text style={styles.orderPriceLabel}>Total Pembayaran</Text>
         <Text style={styles.orderPriceValue}>{money(order.total_amount ?? order.total_price)}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

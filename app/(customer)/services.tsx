@@ -113,6 +113,22 @@ export default function CustomerServicesScreen() {
     setShowOrderModal(true);
   };
 
+  const closeOrderModal = () => {
+    setShowOrderModal(false);
+    setSelectedService(null);
+    setOrderServiceId('');
+    setOrderServiceName('');
+    setPickupAddress('');
+    setPickupLat(null);
+    setPickupLng(null);
+    setPickupScheduledAt('');
+    setLocationStatus('idle');
+    setLocationError('');
+    setShowManualCoords(false);
+    setManualLat('');
+    setManualLng('');
+  };
+
   // ─── GPS Location Handler ───
   const handleGetLocation = async () => {
     setLocationStatus('loading');
@@ -210,13 +226,13 @@ export default function CustomerServicesScreen() {
             {
               text: 'Lihat Pesanan',
               onPress: () => {
-                setShowOrderModal(false);
+                closeOrderModal();
                 router.push('/(customer)/orders');
               },
             },
             {
               text: 'OK',
-              onPress: () => setShowOrderModal(false),
+              onPress: closeOrderModal,
             },
           ]
         );
@@ -390,7 +406,7 @@ export default function CustomerServicesScreen() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Buat Pesanan</Text>
-              <TouchableOpacity onPress={() => setShowOrderModal(false)} disabled={submitting}>
+              <TouchableOpacity onPress={closeOrderModal} disabled={submitting}>
                 <Ionicons name="close-circle" size={28} color={LaundryColors.textMuted} />
               </TouchableOpacity>
             </View>

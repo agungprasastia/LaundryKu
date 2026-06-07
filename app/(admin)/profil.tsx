@@ -35,6 +35,10 @@ export default function ProfilScreen() {
     );
   };
 
+  const handleUnavailableFeature = () => {
+    crossAlert('Fitur Belum Tersedia', 'Fitur ini belum tersedia.', [{ text: 'OK' }]);
+  };
+
   const menuItems = [
     { icon: 'person-outline', label: 'Edit Profil', color: LaundryColors.primary },
     { icon: 'notifications-outline', label: 'Notifikasi', color: '#F97316' },
@@ -70,6 +74,7 @@ export default function ProfilScreen() {
             <TouchableOpacity
               key={index}
               style={[styles.menuItem, index < menuItems.length - 1 && styles.menuItemBorder]}
+              onPress={handleUnavailableFeature}
               activeOpacity={0.7}
             >
               <View style={[styles.menuIcon, { backgroundColor: `${item.color}15` }]}>

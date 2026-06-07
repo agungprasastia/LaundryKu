@@ -12,6 +12,8 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { crossAlert } from '@/utils/crossAlert';
 import { LaundryColors } from '@/constants/colors';
 import { useAuth } from '@/contexts/AuthContext';
 import * as adminService from '@/services/adminService';
@@ -19,6 +21,7 @@ import { PendingUser } from '@/types/user';
 
 // ─── Component ───────────────────────────────────
 export default function AdminBerandaScreen() {
+  const router = useRouter();
   const { user } = useAuth();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
@@ -112,12 +115,16 @@ export default function AdminBerandaScreen() {
   ];
 
   const quickActions = [
-    { icon: 'checkmark-circle', label: 'Verifikasi\nMitra', color: '#2563EB', bg: '#EBF5FF' },
-    { icon: 'checkmark-circle', label: 'Verifikasi\nKurir', color: '#2563EB', bg: '#EBF5FF' },
-    { icon: 'people', label: 'Kelola\nPengguna', color: '#2563EB', bg: '#EBF5FF' },
-    { icon: 'desktop', label: 'Monitoring\nSistem', color: '#2563EB', bg: '#EBF5FF' },
-    { icon: 'chatbubble-ellipses', label: 'Komplain', color: '#2563EB', bg: '#EBF5FF' },
+    { icon: 'checkmark-circle', label: 'Verifikasi\nMitra', color: '#2563EB', bg: '#EBF5FF', onPress: () => router.push('/(admin)/verifikasi') },
+    { icon: 'checkmark-circle', label: 'Verifikasi\nKurir', color: '#2563EB', bg: '#EBF5FF', onPress: () => router.push('/(admin)/verifikasi') },
+    { icon: 'people', label: 'Kelola\nPengguna', color: '#2563EB', bg: '#EBF5FF', onPress: () => router.push('/(admin)/pengguna') },
+    { icon: 'desktop', label: 'Laporan\nAnalytics', color: '#2563EB', bg: '#EBF5FF', onPress: () => router.push('/(admin)/laporan') },
+    { icon: 'person', label: 'Profil', color: '#2563EB', bg: '#EBF5FF', onPress: () => router.push('/(admin)/profil') },
   ];
+
+  const handleUnavailableFeature = () => {
+    crossAlert('Fitur Belum Tersedia', 'Fitur ini belum tersedia.', [{ text: 'OK' }]);
+  };
 
   const systemStatuses = [
     { label: 'API', status: 'Normal', color: '#10B981' },
@@ -158,7 +165,7 @@ export default function AdminBerandaScreen() {
               <Text style={styles.headerSub}>Selamat datang di LaundryKu Admin</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.notifButton}>
+          <TouchableOpacity style={styles.notifButton} onPress={() => router.push('/(admin)/profil')}>
             <Ionicons name="notifications-outline" size={24} color={LaundryColors.textPrimary} />
             <View style={styles.notifDot} />
           </TouchableOpacity>
@@ -179,7 +186,7 @@ export default function AdminBerandaScreen() {
           {/* ─── RINGKASAN PLATFORM ─── */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Ringkasan Platform</Text>
-            <TouchableOpacity style={styles.filterBtn}>
+            <TouchableOpacity style={styles.filterBtn} onPress={handleUnavailableFeature}>
               <Text style={styles.filterText}>Hari ini</Text>
               <Ionicons name="chevron-down" size={14} color={LaundryColors.textSecondary} />
             </TouchableOpacity>
@@ -212,7 +219,7 @@ export default function AdminBerandaScreen() {
           <View style={styles.quickActionsCard}>
             <View style={styles.quickActionsRow}>
               {quickActions.map((action, i) => (
-                <TouchableOpacity key={i} style={styles.quickActionItem} activeOpacity={0.7}>
+                <TouchableOpacity key={i} style={styles.quickActionItem} activeOpacity={0.7} onPress={action.onPress}>
                   <View style={[styles.quickActionIcon, { backgroundColor: action.bg }]}>
                     <Ionicons name={action.icon as any} size={24} color={action.color} />
                   </View>
@@ -225,7 +232,7 @@ export default function AdminBerandaScreen() {
           {/* ─── VERIFIKASI PENDING ─── */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Verifikasi Pending</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/(admin)/verifikasi')}>
               <Text style={styles.linkText}>Lihat Semua {'>'}</Text>
             </TouchableOpacity>
           </View>
@@ -265,7 +272,7 @@ export default function AdminBerandaScreen() {
                     <View style={styles.pendingBadge}>
                       <Text style={styles.pendingBadgeText}>Menunggu Verifikasi</Text>
                     </View>
-                    <TouchableOpacity style={styles.cekButton} activeOpacity={0.7}>
+                    <TouchableOpacity style={styles.cekButton} activeOpacity={0.7} onPress={() => router.push('/(admin)/verifikasi')}>
                       <Text style={styles.cekButtonText}>Cek</Text>
                     </TouchableOpacity>
                   </View>

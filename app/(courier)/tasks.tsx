@@ -31,7 +31,6 @@ import {
   LoadingState,
   PrimaryButton,
   VerificationGate,
-  courierStyles,
 } from "./_components";
 
 type Tab = "active" | "history";
@@ -462,21 +461,23 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 }
 
 function getTaskActions(task: CourierTask) {
-  const status = task.order_status || task.status;
   const phase = task.current_phase || task.type;
-  const pickup = task.pickup_status;
-  const delivery = task.delivery_status;
+  const pickup = task.pickup_status ?? (phase === "pickup" ? task.status : undefined);
+  const delivery = task.delivery_status ?? (phase === "delivery" ? task.status : undefined);
 
-  if (status === "DELIVERY_ON_THE_WAY" || delivery === "DELIVERY_ON_THE_WAY")
-    return [{ label: "Laundry Sudah Diterima Customer", status: "DELIVERED" }];
-  if (status === "DELIVERED" || delivery === "DELIVERED")
-    return [{ label: "Selesaikan Tugas", status: "DONE" }];
-  if (status === "READY_FOR_DELIVERY" || phase === "delivery")
-    return [{ label: "Mulai Delivery", status: "DELIVERY_ON_THE_WAY" }];
-  if (status === "PICKUP_ON_THE_WAY" || pickup === "PICKUP_ON_THE_WAY")
-    return [{ label: "Laundry Sudah Diambil", status: "LAUNDRY_PICKED" }];
-  if (phase === "pickup" || !pickup)
-    return [{ label: "Mulai Pickup", status: "PICKUP_ON_THE_WAY" }];
+  if (phase === "pickup") {
+    if (!pickup) return [{ label: "Mulai Pickup", status: "PICKUP_ON_THE_WAY" }];
+    if (pickup === "PICKUP_ON_THE_WAY") return [{ label: "Laundry Sudah Diambil", status: "LAUNDRY_PICKED" }];
+    return [];
+  }
+
+  if (phase === "delivery") {
+    if (!delivery) return [{ label: "Mulai Delivery", status: "DELIVERY_ON_THE_WAY" }];
+    if (delivery === "DELIVERY_ON_THE_WAY") return [{ label: "Laundry Sudah Diterima Customer", status: "DELIVERED" }];
+    if (delivery === "DELIVERED") return [{ label: "Selesaikan Tugas", status: "DONE" }];
+    return [];
+  }
+
   return [];
 }
 
