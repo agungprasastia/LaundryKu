@@ -159,8 +159,8 @@ export default function VerifikasiScreen() {
                 </Text>
               </View>
               <View style={styles.userInfo}>
-                <Text style={styles.userName}>{user.full_name}</Text>
-                <Text style={styles.userEmail}>{user.email}</Text>
+                <Text style={styles.userName} numberOfLines={1}>{user.full_name}</Text>
+                <Text style={styles.userEmail} numberOfLines={1}>{user.email}</Text>
               </View>
               <View style={[styles.roleBadge, {
                 backgroundColor: user.role === 'owner' ? LaundryColors.roleMitraBg : LaundryColors.roleKurirBg
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 12,
   },
-  userInfo: { flex: 1 },
+  userInfo: { flex: 1, marginRight: 8 },
   userName: { fontSize: 15, fontWeight: '700', color: LaundryColors.textPrimary },
   userEmail: { fontSize: 12, color: LaundryColors.textSecondary, marginTop: 2 },
   roleBadge: {

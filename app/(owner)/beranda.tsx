@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -8,6 +8,8 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Animated,
+  StatusBar,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,11 +24,13 @@ import * as ownerService from "@/services/ownerService";
 import * as walletService from "@/services/walletService";
 import { Order } from "@/types/order";
 import { Wallet } from "@/types/wallet";
+import { VerificationGate, ErrorState } from "./_components";
 
 const money = (n?: number) => "Rp " + Number(n || 0).toLocaleString("id-ID");
 const date = (v?: string) =>
-  v ? new Date(v).toLocaleDateString("id-ID") : "-";
+  v ? new Date(v).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-";
 const verified = (v: unknown) => v === true || v === 1;
+
 const activeStatuses = [
   "WAITING_OWNER_CONFIRMATION",
   "CONFIRMED",
@@ -42,12 +46,15 @@ export default function OwnerBerandaScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const isVerified = verified(user?.is_verified);
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+
   const [loading, setLoading] = useState(isVerified);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [orders, setOrders] = useState<Order[]>([]);
-  const [summary, setSummary] =
-    useState<ownerService.OwnerReportSummary | null>(null);
+  const [summary, setSummary] = useState<ownerService.OwnerReportSummary | null>(null);
   const [wallet, setWallet] = useState<Wallet | null>(null);
 
   const load = useCallback(async () => {
@@ -80,219 +87,225 @@ export default function OwnerBerandaScreen() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: 0, duration: 500, useNativeDriver: true }),
+    ]).start();
+  }, [fadeAnim, slideAnim]);
+
   const retry = () => {
     setRefreshing(true);
     load();
   };
 
-  if (!isVerified) return <Gate name={user?.full_name} />;
-  if (loading)
+  if (!isVerified) {
     return (
-      <Shell title={"Halo, " + (user?.full_name || "Mitra")}>
-        <Loader text="Memuat dashboard owner..." />
-      </Shell>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Halo, {user?.full_name || "Mitra"} 👋</Text>
+          <Text style={styles.headerSub}>LaundryKu Mitra</Text>
+        </View>
+        <ScrollView contentContainerStyle={styles.body}>
+          <VerificationGate />
+        </ScrollView>
+      </View>
     );
+  }
 
-  const totalOrders =
-    summary?.total_orders ?? summary?.total_order ?? orders.length;
-  const active =
-    summary?.active_orders ??
-    orders.filter((order) => activeStatuses.includes(order.status)).length;
-  const revenue =
-    summary?.owner_revenue ??
-    summary?.owner_earning ??
-    summary?.total_owner_earning ??
-    summary?.total_revenue ??
-    orders.reduce((sum, order) => sum + Number(order.owner_earning || 0), 0);
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={LaundryColors.roleMitraIcon} />
+        <Text style={styles.loadingText}>Memuat dashboard owner...</Text>
+      </View>
+    );
+  }
+
+  const totalOrders = summary?.total_orders ?? summary?.total_order ?? orders.length;
+  const active = summary?.active_orders ?? orders.filter((order) => activeStatuses.includes(order.status)).length;
+  const revenue = summary?.owner_revenue ?? summary?.owner_earning ?? summary?.total_owner_earning ?? summary?.total_revenue ?? orders.reduce((sum, order) => sum + Number(order.owner_earning || 0), 0);
   const available = (wallet as any)?.available_balance ?? wallet?.balance ?? 0;
   const pending = (wallet as any)?.pending_balance ?? 0;
 
-  return (
-    <Shell
-      title={"Halo, " + (user?.full_name || "Mitra")}
-      refresh={{ refreshing, onRefresh: retry }}
-    >
-      {error ? <ErrorCard message={error} onRetry={retry} /> : null}
-      <View style={styles.verify}>
-        <Ionicons
-          name="shield-checkmark"
-          size={18}
-          color={LaundryColors.success}
-        />
-        <Text style={styles.verifyText}>Owner terverifikasi</Text>
-      </View>
-      <View style={styles.grid}>
-        <Metric
-          label="Total Order"
-          value={String(totalOrders)}
-          icon="receipt-outline"
-        />
-        <Metric label="Pendapatan" value={money(revenue)} icon="cash-outline" />
-        <Metric
-          label="Available"
-          value={money(available)}
-          icon="wallet-outline"
-        />
-        <Metric label="Pending" value={money(pending)} icon="time-outline" />
-        <Metric
-          label="Order Aktif"
-          value={String(active)}
-          icon="flash-outline"
-        />
-      </View>
-      <Text style={styles.section}>Quick Action</Text>
-      <View style={styles.actions}>
-        {[
-          ["Kelola Layanan", "services"],
-          ["Pesanan Masuk", "orders"],
-          ["Wallet", "wallet"],
-          ["Laporan", "beranda"],
-        ].map(([label, route]) => (
-          <TouchableOpacity
-            key={label}
-            style={styles.action}
-            onPress={() => router.push(("/(owner)/" + route) as any)}
-          >
-            <Text style={styles.actionText}>{label}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      <Text style={styles.section}>Order Terbaru</Text>
-      {orders.length === 0 ? (
-        <Empty text="Belum ada order." />
-      ) : (
-        orders
-          .slice(0, 5)
-          .map((order) => <OrderCard key={order.order_id} order={order} />)
-      )}
-    </Shell>
-  );
-}
+  const quickActions = [
+    {
+      icon: "shirt" as const,
+      label: "Layanan",
+      color: "#2563EB",
+      bg: "#EBF5FF",
+      onPress: () => router.push("/(owner)/services"),
+    },
+    {
+      icon: "receipt" as const,
+      label: "Pesanan",
+      color: "#10B981",
+      bg: "#ECFDF5",
+      onPress: () => router.push("/(owner)/orders"),
+    },
+    {
+      icon: "wallet" as const,
+      label: "Wallet",
+      color: "#F97316",
+      bg: "#FFF7ED",
+      onPress: () => router.push("/(owner)/wallet"),
+    },
+    {
+      icon: "person" as const,
+      label: "Profil",
+      color: "#8B5CF6",
+      bg: "#F5F3FF",
+      onPress: () => router.push("/(owner)/profile"),
+    },
+  ];
 
-function Gate({ name }: { name?: string }) {
-  return (
-    <Shell title={"Halo, " + (name || "Mitra")}>
-      <View style={styles.wait}>
-        <Ionicons
-          name="hourglass-outline"
-          size={42}
-          color={LaundryColors.roleMitraIcon}
-        />
-        <Text style={styles.waitTitle}>Menunggu verifikasi admin</Text>
-        <Text style={styles.mutedCenter}>
-          Akun owner Anda belum diverifikasi admin. Fitur owner aktif setelah
-          verifikasi.
-        </Text>
-      </View>
-    </Shell>
-  );
-}
-function Shell({
-  title,
-  children,
-  refresh,
-}: {
-  title: string;
-  children: React.ReactNode;
-  refresh?: any;
-}) {
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>{title}</Text>
-        <Text style={styles.headerSub}>LaundryKu Mitra</Text>
-      </View>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      
       <ScrollView
         contentContainerStyle={styles.body}
-        refreshControl={
-          refresh ? (
-            <RefreshControl {...refresh} colors={[LaundryColors.primary]} />
-          ) : undefined
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={retry} colors={[LaundryColors.roleMitraIcon]} />}
+        showsVerticalScrollIndicator={false}
       >
-        {children}
+        {/* HEADER */}
+        <View style={styles.headerContainer}>
+          <View style={styles.headerRow}>
+            <View style={styles.userInfo}>
+              <View style={styles.avatar}>
+                <Ionicons name="business" size={24} color="#FFF" />
+              </View>
+              <View>
+                <Text style={styles.greeting}>Halo, {user?.full_name || "Mitra"} 👋</Text>
+                <Text style={styles.subtitle}>Selamat datang di LaundryKu Mitra</Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              style={styles.notifButton}
+              onPress={() => router.push("/(owner)/profile")}
+            >
+              <Ionicons name="notifications-outline" size={24} color={LaundryColors.textPrimary} />
+              <View style={styles.notifBadge} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }], paddingHorizontal: 20, paddingTop: 20 }}>
+          {error ? <ErrorState message={error} onRetry={retry} /> : null}
+
+          {/* METRICS */}
+          <View style={styles.metricsWrapper}>
+            <View style={styles.metricCardBig}>
+              <View style={[styles.metricIconBg, { backgroundColor: "#EBF5FF" }]}>
+                <Ionicons name="cash" size={24} color="#2563EB" />
+              </View>
+              <Text style={styles.metricLabelBig}>Total Pendapatan</Text>
+              <Text style={styles.metricValueBig}>{money(revenue)}</Text>
+            </View>
+            <View style={styles.metricsGridRow}>
+              <MetricBox title="Order Aktif" value={String(active)} icon="flash" color="#F97316" bg="#FFF7ED" />
+              <MetricBox title="Total Order" value={String(totalOrders)} icon="receipt" color="#10B981" bg="#ECFDF5" />
+            </View>
+            <View style={styles.metricsGridRow}>
+              <MetricBox title="Available" value={money(available)} icon="wallet" color="#8B5CF6" bg="#F5F3FF" />
+              <MetricBox title="Pending" value={money(pending)} icon="time" color="#F43F5E" bg="#FFE4E6" />
+            </View>
+          </View>
+
+          {/* QUICK ACTIONS */}
+          <Text style={styles.sectionTitle}>Aksi Cepat</Text>
+          <View style={styles.quickActionsContainer}>
+            {quickActions.map((action, index) => (
+              <TouchableOpacity key={index} style={styles.actionItem} onPress={action.onPress}>
+                <View style={[styles.actionIconContainer, { backgroundColor: action.bg }]}>
+                  <Ionicons name={action.icon} size={28} color={action.color} />
+                </View>
+                <Text style={styles.actionLabel}>{action.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* RECENT ORDERS */}
+          <Text style={styles.sectionTitle}>Order Terbaru</Text>
+          {orders.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="receipt-outline" size={48} color={LaundryColors.textMuted} />
+              <Text style={styles.emptyTitle}>Belum ada order</Text>
+              <Text style={styles.emptyText}>Order terbaru akan muncul di sini</Text>
+            </View>
+          ) : (
+            orders.slice(0, 5).map((order) => <OrderCard key={order.order_id} order={order} />)
+          )}
+        </Animated.View>
       </ScrollView>
     </View>
   );
 }
-function Loader({ text }: { text: string }) {
+
+function MetricBox({ title, value, icon, color, bg }: { title: string; value: string; icon: any; color: string; bg: string }) {
   return (
-    <View style={styles.center}>
-      <ActivityIndicator size="large" color={LaundryColors.primary} />
-      <Text style={styles.muted}>{text}</Text>
+    <View style={styles.metricBox}>
+      <View style={styles.metricBoxHeader}>
+        <View style={[styles.metricIconSmBg, { backgroundColor: bg }]}>
+          <Ionicons name={icon} size={16} color={color} />
+        </View>
+      </View>
+      <Text style={styles.metricBoxValue} numberOfLines={1}>{value}</Text>
+      <Text style={styles.metricBoxTitle}>{title}</Text>
     </View>
   );
 }
-function ErrorCard({
-  message,
-  onRetry,
-}: {
-  message: string;
-  onRetry: () => void;
-}) {
-  return (
-    <View style={styles.error}>
-      <Text style={styles.errorText}>{message}</Text>
-      <TouchableOpacity onPress={onRetry}>
-        <Text style={styles.link}>Retry</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-function Empty({ text }: { text: string }) {
-  return (
-    <View style={styles.empty}>
-      <Text style={styles.muted}>{text}</Text>
-    </View>
-  );
-}
-function Metric({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string;
-  icon: any;
-}) {
-  return (
-    <View style={styles.metric}>
-      <Ionicons name={icon} size={18} color={LaundryColors.roleMitraIcon} />
-      <Text style={styles.metricVal}>{value}</Text>
-      <Text style={styles.metricLbl}>{label}</Text>
-    </View>
-  );
-}
+
 function Badge({ status }: { status: string }) {
   return (
     <View style={[styles.badge, { backgroundColor: getStatusBgColor(status) }]}>
-      <Text style={[styles.badgeText, { color: getStatusColor(status) }]}>
-        {getStatusLabel(status)}
-      </Text>
+      <Text style={[styles.badgeText, { color: getStatusColor(status) }]}>{getStatusLabel(status)}</Text>
     </View>
   );
 }
+
 function OrderCard({ order }: { order: Order }) {
   return (
-    <View style={styles.card}>
-      <View style={styles.row}>
-        <Text style={styles.cardTitle}>{order.order_id}</Text>
+    <View style={styles.orderCard}>
+      <View style={styles.orderHeader}>
+        <View style={styles.orderTitleContainer}>
+          <Ionicons name="basket" size={20} color={LaundryColors.roleMitraIcon} />
+          <Text style={styles.orderIdText} numberOfLines={1} ellipsizeMode="middle">{order.order_id}</Text>
+        </View>
         <Badge status={order.status} />
       </View>
-      <Text style={styles.muted}>
-        {order.customer_name || "Customer"} •{" "}
-        {order.service_name || order.service?.name || "-"}
-      </Text>
-      <Text style={styles.muted}>
-        {date(order.created_at)} •{" "}
-        {money(order.total_amount ?? order.total_price)}
-      </Text>
+      <View style={styles.orderDivider} />
+      <View style={styles.orderContent}>
+        <Text style={styles.orderCustomer}>{order.customer_name || "Customer"}</Text>
+        <Text style={styles.orderService}>{order.service_name || order.service?.name || "Layanan Reguler"}</Text>
+        <View style={styles.orderMeta}>
+          <Ionicons name="calendar-outline" size={14} color={LaundryColors.textSecondary} />
+          <Text style={styles.orderDate}>{date(order.created_at)}</Text>
+        </View>
+      </View>
+      <View style={styles.orderFooter}>
+        <Text style={styles.orderPriceLabel}>Total Pembayaran</Text>
+        <Text style={styles.orderPriceValue}>{money(order.total_amount ?? order.total_price)}</Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: LaundryColors.background,
+    gap: 12,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: LaundryColors.textSecondary,
+    fontWeight: "500",
+  },
   header: {
     backgroundColor: "#FFF",
     paddingTop: Platform.OS === "ios" ? 56 : 40,
@@ -307,109 +320,257 @@ const styles = StyleSheet.create({
     color: LaundryColors.textPrimary,
   },
   headerSub: { fontSize: 12, color: LaundryColors.textSecondary, marginTop: 2 },
-  body: { padding: 16, paddingBottom: 30 },
-  center: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 40,
-    gap: 10,
+  
+  headerContainer: {
+    backgroundColor: "#FFFFFF",
+    paddingTop: Platform.OS === "ios" ? 60 : StatusBar.currentHeight ? StatusBar.currentHeight + 10 : 40,
+    paddingBottom: 20,
+    paddingHorizontal: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: LaundryColors.inputBorder,
   },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  metric: {
-    backgroundColor: "#FFF",
-    borderRadius: 16,
-    padding: 14,
-    width: "48%",
-    borderWidth: 1,
-    borderColor: LaundryColors.cardBorder,
-  },
-  metricVal: {
-    fontSize: 17,
-    fontWeight: "800",
-    color: LaundryColors.textPrimary,
-    marginTop: 8,
-  },
-  metricLbl: { fontSize: 12, color: LaundryColors.textSecondary },
-  section: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: LaundryColors.textPrimary,
-    marginTop: 18,
-    marginBottom: 10,
-  },
-  actions: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  action: {
-    backgroundColor: LaundryColors.roleMitraIcon,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: 14,
-  },
-  actionText: { color: "#FFF", fontWeight: "700" },
-  card: {
-    backgroundColor: "#FFF",
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: LaundryColors.cardBorder,
-  },
-  row: {
+  headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 8,
     alignItems: "center",
   },
-  cardTitle: {
-    fontSize: 14,
-    fontWeight: "800",
+  userInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: LaundryColors.roleMitraIcon,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  greeting: {
+    fontSize: 18,
+    fontWeight: "700",
     color: LaundryColors.textPrimary,
   },
-  muted: { fontSize: 12, color: LaundryColors.textSecondary, marginTop: 4 },
-  mutedCenter: {
+  subtitle: {
     fontSize: 13,
     color: LaundryColors.textSecondary,
-    textAlign: "center",
+    marginTop: 2,
   },
-  badge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10 },
-  badgeText: { fontSize: 10, fontWeight: "800" },
-  error: {
-    backgroundColor: "#FEF2F2",
-    borderColor: "#FECACA",
+  notifButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: LaundryColors.background,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  notifBadge: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: LaundryColors.error,
     borderWidth: 1,
-    borderRadius: 14,
-    padding: 12,
+    borderColor: "#FFF",
+  },
+
+  body: { paddingBottom: 40 },
+
+  metricsWrapper: {
+    gap: 12,
+    marginBottom: 24,
+  },
+  metricCardBig: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+  },
+  metricIconBg: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  metricLabelBig: {
+    fontSize: 14,
+    color: LaundryColors.textSecondary,
+    fontWeight: "600",
+  },
+  metricValueBig: {
+    fontSize: 26,
+    fontWeight: "700",
+    color: LaundryColors.textPrimary,
+    marginTop: 4,
+  },
+  metricsGridRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  metricBox: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+  },
+  metricBoxHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 12,
   },
-  errorText: { color: LaundryColors.error, fontWeight: "600" },
-  link: { color: LaundryColors.primary, fontWeight: "800", marginTop: 6 },
-  empty: {
-    backgroundColor: "#FFF",
-    borderRadius: 16,
-    padding: 24,
+  metricIconSmBg: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     alignItems: "center",
+    justifyContent: "center",
   },
-  verify: {
-    backgroundColor: LaundryColors.roleMitraBg,
-    borderRadius: 14,
-    padding: 12,
+  metricBoxValue: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: LaundryColors.textPrimary,
+  },
+  metricBoxTitle: {
+    fontSize: 12,
+    color: LaundryColors.textSecondary,
+    fontWeight: "500",
+    marginTop: 2,
+  },
+
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: LaundryColors.textPrimary,
+    marginBottom: 16,
+  },
+
+  quickActionsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginBottom: 32,
+  },
+  actionItem: {
+    alignItems: "center",
+    width: "23%",
+    gap: 8,
+  },
+  actionIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  actionLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: LaundryColors.textPrimary,
+    textAlign: "center",
+  },
+
+  emptyContainer: {
+    alignItems: "center",
+    paddingVertical: 40,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: LaundryColors.textPrimary,
+    marginTop: 12,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: LaundryColors.textSecondary,
+    marginTop: 4,
+  },
+
+  orderCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+  },
+  orderHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  orderTitleContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginBottom: 12,
+    flex: 1,
+    marginRight: 8,
   },
-  verifyText: { color: LaundryColors.roleMitraIcon, fontWeight: "800" },
-  wait: {
-    backgroundColor: "#FFF",
-    borderRadius: 18,
-    padding: 24,
-    alignItems: "center",
-    gap: 10,
-    borderWidth: 1,
-    borderColor: LaundryColors.cardBorder,
-  },
-  waitTitle: {
-    fontSize: 18,
-    fontWeight: "800",
+  orderIdText: {
+    fontSize: 15,
+    fontWeight: "700",
     color: LaundryColors.textPrimary,
+  },
+  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+  badgeText: { fontSize: 11, fontWeight: "700" },
+  orderDivider: {
+    height: 1,
+    backgroundColor: LaundryColors.inputBorder,
+    marginVertical: 12,
+  },
+  orderContent: {
+    marginBottom: 16,
+  },
+  orderCustomer: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: LaundryColors.textPrimary,
+  },
+  orderService: {
+    fontSize: 14,
+    color: LaundryColors.textSecondary,
+    marginTop: 4,
+  },
+  orderMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 8,
+  },
+  orderDate: {
+    fontSize: 13,
+    color: LaundryColors.textSecondary,
+  },
+  orderFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: LaundryColors.inputBorder,
+  },
+  orderPriceLabel: {
+    fontSize: 13,
+    color: LaundryColors.textSecondary,
+    fontWeight: "600",
+  },
+  orderPriceValue: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: LaundryColors.roleMitraIcon,
   },
 });

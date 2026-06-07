@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { crossAlert } from "@/utils/crossAlert";
 import * as walletService from "@/services/walletService";
 import { useAuth } from "@/contexts/AuthContext";
@@ -25,6 +26,7 @@ import {
   LoadingState,
   OwnerScreen,
   VerificationGate,
+  PrimaryButton,
   ownerStyles,
 } from "./_components";
 
@@ -53,9 +55,11 @@ export default function OwnerWalletScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<WithdrawForm>(emptyForm);
+  const [withdrawMethod, setWithdrawMethod] = useState<"bank" | "ewallet">("bank");
 
   const loadWallet = useCallback(async () => {
     if (!verified) {
@@ -119,6 +123,7 @@ export default function OwnerWalletScreen() {
         setRefreshing(true);
         loadWallet();
       }}
+      colors={[LaundryColors.roleMitraIcon]}
     />
   );
 
@@ -128,16 +133,21 @@ export default function OwnerWalletScreen() {
     const hasEWalletInfo = !!form.e_wallet_number && !!form.e_wallet_provider;
 
     if (!amount || amount <= 0)
-      return crossAlert("Validasi", "amount wajib angka > 0");
+      return crossAlert("Validasi", "Nominal withdraw wajib angka lebih dari 0");
     if (amount > availableBalance)
       return crossAlert(
         "Validasi",
-        "amount tidak boleh lebih dari available_balance",
+        "Nominal tidak boleh melebihi saldo yang tersedia",
       );
-    if (!hasBankInfo && !hasEWalletInfo)
-      return crossAlert("Validasi", "Isi info bank atau e-wallet");
+    
+    if (withdrawMethod === "bank" && !hasBankInfo) {
+      return crossAlert("Validasi", "Harap isi nama bank dan nomor rekening");
+    }
+    if (withdrawMethod === "ewallet" && !hasEWalletInfo) {
+      return crossAlert("Validasi", "Harap isi provider e-wallet dan nomornya");
+    }
 
-    const payload: WithdrawPayload = hasBankInfo
+    const payload: WithdrawPayload = withdrawMethod === "bank"
       ? {
           amount,
           bank_account_number: form.bank_account_number,
@@ -157,7 +167,7 @@ export default function OwnerWalletScreen() {
       setForm(emptyForm);
       loadWallet();
     } catch (err) {
-      crossAlert("Error", getErrorMessage(err, "Gagal withdraw"));
+      crossAlert("Error", getErrorMessage(err, "Gagal memproses penarikan"));
     } finally {
       setSubmitting(false);
     }
@@ -165,7 +175,7 @@ export default function OwnerWalletScreen() {
 
   if (!verified) {
     return (
-      <OwnerScreen title="Wallet" subtitle="Balance, transaksi, withdraw">
+      <OwnerScreen title="Wallet Mitra" subtitle="Kelola penghasilan Anda">
         <VerificationGate />
       </OwnerScreen>
     );
@@ -173,171 +183,221 @@ export default function OwnerWalletScreen() {
 
   if (loading) {
     return (
-      <OwnerScreen title="Wallet" subtitle="Balance, transaksi, withdraw">
-        <LoadingState text="Memuat wallet..." />
+      <OwnerScreen title="Wallet Mitra" subtitle="Kelola penghasilan Anda">
+        <LoadingState text="Memuat informasi wallet..." />
       </OwnerScreen>
     );
   }
 
   return (
     <OwnerScreen
-      title="Wallet"
-      subtitle="Balance, transaksi, withdraw"
+      title="Wallet Mitra"
+      subtitle="Kelola penghasilan Anda"
       refreshControl={refreshControl}
     >
       {error ? <ErrorState message={error} onRetry={loadWallet} /> : null}
 
-      <View style={styles.balanceCard}>
-        <Text style={styles.balanceLabel}>Available balance</Text>
-        <Text style={styles.balanceValue}>{formatMoney(availableBalance)}</Text>
-        <Text style={styles.balanceMeta}>
-          Pending: {formatMoney(pendingBalance)} • Total:{" "}
-          {formatMoney(availableBalance + pendingBalance)}
-        </Text>
-        <TouchableOpacity
-          style={styles.withdrawButton}
-          onPress={() => setWithdrawModalOpen(true)}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.withdrawButtonText}>Withdraw</Text>
-        </TouchableOpacity>
+      {/* WALLET CARD */}
+      <View style={styles.walletCardWrapper}>
+        <View style={styles.walletCard}>
+          <View style={styles.walletHeaderRow}>
+            <Text style={styles.walletLabel}>Saldo Tersedia</Text>
+            <Ionicons name="wallet" size={24} color="#D1FAE5" />
+          </View>
+          <Text style={styles.walletValue}>{formatMoney(availableBalance)}</Text>
+          
+          <View style={styles.walletDivider} />
+          
+          <View style={styles.walletFooterRow}>
+            <View>
+              <Text style={styles.walletMetaLabel}>Pending</Text>
+              <Text style={styles.walletMetaValue}>{formatMoney(pendingBalance)}</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.withdrawBtn}
+              onPress={() => setWithdrawModalOpen(true)}
+              activeOpacity={0.9}
+            >
+              <Ionicons name="cash-outline" size={18} color={LaundryColors.roleMitraIcon} />
+              <Text style={styles.withdrawBtnText}>Tarik Saldo</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
 
-      <Text style={ownerStyles.sectionTitle}>Transaksi</Text>
+      <Text style={styles.sectionHeading}>Riwayat Transaksi</Text>
       {transactions.length === 0 ? (
-        <EmptyState title="Belum ada transaksi" />
+        <EmptyState title="Belum ada transaksi" icon="receipt-outline" />
       ) : (
-        transactions.map((item) => (
+        transactions.slice(0, 10).map((item) => (
           <TransactionCard key={item.transaction_id} item={item} />
         ))
       )}
 
-      <Text style={ownerStyles.sectionTitle}>Withdrawal History</Text>
+      <Text style={styles.sectionHeading}>Riwayat Penarikan</Text>
       {withdrawals.length === 0 ? (
-        <EmptyState title="Belum ada withdrawal" />
+        <EmptyState title="Belum ada penarikan" icon="card-outline" />
       ) : (
         withdrawals.map((item) => (
           <WithdrawalCard key={item.withdraw_id} item={item} />
         ))
       )}
 
-      <WithdrawModal
-        visible={withdrawModalOpen}
-        form={form}
-        submitting={submitting}
-        onChange={setForm}
-        onClose={() => setWithdrawModalOpen(false)}
-        onSubmit={submitWithdraw}
-      />
+      {/* WITHDRAW MODAL */}
+      <Modal visible={withdrawModalOpen} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.sheet}>
+            <View style={styles.sheetHeaderRow}>
+              <Text style={styles.sheetTitle}>Tarik Saldo</Text>
+              <TouchableOpacity onPress={() => setWithdrawModalOpen(false)}>
+                <Ionicons name="close-circle" size={28} color={LaundryColors.textMuted} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView contentContainerStyle={{ paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
+              <View style={styles.withdrawAvailableBox}>
+                <Text style={styles.withdrawAvailableLabel}>Saldo yang bisa ditarik</Text>
+                <Text style={styles.withdrawAvailableValue}>{formatMoney(availableBalance)}</Text>
+              </View>
+
+              <FormInput
+                label="Nominal Penarikan (Rp)"
+                value={form.amount}
+                keyboardType="numeric"
+                onChangeText={(amount) => setForm({ ...form, amount })}
+                placeholder="Minimal Rp 50.000"
+              />
+
+              <Text style={styles.inputLabel}>Pilih Metode Penarikan</Text>
+              <View style={styles.methodTabsRow}>
+                <TouchableOpacity 
+                  style={[styles.methodTab, withdrawMethod === "bank" && styles.methodTabActive]} 
+                  onPress={() => setWithdrawMethod("bank")}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="business" size={18} color={withdrawMethod === "bank" ? LaundryColors.roleMitraIcon : LaundryColors.textSecondary} />
+                  <Text style={[styles.methodTabText, withdrawMethod === "bank" && styles.methodTabTextActive]}>Transfer Bank</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.methodTab, withdrawMethod === "ewallet" && styles.methodTabActive]} 
+                  onPress={() => setWithdrawMethod("ewallet")}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="phone-portrait" size={18} color={withdrawMethod === "ewallet" ? LaundryColors.roleMitraIcon : LaundryColors.textSecondary} />
+                  <Text style={[styles.methodTabText, withdrawMethod === "ewallet" && styles.methodTabTextActive]}>E-Wallet</Text>
+                </TouchableOpacity>
+              </View>
+
+              {withdrawMethod === "bank" ? (
+                <View style={styles.methodContentBox}>
+                  <FormInput
+                    label="Nama Bank"
+                    value={form.bank_name}
+                    onChangeText={(bank_name) => setForm({ ...form, bank_name })}
+                    placeholder="Misal: BCA / Mandiri / BNI"
+                  />
+                  <FormInput
+                    label="Nomor Rekening"
+                    value={form.bank_account_number}
+                    onChangeText={(bank_account_number) =>
+                      setForm({ ...form, bank_account_number })
+                    }
+                    placeholder="Masukkan nomor rekening"
+                    keyboardType="numeric"
+                  />
+                </View>
+              ) : (
+                <View style={styles.methodContentBox}>
+                  <FormInput
+                    label="Provider E-Wallet"
+                    value={form.e_wallet_provider}
+                    onChangeText={(e_wallet_provider) =>
+                      setForm({ ...form, e_wallet_provider })
+                    }
+                    placeholder="Misal: GoPay / OVO / DANA"
+                  />
+                  <FormInput
+                    label="Nomor HP / E-Wallet"
+                    value={form.e_wallet_number}
+                    onChangeText={(e_wallet_number) =>
+                      setForm({ ...form, e_wallet_number })
+                    }
+                    placeholder="0812xxxxxx"
+                    keyboardType="numeric"
+                  />
+                </View>
+              )}
+
+              <View style={{ marginTop: 16 }}>
+                <PrimaryButton text={submitting ? "Memproses..." : "Ajukan Penarikan"} onPress={submitWithdraw} disabled={submitting} />
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
     </OwnerScreen>
   );
 }
 
 function TransactionCard({ item }: { item: WalletTransaction }) {
+  const isIncome = item.type.toLowerCase() === "income" || item.amount > 0;
   return (
-    <View style={ownerStyles.card}>
-      <Text style={styles.itemTitle}>
-        {item.type.toUpperCase()} {formatMoney(item.amount)}
-      </Text>
-      <Text style={ownerStyles.muted}>
-        {item.description || "-"} • {formatDate(item.created_at)}
+    <View style={styles.listItemCard}>
+      <View style={[styles.listIconBox, { backgroundColor: isIncome ? "#ECFDF5" : "#FEF2F2" }]}>
+        <Ionicons name={isIncome ? "arrow-down" : "arrow-up"} size={18} color={isIncome ? "#10B981" : LaundryColors.error} />
+      </View>
+      <View style={styles.listContentBox}>
+        <Text style={styles.listTitle} numberOfLines={1}>
+          {item.description || (isIncome ? "Pemasukan" : "Pengeluaran")}
+        </Text>
+        <Text style={styles.listMeta}>{formatDate(item.created_at)}</Text>
+      </View>
+      <Text style={[styles.listAmount, { color: isIncome ? "#10B981" : LaundryColors.error }]}>
+        {isIncome ? "+" : ""}{formatMoney(item.amount)}
       </Text>
     </View>
   );
 }
 
 function WithdrawalCard({ item }: { item: Withdrawal }) {
-  return (
-    <View style={ownerStyles.card}>
-      <Text style={styles.itemTitle}>
-        {formatMoney(item.amount)} • {item.status}
-      </Text>
-      <Text style={ownerStyles.muted}>
-        {item.bank_name || "-"} {item.account_number || ""} •{" "}
-        {formatDate(item.created_at)}
-      </Text>
-    </View>
-  );
-}
+  let statusColor = LaundryColors.textSecondary;
+  let statusBg = "#F1F5F9";
+  
+  if (item.status === "success" || item.status === "approved") {
+    statusColor = "#10B981";
+    statusBg = "#ECFDF5";
+  } else if (item.status === "pending") {
+    statusColor = "#F59E0B";
+    statusBg = "#FEF3C7";
+  } else if (item.status === "failed" || item.status === "rejected") {
+    statusColor = LaundryColors.error;
+    statusBg = "#FEF2F2";
+  }
 
-function WithdrawModal({
-  visible,
-  form,
-  submitting,
-  onChange,
-  onClose,
-  onSubmit,
-}: {
-  visible: boolean;
-  form: WithdrawForm;
-  submitting: boolean;
-  onChange: (form: WithdrawForm) => void;
-  onClose: () => void;
-  onSubmit: () => void;
-}) {
   return (
-    <Modal visible={visible} transparent animationType="slide">
-      <View style={styles.modalOverlay}>
-        <View style={styles.sheet}>
-          <Text style={styles.sheetTitle}>Request Withdraw</Text>
-          <ScrollView>
-            <FormInput
-              label="amount"
-              value={form.amount}
-              keyboardType="numeric"
-              onChangeText={(amount) => onChange({ ...form, amount })}
-            />
-            <Text style={ownerStyles.sectionTitle}>Bank</Text>
-            <FormInput
-              label="bank_account_number"
-              value={form.bank_account_number}
-              onChangeText={(bank_account_number) =>
-                onChange({ ...form, bank_account_number })
-              }
-            />
-            <FormInput
-              label="bank_name"
-              value={form.bank_name}
-              onChangeText={(bank_name) => onChange({ ...form, bank_name })}
-            />
-            <Text style={ownerStyles.sectionTitle}>E-wallet</Text>
-            <FormInput
-              label="e_wallet_number"
-              value={form.e_wallet_number}
-              onChangeText={(e_wallet_number) =>
-                onChange({ ...form, e_wallet_number })
-              }
-            />
-            <FormInput
-              label="e_wallet_provider"
-              value={form.e_wallet_provider}
-              onChangeText={(e_wallet_provider) =>
-                onChange({ ...form, e_wallet_provider })
-              }
-            />
-            <TouchableOpacity
-              disabled={submitting}
-              style={[
-                ownerStyles.primaryButton,
-                submitting && ownerStyles.disabled,
-              ]}
-              onPress={onSubmit}
-            >
-              {submitting ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={ownerStyles.primaryButtonText}>
-                  Submit Withdraw
-                </Text>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={ownerStyles.link}>Batal</Text>
-            </TouchableOpacity>
-          </ScrollView>
+    <View style={styles.listItemCard}>
+      <View style={[styles.listIconBox, { backgroundColor: "#F5F3FF" }]}>
+        <Ionicons name="card" size={18} color="#8B5CF6" />
+      </View>
+      <View style={styles.listContentBox}>
+        <Text style={styles.listTitle} numberOfLines={1}>
+          Penarikan Saldo
+        </Text>
+        <Text style={styles.listMeta}>
+          {item.bank_name ? `${item.bank_name} - ${item.account_number}` : item.e_wallet_provider ? `${item.e_wallet_provider} - ${item.account_number}` : "-"}
+        </Text>
+        <Text style={styles.listMeta}>{formatDate(item.created_at)}</Text>
+      </View>
+      <View style={{ alignItems: "flex-end" }}>
+        <Text style={[styles.listAmount, { color: LaundryColors.textPrimary }]}>
+          {formatMoney(item.amount)}
+        </Text>
+        <View style={[styles.statusPill, { backgroundColor: statusBg }]}>
+          <Text style={[styles.statusPillText, { color: statusColor }]}>{item.status}</Text>
         </View>
       </View>
-    </Modal>
+    </View>
   );
 }
 
@@ -345,6 +405,7 @@ function FormInput(props: {
   label: string;
   value: string;
   keyboardType?: "default" | "numeric";
+  placeholder?: string;
   onChangeText: (value: string) => void;
 }) {
   return (
@@ -355,71 +416,168 @@ function FormInput(props: {
         value={props.value}
         keyboardType={props.keyboardType || "default"}
         onChangeText={props.onChangeText}
+        placeholder={props.placeholder}
+        placeholderTextColor={LaundryColors.textMuted}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  balanceCard: {
+  sectionHeading: { fontSize: 16, fontWeight: "700", color: LaundryColors.textPrimary, marginTop: 24, marginBottom: 12 },
+  
+  walletCardWrapper: {
+    shadowColor: LaundryColors.roleMitraIcon,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 8,
+    marginBottom: 8,
+  },
+  walletCard: {
     backgroundColor: LaundryColors.roleMitraIcon,
-    borderRadius: 20,
-    padding: 18,
-    marginBottom: 12,
+    borderRadius: 24,
+    padding: 24,
+    overflow: "hidden",
   },
-  balanceLabel: { fontSize: 12, color: "#D1FAE5", fontWeight: "700" },
-  balanceValue: {
-    fontSize: 28,
-    fontWeight: "900",
-    color: "#FFF",
-    marginVertical: 6,
-  },
-  balanceMeta: { fontSize: 12, color: "#D1FAE5" },
-  withdrawButton: {
-    backgroundColor: "#FFF",
-    borderRadius: 14,
-    padding: 12,
+  walletHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 14,
   },
-  withdrawButtonText: { color: LaundryColors.roleMitraIcon, fontWeight: "900" },
-  itemTitle: {
-    fontSize: 15,
-    fontWeight: "800",
-    color: LaundryColors.textPrimary,
+  walletLabel: { fontSize: 14, color: "#D1FAE5", fontWeight: "600" },
+  walletValue: {
+    fontSize: 34,
+    fontWeight: "700",
+    color: "#FFF",
+    marginTop: 8,
+    marginBottom: 20,
   },
+  walletDivider: { height: 1, backgroundColor: "rgba(255,255,255,0.2)", marginBottom: 16 },
+  walletFooterRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  walletMetaLabel: { fontSize: 12, color: "rgba(255,255,255,0.7)", fontWeight: "500" },
+  walletMetaValue: { fontSize: 16, color: "#FFF", fontWeight: "700" },
+  withdrawBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 99,
+    gap: 6,
+  },
+  withdrawBtnText: { color: LaundryColors.roleMitraIcon, fontWeight: "700", fontSize: 14 },
+  
+  listItemCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+  },
+  listIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  listContentBox: { flex: 1, paddingRight: 8 },
+  listTitle: { fontSize: 15, fontWeight: "700", color: LaundryColors.textPrimary },
+  listMeta: { fontSize: 12, color: LaundryColors.textSecondary, marginTop: 4 },
+  listAmount: { fontSize: 16, fontWeight: "700" },
+  statusPill: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, marginTop: 6 },
+  statusPillText: { fontSize: 10, fontWeight: "700" },
+
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,.35)",
+    backgroundColor: "rgba(15,23,42,.4)",
     justifyContent: "flex-end",
   },
   sheet: {
     backgroundColor: LaundryColors.background,
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 22,
-    padding: 16,
-    maxHeight: "88%",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    maxHeight: "92%",
+  },
+  sheetHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
   },
   sheetTitle: {
-    fontSize: 18,
-    fontWeight: "900",
+    fontSize: 20,
+    fontWeight: "700",
     color: LaundryColors.textPrimary,
-    marginBottom: 8,
   },
-  inputGroup: { marginTop: 8 },
+  
+  withdrawAvailableBox: {
+    backgroundColor: "#ECFDF5",
+    padding: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#A7F3D0",
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  withdrawAvailableLabel: { fontSize: 13, color: "#065F46", fontWeight: "600" },
+  withdrawAvailableValue: { fontSize: 24, color: "#064E3B", fontWeight: "700", marginTop: 4 },
+
+  methodTabsRow: { flexDirection: "row", gap: 12, marginBottom: 16 },
+  methodTab: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+    backgroundColor: "#F8FAFC",
+  },
+  methodTabActive: {
+    borderColor: LaundryColors.roleMitraIcon,
+    backgroundColor: LaundryColors.roleMitraBg,
+  },
+  methodTabText: { fontSize: 13, fontWeight: "700", color: LaundryColors.textSecondary },
+  methodTabTextActive: { color: LaundryColors.roleMitraIcon },
+  
+  methodContentBox: {
+    backgroundColor: "#F8FAFC",
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+    marginBottom: 16,
+  },
+
+  inputGroup: { marginBottom: 16 },
   inputLabel: {
-    fontSize: 12,
-    fontWeight: "800",
-    color: LaundryColors.textSecondary,
+    fontSize: 13,
+    color: LaundryColors.textPrimary,
+    fontWeight: "700",
+    marginBottom: 8,
   },
   input: {
     backgroundColor: "#FFF",
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
     borderRadius: 12,
-    padding: 11,
-    marginTop: 5,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 15,
+    fontWeight: "600",
+    color: LaundryColors.textPrimary,
   },
-  cancelButton: { padding: 12, alignItems: "center" },
 });
-

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { RefreshControl, Text, TouchableOpacity, View } from "react-native";
+import { RefreshControl, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { crossAlert } from "@/utils/crossAlert";
@@ -13,10 +13,8 @@ import {
   ErrorState,
   formatDate,
   getErrorMessage,
-  InfoRow,
   isVerified,
   LoadingState,
-  StatusPill,
   courierStyles,
 } from "./_components";
 
@@ -48,7 +46,7 @@ export default function CourierProfileScreen() {
   }, [loadNotifications]);
 
   const handleLogout = () => {
-    crossAlert("Logout", "Yakin ingin keluar?", [
+    crossAlert("Logout", "Yakin ingin keluar dari akun Anda?", [
       { text: "Batal", style: "cancel" },
       {
         text: "Keluar",
@@ -62,6 +60,7 @@ export default function CourierProfileScreen() {
   };
 
   const markRead = async (notification: Notification) => {
+    if (notification.is_read) return;
     try {
       await notificationService.markAsRead(notification.notification_id);
       setNotifications((current) =>
@@ -76,10 +75,12 @@ export default function CourierProfileScreen() {
     }
   };
 
+  const isUserVerified = isVerified(user?.is_verified);
+
   return (
     <CourierScreen
-      title="Profil"
-      subtitle="Akun kurir"
+      title="Profil Kurir"
+      subtitle="Pengaturan akun & notifikasi"
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -87,109 +88,329 @@ export default function CourierProfileScreen() {
             setRefreshing(true);
             loadNotifications();
           }}
+          colors={[LaundryColors.roleKurirIcon]}
         />
       }
     >
-      <View style={courierStyles.card}>
-        <View style={[courierStyles.center, { padding: 8 }]}>
-          <View
-            style={{
-              width: 72,
-              height: 72,
-              borderRadius: 36,
-              backgroundColor: LaundryColors.roleKurirIcon,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Ionicons name="person" size={34} color="#FFF" />
+      {/* PROFILE HEADER */}
+      <View style={styles.profileHeaderCard}>
+        <View style={styles.avatarContainer}>
+          <View style={styles.avatar}>
+            <Ionicons name="bicycle" size={40} color="#FFF" />
           </View>
-          <Text style={courierStyles.cardTitle}>
-            {user?.full_name || "Kurir"}
-          </Text>
-          <Text style={courierStyles.muted}>{user?.email || "-"}</Text>
-          <StatusPill
-            text={
-              isVerified(user?.is_verified) ? "Verified" : "Menunggu Verifikasi"
-            }
-            accent={isVerified(user?.is_verified)}
-          />
+          {isUserVerified && (
+            <View style={styles.verifiedBadgeIcon}>
+              <Ionicons name="checkmark-circle" size={24} color="#10B981" />
+            </View>
+          )}
         </View>
-        <InfoRow label="Role" value={user?.role || "-"} />
-        <InfoRow label="Vehicle" value={user?.vehicle_name || "-"} />
-        <InfoRow label="Plate" value={user?.vehicle_plate_number || "-"} />
-        <InfoRow label="Address" value={user?.address || "-"} />
-        <TouchableOpacity
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-            backgroundColor: "#FEF2F2",
-            borderRadius: 14,
-            padding: 13,
-            marginTop: 16,
-            borderWidth: 1,
-            borderColor: "#FECACA",
-          }}
-          onPress={handleLogout}
-        >
-          <Ionicons
-            name="log-out-outline"
-            size={18}
-            color={LaundryColors.error}
-          />
-          <Text style={{ color: LaundryColors.error, fontWeight: "800" }}>
-            Keluar
+        <Text style={styles.profileName}>{user?.full_name || "Kurir Laundry"}</Text>
+        <Text style={styles.profileEmail}>{user?.email || "-"}</Text>
+
+        <View style={[styles.statusPill, { backgroundColor: isUserVerified ? "#ECFDF5" : "#FFF7ED" }]}>
+          <Text style={[styles.statusPillText, { color: isUserVerified ? "#10B981" : "#F59E0B" }]}>
+            {isUserVerified ? "Kurir Terverifikasi" : "Menunggu Verifikasi"}
           </Text>
-        </TouchableOpacity>
+        </View>
       </View>
 
-      <Text style={courierStyles.sectionTitle}>Notifications</Text>
+      {/* PROFILE DETAILS */}
+      <View style={styles.detailsCard}>
+        <Text style={styles.detailsHeading}>Informasi Kendaraan & Akun</Text>
+        
+        <View style={styles.detailRow}>
+          <View style={styles.detailIconBox}>
+            <Ionicons name="car-outline" size={20} color={LaundryColors.roleKurirIcon} />
+          </View>
+          <View style={styles.detailContent}>
+            <Text style={styles.detailLabel}>Kendaraan</Text>
+            <Text style={styles.detailValue}>{user?.vehicle_name || "-"}</Text>
+          </View>
+        </View>
+
+        <View style={styles.detailDivider} />
+
+        <View style={styles.detailRow}>
+          <View style={styles.detailIconBox}>
+            <Ionicons name="barcode-outline" size={20} color={LaundryColors.roleKurirIcon} />
+          </View>
+          <View style={styles.detailContent}>
+            <Text style={styles.detailLabel}>Plat Nomor</Text>
+            <Text style={styles.detailValue}>{user?.vehicle_plate_number || "-"}</Text>
+          </View>
+        </View>
+
+        <View style={styles.detailDivider} />
+
+        <View style={styles.detailRow}>
+          <View style={styles.detailIconBox}>
+            <Ionicons name="home-outline" size={20} color={LaundryColors.roleKurirIcon} />
+          </View>
+          <View style={styles.detailContent}>
+            <Text style={styles.detailLabel}>Alamat Rumah</Text>
+            <Text style={styles.detailValue}>{user?.address || "-"}</Text>
+          </View>
+        </View>
+      </View>
+
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.8}>
+        <Ionicons name="log-out-outline" size={20} color={LaundryColors.error} />
+        <Text style={styles.logoutButtonText}>Keluar Akun</Text>
+      </TouchableOpacity>
+
+      {/* NOTIFICATIONS SECTION */}
+      <View style={styles.notificationsHeaderRow}>
+        <Text style={courierStyles.sectionTitle}>Notifikasi Terbaru</Text>
+        {notifications.filter(i => !i.is_read).length > 0 && (
+          <View style={styles.unreadBadge}>
+            <Text style={styles.unreadBadgeText}>{notifications.filter(i => !i.is_read).length} Baru</Text>
+          </View>
+        )}
+      </View>
+
       {loading ? (
         <LoadingState text="Memuat notifikasi..." />
       ) : error ? (
         <ErrorState message={error} onRetry={loadNotifications} />
       ) : notifications.length === 0 ? (
-        <EmptyState title="Belum ada notifikasi" />
+        <EmptyState title="Tidak ada notifikasi" icon="notifications-off-outline" />
       ) : (
-        notifications.map((notification) => (
+        notifications.map((n) => (
           <TouchableOpacity
-            key={notification.notification_id}
-            style={[
-              courierStyles.card,
-              !notification.is_read && {
-                borderColor: LaundryColors.roleKurirIcon,
-                backgroundColor: "#FFF7ED",
-              },
-            ]}
-            onPress={() => markRead(notification)}
+            key={n.notification_id}
+            style={[styles.notificationCard, !n.is_read && styles.notificationCardUnread]}
+            onPress={() => markRead(n)}
+            activeOpacity={0.8}
           >
-            <View style={courierStyles.row}>
-              <Text
-                style={{
-                  fontSize: 15,
-                  fontWeight: "900",
-                  color: LaundryColors.textPrimary,
-                  flex: 1,
-                }}
-              >
-                {notification.title || notification.type || "Notifikasi"}
-              </Text>
-              <StatusPill
-                text={notification.is_read ? "Read" : "Unread"}
-                accent={!notification.is_read}
+            <View style={[styles.notifIconBox, !n.is_read && styles.notifIconBoxUnread]}>
+              <Ionicons 
+                name={n.is_read ? "notifications-outline" : "notifications"} 
+                size={22} 
+                color={!n.is_read ? LaundryColors.roleKurirIcon : LaundryColors.textMuted} 
               />
             </View>
-            <Text style={courierStyles.muted}>
-              {notification.body || notification.message || "-"}
-            </Text>
-            <Text style={courierStyles.muted}>
-              {formatDate(notification.created_at)}
-            </Text>
+            <View style={styles.notifContentBox}>
+              <View style={styles.notifHeaderRow}>
+                <Text style={[styles.notifTitle, !n.is_read && styles.notifTitleUnread]} numberOfLines={1}>
+                  {n.title || n.type || "Notifikasi"}
+                </Text>
+                <Text style={styles.notifTime}>{formatDate(n.created_at)}</Text>
+              </View>
+              <Text style={styles.notifMessage} numberOfLines={2}>
+                {n.body || n.message || "-"}
+              </Text>
+            </View>
+            {!n.is_read && <View style={styles.unreadDot} />}
           </TouchableOpacity>
         ))
       )}
     </CourierScreen>
   );
 }
+
+const styles = StyleSheet.create({
+  profileHeaderCard: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    padding: 24,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  avatarContainer: {
+    position: "relative",
+    marginBottom: 16,
+  },
+  avatar: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: LaundryColors.roleKurirIcon,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 4,
+    borderColor: "#F8FAFC",
+  },
+  verifiedBadgeIcon: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+  },
+  profileName: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: LaundryColors.textPrimary,
+  },
+  profileEmail: {
+    fontSize: 14,
+    color: LaundryColors.textSecondary,
+    marginTop: 4,
+  },
+  statusPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 99,
+    marginTop: 12,
+  },
+  statusPillText: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+
+  detailsCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+  },
+  detailsHeading: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: LaundryColors.textPrimary,
+    marginBottom: 16,
+  },
+  detailRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 16,
+  },
+  detailIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#F8FAFC",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  detailContent: {
+    flex: 1,
+  },
+  detailLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: LaundryColors.textSecondary,
+    marginBottom: 2,
+  },
+  detailValue: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: LaundryColors.textPrimary,
+  },
+  detailDivider: {
+    height: 1,
+    backgroundColor: LaundryColors.inputBorder,
+    marginVertical: 16,
+    marginLeft: 56,
+  },
+
+  logoutButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    backgroundColor: "#FEF2F2",
+    borderRadius: 16,
+    paddingVertical: 16,
+    marginBottom: 32,
+    borderWidth: 1,
+    borderColor: "#FECACA",
+  },
+  logoutButtonText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: LaundryColors.error,
+  },
+
+  notificationsHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  unreadBadge: {
+    backgroundColor: LaundryColors.roleKurirIcon,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 99,
+  },
+  unreadBadgeText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#FFF",
+  },
+
+  notificationCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+  },
+  notificationCardUnread: {
+    backgroundColor: "#F8FAFC",
+    borderColor: "#DBEAFE",
+  },
+  notifIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#F1F5F9",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  notifIconBoxUnread: {
+    backgroundColor: "#EBF5FF",
+  },
+  notifContentBox: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  notifHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  notifTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: LaundryColors.textSecondary,
+    flex: 1,
+    marginRight: 8,
+  },
+  notifTitleUnread: {
+    color: LaundryColors.textPrimary,
+    fontWeight: "700",
+  },
+  notifTime: {
+    fontSize: 11,
+    color: LaundryColors.textMuted,
+    fontWeight: "500",
+  },
+  notifMessage: {
+    fontSize: 13,
+    color: LaundryColors.textSecondary,
+    lineHeight: 20,
+  },
+  unreadDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: LaundryColors.roleKurirIcon,
+    marginTop: 18,
+  },
+});

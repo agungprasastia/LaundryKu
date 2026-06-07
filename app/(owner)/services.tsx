@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { crossAlert } from "@/utils/crossAlert";
 import * as serviceService from "@/services/serviceService";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,7 +28,6 @@ import {
   LoadingState,
   OwnerScreen,
   PrimaryButton,
-  SecondaryButton,
   VerificationGate,
   ownerStyles,
 } from "./_components";
@@ -56,9 +56,7 @@ export default function OwnerServicesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingService, setEditingService] = useState<LaundryService | null>(
-    null,
-  );
+  const [editingService, setEditingService] = useState<LaundryService | null>(null);
   const [form, setForm] = useState<ServiceForm>(emptyForm);
   const [submitting, setSubmitting] = useState(false);
 
@@ -67,7 +65,6 @@ export default function OwnerServicesScreen() {
       setLoading(false);
       return;
     }
-
     try {
       setError("");
       const response = await serviceService.getServices();
@@ -93,6 +90,7 @@ export default function OwnerServicesScreen() {
         setRefreshing(true);
         loadServices();
       }}
+      colors={[LaundryColors.roleMitraIcon]}
     />
   );
 
@@ -118,10 +116,10 @@ export default function OwnerServicesScreen() {
     const price = Number(form.price_per_kg_owner);
 
     if (!editingService && !form.service_id.trim())
-      return crossAlert("Validasi", "service_id wajib diisi");
-    if (!form.name.trim()) return crossAlert("Validasi", "name wajib diisi");
+      return crossAlert("Validasi", "ID Layanan wajib diisi");
+    if (!form.name.trim()) return crossAlert("Validasi", "Nama layanan wajib diisi");
     if (!price || price <= 0)
-      return crossAlert("Validasi", "price_per_kg_owner wajib angka > 0");
+      return crossAlert("Validasi", "Harga owner per kg wajib angka > 0");
 
     setSubmitting(true);
     try {
@@ -156,7 +154,7 @@ export default function OwnerServicesScreen() {
   const confirmDeactivate = (service: LaundryService) => {
     crossAlert(
       "Nonaktifkan Layanan",
-      "Layanan akan dinonaktifkan (soft delete).",
+      `Apakah Anda yakin ingin menonaktifkan layanan "${service.name}"? Layanan ini tidak akan bisa dipilih lagi oleh customer.`,
       [
         { text: "Batal", style: "cancel" },
         {
@@ -181,7 +179,7 @@ export default function OwnerServicesScreen() {
 
   if (!verified) {
     return (
-      <OwnerScreen title="Layanan Saya" subtitle="CRUD layanan owner">
+      <OwnerScreen title="Kelola Layanan" subtitle="Daftar layanan laundry Anda">
         <VerificationGate />
       </OwnerScreen>
     );
@@ -189,7 +187,7 @@ export default function OwnerServicesScreen() {
 
   if (loading) {
     return (
-      <OwnerScreen title="Layanan Saya" subtitle="CRUD layanan owner">
+      <OwnerScreen title="Kelola Layanan" subtitle="Daftar layanan laundry Anda">
         <LoadingState text="Memuat layanan..." />
       </OwnerScreen>
     );
@@ -197,20 +195,26 @@ export default function OwnerServicesScreen() {
 
   return (
     <OwnerScreen
-      title="Layanan Saya"
-      subtitle="CRUD layanan owner"
+      title="Kelola Layanan"
+      subtitle="Daftar layanan laundry Anda"
       refreshControl={refreshControl}
     >
       <View style={styles.toolbar}>
-        <Text style={styles.countText}>{services.length} layanan</Text>
-        <PrimaryButton text="+ Create Service" onPress={openCreateModal} />
+        <View style={styles.countBadge}>
+          <Text style={styles.countText}>{services.length} Layanan</Text>
+        </View>
+        <TouchableOpacity style={styles.createButton} onPress={openCreateModal} activeOpacity={0.8}>
+          <Ionicons name="add" size={20} color="#FFF" />
+          <Text style={styles.createButtonText}>Tambah</Text>
+        </TouchableOpacity>
       </View>
 
       {error ? <ErrorState message={error} onRetry={loadServices} /> : null}
+      
       {services.length === 0 ? (
         <EmptyState
           title="Belum ada layanan"
-          message="Buat layanan pertama untuk menerima order."
+          message="Buat layanan pertama Anda untuk mulai menerima order dari customer."
           icon="shirt-outline"
         />
       ) : (
@@ -249,23 +253,49 @@ function ServiceCard({
   const active = service.is_active !== false && service.is_active !== 0;
 
   return (
-    <View style={ownerStyles.card}>
+    <View style={styles.card}>
       <View style={ownerStyles.row}>
-        <Text style={styles.serviceName}>{service.name}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flex: 1 }}>
+          <View style={[styles.iconWrapper, { backgroundColor: active ? "#EBF5FF" : "#F1F5F9" }]}>
+            <Ionicons name="shirt" size={20} color={active ? "#2563EB" : LaundryColors.textMuted} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.serviceName} numberOfLines={1}>{service.name}</Text>
+            <Text style={styles.serviceId}>{service.service_id}</Text>
+          </View>
+        </View>
         <StatusBadge active={active} />
       </View>
-      <Text style={styles.serviceId}>{service.service_id}</Text>
-      <Text style={ownerStyles.muted}>{service.description || "-"}</Text>
-      <Text style={styles.priceText}>
-        Owner {formatMoney(service.price_per_kg_owner ?? service.price_per_kg)}{" "}
-        • Customer {formatMoney(service.price_per_kg_customer)}
+      
+      <Text style={styles.descriptionText} numberOfLines={2}>
+        {service.description || "Tidak ada deskripsi."}
       </Text>
-      <Text style={ownerStyles.muted}>
-        Dibuat {formatDate(service.created_at)}
-      </Text>
-      <View style={styles.actions}>
-        <SecondaryButton text="Edit" onPress={onEdit} />
-        <DangerButton text="Nonaktifkan Layanan" onPress={onDeactivate} />
+      
+      <View style={styles.pricingContainer}>
+        <View style={styles.priceBox}>
+          <Text style={styles.priceLabel}>Harga Owner / Kg</Text>
+          <Text style={styles.priceValue}>{formatMoney(service.price_per_kg_owner ?? service.price_per_kg)}</Text>
+        </View>
+        <View style={styles.priceDivider} />
+        <View style={styles.priceBox}>
+          <Text style={styles.priceLabel}>Harga Customer / Kg</Text>
+          <Text style={[styles.priceValue, { color: LaundryColors.primary }]}>{formatMoney(service.price_per_kg_customer)}</Text>
+        </View>
+      </View>
+      
+      <View style={styles.cardFooter}>
+        <Text style={styles.dateText}>Dibuat {formatDate(service.created_at)}</Text>
+        <View style={styles.actionButtons}>
+          <TouchableOpacity style={styles.editBtn} onPress={onEdit}>
+            <Ionicons name="create-outline" size={16} color={LaundryColors.roleMitraIcon} />
+            <Text style={styles.editBtnText}>Edit</Text>
+          </TouchableOpacity>
+          {active && (
+            <TouchableOpacity style={styles.deleteBtn} onPress={onDeactivate}>
+              <Ionicons name="trash-outline" size={16} color={LaundryColors.error} />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -273,23 +303,9 @@ function ServiceCard({
 
 function StatusBadge({ active }: { active: boolean }) {
   return (
-    <View
-      style={[
-        styles.badge,
-        { backgroundColor: active ? LaundryColors.roleMitraBg : "#F1F5F9" },
-      ]}
-    >
-      <Text
-        style={[
-          styles.badgeText,
-          {
-            color: active
-              ? LaundryColors.roleMitraIcon
-              : LaundryColors.textMuted,
-          },
-        ]}
-      >
-        {active ? "ACTIVE" : "INACTIVE"}
+    <View style={[styles.badge, { backgroundColor: active ? "#ECFDF5" : "#FEF2F2" }]}>
+      <Text style={[styles.badgeText, { color: active ? "#10B981" : LaundryColors.error }]}>
+        {active ? "AKTIF" : "NONAKTIF"}
       </Text>
     </View>
   );
@@ -316,62 +332,71 @@ function ServiceModal({
     <Modal visible={visible} transparent animationType="slide">
       <View style={styles.modalOverlay}>
         <View style={styles.sheet}>
-          <Text style={styles.sheetTitle}>
-            {editing ? "Edit Service" : "Create Service"}
-          </Text>
-          <ScrollView>
+          <View style={styles.sheetHeader}>
+            <Text style={styles.sheetTitle}>
+              {editing ? "Edit Layanan" : "Tambah Layanan Baru"}
+            </Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+              <Ionicons name="close" size={24} color={LaundryColors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+          
+          <ScrollView contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
             <FormInput
-              label="service_id"
+              label="ID Layanan (Unik)"
               value={form.service_id}
               disabled={editing}
               onChangeText={(service_id) => onChange({ ...form, service_id })}
+              placeholder="Misal: CUCI_KILAT"
             />
             <FormInput
-              label="name"
+              label="Nama Layanan"
               value={form.name}
               onChangeText={(name) => onChange({ ...form, name })}
+              placeholder="Misal: Cuci Kering Kilat"
             />
             <FormInput
-              label="description"
+              label="Deskripsi"
               value={form.description}
               onChangeText={(description) => onChange({ ...form, description })}
+              placeholder="Misal: Selesai dalam 1 hari"
+              multiline
             />
             <FormInput
-              label="price_per_kg_owner"
+              label="Harga Owner per Kg (Rp)"
               value={form.price_per_kg_owner}
               keyboardType="numeric"
               onChangeText={(price_per_kg_owner) =>
                 onChange({ ...form, price_per_kg_owner })
               }
+              placeholder="Misal: 5000"
             />
             {editing ? (
               <View style={styles.switchRow}>
-                <Text style={styles.inputLabel}>is_active</Text>
+                <View>
+                  <Text style={styles.switchLabel}>Status Layanan</Text>
+                  <Text style={styles.switchDesc}>
+                    {form.is_active ? "Aktif (Terlihat oleh customer)" : "Nonaktif (Disembunyikan dari customer)"}
+                  </Text>
+                </View>
                 <Switch
                   value={form.is_active}
                   onValueChange={(is_active) =>
                     onChange({ ...form, is_active })
                   }
+                  trackColor={{ false: "#CBD5E1", true: LaundryColors.roleMitraIcon }}
+                  thumbColor="#FFF"
                 />
               </View>
             ) : null}
-            <TouchableOpacity
-              disabled={submitting}
-              style={[
-                ownerStyles.primaryButton,
-                submitting && ownerStyles.disabled,
-              ]}
-              onPress={onSubmit}
-            >
-              {submitting ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={ownerStyles.primaryButtonText}>Simpan</Text>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={ownerStyles.link}>Batal</Text>
-            </TouchableOpacity>
+            
+            <View style={{ marginTop: 12 }}>
+              <PrimaryButton 
+                text={submitting ? "Menyimpan..." : "Simpan Layanan"} 
+                onPress={onSubmit} 
+                disabled={submitting} 
+              />
+            </View>
           </ScrollView>
         </View>
       </View>
@@ -384,17 +409,26 @@ function FormInput(props: {
   value: string;
   disabled?: boolean;
   keyboardType?: "default" | "numeric";
+  placeholder?: string;
+  multiline?: boolean;
   onChangeText: (value: string) => void;
 }) {
   return (
     <View style={styles.inputGroup}>
       <Text style={styles.inputLabel}>{props.label}</Text>
       <TextInput
-        style={[styles.input, props.disabled && ownerStyles.disabled]}
+        style={[
+          styles.input, 
+          props.disabled && styles.inputDisabled,
+          props.multiline && { minHeight: 80, textAlignVertical: 'top' }
+        ]}
         value={props.value}
         editable={!props.disabled}
         keyboardType={props.keyboardType || "default"}
         onChangeText={props.onChangeText}
+        placeholder={props.placeholder}
+        placeholderTextColor={LaundryColors.textMuted}
+        multiline={props.multiline}
       />
     </View>
   );
@@ -405,69 +439,167 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
-    gap: 12,
+    marginBottom: 16,
   },
-  countText: { color: LaundryColors.textSecondary, fontWeight: "800" },
+  countBadge: {
+    backgroundColor: "#F1F5F9",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  countText: { color: LaundryColors.textSecondary, fontWeight: "700", fontSize: 13 },
+  createButton: {
+    backgroundColor: LaundryColors.roleMitraIcon,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+    gap: 6,
+  },
+  createButtonText: { color: "#FFF", fontWeight: "700", fontSize: 14 },
+  
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+  },
+  iconWrapper: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   serviceName: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: LaundryColors.textPrimary,
-    flex: 1,
   },
   serviceId: {
-    fontSize: 12,
-    fontWeight: "800",
-    color: LaundryColors.roleMitraIcon,
-    marginTop: 4,
+    fontSize: 11,
+    fontWeight: "700",
+    color: LaundryColors.textMuted,
+    marginTop: 2,
   },
-  priceText: {
+  descriptionText: {
     fontSize: 13,
-    fontWeight: "800",
-    color: LaundryColors.textPrimary,
-    marginTop: 8,
+    color: LaundryColors.textSecondary,
+    lineHeight: 20,
+    marginTop: 12,
   },
-  actions: { flexDirection: "row", gap: 8, marginTop: 12, flexWrap: "wrap" },
-  badge: { paddingHorizontal: 9, paddingVertical: 4, borderRadius: 999 },
-  badgeText: { fontSize: 10, fontWeight: "900" },
+  pricingContainer: {
+    flexDirection: "row",
+    backgroundColor: "#F8FAFC",
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 16,
+    alignItems: "center",
+  },
+  priceBox: { flex: 1 },
+  priceDivider: { width: 1, height: 30, backgroundColor: LaundryColors.inputBorder, marginHorizontal: 12 },
+  priceLabel: { fontSize: 11, color: LaundryColors.textSecondary, fontWeight: "600", marginBottom: 4 },
+  priceValue: { fontSize: 16, fontWeight: "700", color: LaundryColors.textPrimary },
+  
+  cardFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: LaundryColors.inputBorder,
+  },
+  dateText: { fontSize: 11, color: LaundryColors.textMuted, fontWeight: "500" },
+  actionButtons: { flexDirection: "row", gap: 8 },
+  editBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: LaundryColors.roleMitraBg,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    gap: 4,
+  },
+  editBtnText: { color: LaundryColors.roleMitraIcon, fontWeight: "700", fontSize: 12 },
+  deleteBtn: {
+    backgroundColor: "#FEF2F2",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    justifyContent: "center",
+  },
+
+  badge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+  badgeText: { fontSize: 10, fontWeight: "700" },
+  
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(15,23,42,.35)",
+    backgroundColor: "rgba(15,23,42,.4)",
     justifyContent: "flex-end",
   },
   sheet: {
     backgroundColor: LaundryColors.background,
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 22,
-    padding: 16,
-    maxHeight: "88%",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    maxHeight: "92%",
+  },
+  sheetHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
   },
   sheetTitle: {
-    fontSize: 18,
-    fontWeight: "900",
+    fontSize: 20,
+    fontWeight: "700",
     color: LaundryColors.textPrimary,
-    marginBottom: 12,
   },
-  inputGroup: { marginBottom: 10 },
+  closeBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#F1F5F9",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  inputGroup: { marginBottom: 16 },
   inputLabel: {
-    fontSize: 12,
-    color: LaundryColors.textSecondary,
-    fontWeight: "800",
+    fontSize: 13,
+    color: LaundryColors.textPrimary,
+    fontWeight: "700",
+    marginBottom: 8,
   },
   input: {
     backgroundColor: "#FFF",
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginTop: 5,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 15,
+    color: LaundryColors.textPrimary,
+    fontWeight: "500",
+  },
+  inputDisabled: {
+    backgroundColor: "#F8FAFC",
+    color: LaundryColors.textMuted,
   },
   switchRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 14,
+    backgroundColor: "#F8FAFC",
+    padding: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+    marginBottom: 16,
   },
-  cancelButton: { padding: 14, alignItems: "center" },
+  switchLabel: { fontSize: 14, fontWeight: "700", color: LaundryColors.textPrimary },
+  switchDesc: { fontSize: 11, color: LaundryColors.textSecondary, marginTop: 4, maxWidth: 200 },
 });

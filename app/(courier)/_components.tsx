@@ -33,16 +33,16 @@ export function CourierScreen({
 }) {
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>{title}</Text>
-        {subtitle ? (
-          <Text style={styles.headerSubtitle}>{subtitle}</Text>
-        ) : null}
-      </View>
       <ScrollView
         contentContainerStyle={styles.body}
         refreshControl={refreshControl}
       >
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>{title}</Text>
+          {subtitle ? (
+            <Text style={styles.headerSubtitle}>{subtitle}</Text>
+          ) : null}
+        </View>
         {children}
       </ScrollView>
     </View>
@@ -51,9 +51,9 @@ export function CourierScreen({
 
 export function LoadingState({ text }: { text: string }) {
   return (
-    <View style={styles.center}>
+    <View style={styles.loadingContainer}>
       <ActivityIndicator size="large" color={LaundryColors.roleKurirIcon} />
-      <Text style={styles.muted}>{text}</Text>
+      <Text style={styles.loadingText}>{text}</Text>
     </View>
   );
 }
@@ -66,11 +66,14 @@ export function ErrorState({
   onRetry: () => void;
 }) {
   return (
-    <View style={styles.errorCard}>
-      <Text style={styles.errorText}>{message}</Text>
-      <TouchableOpacity onPress={onRetry}>
-        <Text style={styles.link}>Retry</Text>
-      </TouchableOpacity>
+    <View style={styles.errorBanner}>
+      <Ionicons name="alert-circle" size={20} color={LaundryColors.error} />
+      <View style={{ flex: 1 }}>
+        <Text style={styles.errorBannerText}>{message}</Text>
+        <TouchableOpacity onPress={onRetry} activeOpacity={0.8} style={{ marginTop: 4 }}>
+          <Text style={styles.retryText}>Coba Lagi</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -85,26 +88,26 @@ export function EmptyState({
   icon?: any;
 }) {
   return (
-    <View style={styles.cardCenter}>
-      <Ionicons name={icon} size={36} color={LaundryColors.textMuted} />
-      <Text style={styles.cardTitle}>{title}</Text>
-      {message ? <Text style={styles.mutedCenter}>{message}</Text> : null}
+    <View style={styles.emptyCard}>
+      <Ionicons name={icon} size={40} color={LaundryColors.textMuted} />
+      <Text style={styles.emptyTitle}>{title}</Text>
+      {message ? <Text style={styles.emptyMessage}>{message}</Text> : null}
     </View>
   );
 }
 
 export function VerificationGate() {
   return (
-    <View style={styles.cardCenter}>
+    <View style={styles.emptyCard}>
       <Ionicons
         name="time-outline"
-        size={36}
+        size={48}
         color={LaundryColors.roleKurirIcon}
       />
-      <Text style={styles.cardTitle}>
+      <Text style={styles.emptyTitle}>
         Akun kurir Anda menunggu verifikasi admin
       </Text>
-      <Text style={styles.mutedCenter}>
+      <Text style={styles.emptyMessage}>
         Fitur ini akan aktif setelah verifikasi.
       </Text>
     </View>
@@ -166,58 +169,89 @@ export function StatusPill({
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
-    backgroundColor: "#FFF",
-    paddingTop: Platform.OS === "ios" ? 56 : 40,
+    paddingTop: Platform.OS === "ios" ? 20 : 10,
     paddingBottom: 16,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: LaundryColors.inputBorder,
+    marginBottom: 16,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: "800",
+    fontSize: 22,
+    fontWeight: "700",
     color: LaundryColors.textPrimary,
   },
   headerSubtitle: {
-    fontSize: 12,
+    fontSize: 13,
     color: LaundryColors.textSecondary,
     marginTop: 2,
   },
-  body: { padding: 16, paddingBottom: 32 },
-  center: {
+  body: { padding: 20, paddingBottom: 40, paddingTop: Platform.OS === "ios" ? 40 : 20 },
+
+  loadingContainer: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: LaundryColors.background,
+    gap: 12,
     padding: 32,
-    gap: 10,
   },
-  card: {
-    backgroundColor: "#FFF",
+  loadingText: {
+    fontSize: 14,
+    color: LaundryColors.textSecondary,
+    fontWeight: "500",
+  },
+
+  errorBanner: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    backgroundColor: "#FEF2F2",
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#FECACA",
+  },
+  errorBannerText: {
+    fontSize: 13,
+    color: LaundryColors.error,
+    fontWeight: "600",
+    lineHeight: 18,
+  },
+  retryText: {
+    fontSize: 13,
+    color: LaundryColors.primary,
+    fontWeight: "700",
+  },
+
+  emptyCard: {
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    padding: 14,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: LaundryColors.cardBorder,
-  },
-  cardCenter: {
-    backgroundColor: "#FFF",
-    borderRadius: 18,
-    padding: 24,
+    padding: 32,
     alignItems: "center",
-    gap: 8,
+    gap: 12,
     borderWidth: 1,
-    borderColor: LaundryColors.cardBorder,
+    borderColor: LaundryColors.inputBorder,
+    marginVertical: 12,
   },
-  cardTitle: {
+  emptyTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: LaundryColors.textPrimary,
     textAlign: "center",
   },
-  muted: { fontSize: 12, color: LaundryColors.textSecondary, marginTop: 4 },
-  mutedCenter: {
+  emptyMessage: {
     fontSize: 13,
     color: LaundryColors.textSecondary,
     textAlign: "center",
+    lineHeight: 20,
+  },
+
+  card: {
+    backgroundColor: "#FFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: LaundryColors.cardBorder,
   },
   row: {
     flexDirection: "row",
@@ -227,7 +261,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
     color: LaundryColors.textPrimary,
     marginTop: 16,
     marginBottom: 10,
@@ -236,7 +270,7 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 11,
     color: LaundryColors.textMuted,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   infoValue: {
     fontSize: 14,
@@ -247,22 +281,17 @@ const styles = StyleSheet.create({
   primaryButton: {
     backgroundColor: LaundryColors.roleKurirIcon,
     borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     alignItems: "center",
     marginTop: 12,
   },
-  primaryButtonText: { color: "#FFF", fontWeight: "800" },
-  errorCard: {
-    backgroundColor: "#FEF2F2",
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#FECACA",
+  primaryButtonText: {
+    color: "#FFF",
+    fontSize: 14,
+    fontWeight: "700",
   },
-  errorText: { color: LaundryColors.error, fontWeight: "800" },
-  link: { color: LaundryColors.primary, fontWeight: "800", marginTop: 6 },
+  link: { color: LaundryColors.primary, fontWeight: "700", marginTop: 6 },
   badge: {
     backgroundColor: "#F1F5F9",
     borderRadius: 999,
@@ -273,7 +302,7 @@ const styles = StyleSheet.create({
   badgeAccent: { backgroundColor: LaundryColors.roleKurirBg },
   badgeText: {
     color: LaundryColors.textSecondary,
-    fontWeight: "900",
+    fontWeight: "700",
     fontSize: 11,
   },
   badgeTextAccent: { color: LaundryColors.roleKurirIcon },

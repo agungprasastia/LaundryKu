@@ -112,8 +112,8 @@ export default function PenggunaScreen() {
                   />
                 </View>
                 <View style={styles.userInfo}>
-                  <Text style={styles.userName}>{user.full_name}</Text>
-                  <Text style={styles.userEmail}>{user.email}</Text>
+                  <Text style={styles.userName} numberOfLines={1}>{user.full_name}</Text>
+                  <Text style={styles.userEmail} numberOfLines={1}>{user.email}</Text>
                 </View>
                 <View style={styles.userMeta}>
                   <View style={[styles.roleBadge, {
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   userAvatar: {
     width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center', marginRight: 12,
   },
-  userInfo: { flex: 1 },
+  userInfo: { flex: 1, marginRight: 8 },
   userName: { fontSize: 14, fontWeight: '700', color: LaundryColors.textPrimary },
   userEmail: { fontSize: 11, color: LaundryColors.textSecondary, marginTop: 2 },
   userMeta: { alignItems: 'flex-end', gap: 4 },

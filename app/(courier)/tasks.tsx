@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import * as Location from "expo-location";
+import { Ionicons } from "@expo/vector-icons";
 import { crossAlert } from "@/utils/crossAlert";
 import { LaundryColors } from "@/constants/colors";
 import {
@@ -26,11 +27,9 @@ import {
   ErrorState,
   formatDate,
   getErrorMessage,
-  InfoRow,
   isVerified,
   LoadingState,
   PrimaryButton,
-  StatusPill,
   VerificationGate,
   courierStyles,
 } from "./_components";
@@ -86,7 +85,6 @@ export default function CourierTasksScreen() {
     loadTasks();
   }, [loadTasks]);
 
-
   const stopAutoLocation = useCallback(() => {
     if (autoInterval.current) clearInterval(autoInterval.current);
     autoInterval.current = null;
@@ -104,7 +102,7 @@ export default function CourierTasksScreen() {
   const sendLocation = useCallback(async (task: CourierTask, silent = false) => {
     const permission = await Location.requestForegroundPermissionsAsync();
     if (permission.status !== "granted") {
-      crossAlert("Izin Lokasi", "Izin lokasi diperlukan untuk update posisi kurir.");
+      if (!silent) crossAlert("Izin Lokasi", "Izin lokasi diperlukan untuk update posisi kurir.");
       return false;
     }
     const current = await Location.getCurrentPositionAsync({});
@@ -138,11 +136,12 @@ export default function CourierTasksScreen() {
         }
       }, 12000);
     } catch (err) {
-      crossAlert("Error", getErrorMessage(err, "Gagal update lokasi"));
+      crossAlert("Error", getErrorMessage(err, "Gagal mengaktifkan auto-update lokasi"));
     } finally {
       setSubmitting(false);
     }
   };
+
   const refreshControl = useMemo(
     () => (
       <RefreshControl
@@ -151,6 +150,7 @@ export default function CourierTasksScreen() {
           setRefreshing(true);
           loadTasks();
         }}
+        colors={[LaundryColors.roleKurirIcon]}
       />
     ),
     [loadTasks, refreshing],
@@ -185,7 +185,7 @@ export default function CourierTasksScreen() {
 
   if (!verified) {
     return (
-      <CourierScreen title="Tugas" subtitle="Pickup dan delivery">
+      <CourierScreen title="Tugas Anda" subtitle="Pickup dan delivery order">
         <VerificationGate />
       </CourierScreen>
     );
@@ -193,38 +193,40 @@ export default function CourierTasksScreen() {
 
   if (loading) {
     return (
-      <CourierScreen title="Tugas" subtitle="Pickup dan delivery">
-        <LoadingState text="Memuat tugas..." />
+      <CourierScreen title="Tugas Anda" subtitle="Pickup dan delivery order">
+        <LoadingState text="Memuat daftar tugas..." />
       </CourierScreen>
     );
   }
 
   return (
     <CourierScreen
-      title="Tugas"
-      subtitle="Pickup dan delivery"
+      title="Tugas Anda"
+      subtitle="Pickup dan delivery order"
       refreshControl={refreshControl}
     >
       {error ? <ErrorState message={error} onRetry={loadTasks} /> : null}
-      <View style={styles.tabs}>
+      
+      <View style={styles.tabsContainer}>
         <TabButton
           active={tab === "active"}
           text={`Tugas Aktif (${activeTasks.length})`}
+          icon="bicycle"
           onPress={() => setTab("active")}
         />
         <TabButton
           active={tab === "history"}
           text={`Riwayat (${historyTasks.length})`}
+          icon="time"
           onPress={() => setTab("history")}
         />
       </View>
 
       {tasks.length === 0 ? (
         <EmptyState
-          title={
-            tab === "active" ? "Belum ada tugas aktif" : "Belum ada riwayat"
-          }
-          icon="list-outline"
+          title={tab === "active" ? "Belum ada tugas aktif" : "Belum ada riwayat tugas"}
+          message={tab === "active" ? "Anda akan menerima notifikasi jika ada tugas baru" : "Tugas yang selesai akan muncul di sini"}
+          icon={tab === "active" ? "bicycle-outline" : "time-outline"}
         />
       ) : (
         tasks.map((task) => (
@@ -254,18 +256,22 @@ export default function CourierTasksScreen() {
 function TabButton({
   active,
   text,
+  icon,
   onPress,
 }: {
   active: boolean;
   text: string;
+  icon: any;
   onPress: () => void;
 }) {
   return (
     <TouchableOpacity
-      style={[styles.tab, active && styles.tabActive]}
+      style={[styles.tabButton, active && styles.tabButtonActive]}
       onPress={onPress}
+      activeOpacity={0.8}
     >
-      <Text style={[styles.tabText, active && styles.tabTextActive]}>
+      <Ionicons name={icon} size={18} color={active ? LaundryColors.roleKurirIcon : LaundryColors.textSecondary} />
+      <Text style={[styles.tabButtonText, active && styles.tabButtonTextActive]}>
         {text}
       </Text>
     </TouchableOpacity>
@@ -279,27 +285,46 @@ function TaskCard({
   task: CourierTask;
   onPress: () => void;
 }) {
+  const isPickup = task.type === "pickup" || task.current_phase === "pickup";
+  
   return (
     <TouchableOpacity
-      style={courierStyles.card}
+      style={styles.taskCard}
       onPress={onPress}
       activeOpacity={0.85}
     >
-      <View style={courierStyles.row}>
-        <Text style={styles.title}>{task.assignment_id}</Text>
-        <StatusPill
-          text={task.type || task.current_phase || task.status || "-"}
-          accent
-        />
+      <View style={styles.taskCardHeader}>
+        <View style={styles.taskTitleRow}>
+          <View style={[styles.typeIconBox, { backgroundColor: isPickup ? "#FEF3C7" : "#EBF5FF" }]}>
+            <Ionicons name={isPickup ? "arrow-up" : "arrow-down"} size={16} color={isPickup ? "#D97706" : "#2563EB"} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.taskTitle} numberOfLines={1} ellipsizeMode="middle">{task.assignment_id}</Text>
+            <Text style={styles.taskSubtitle} numberOfLines={1} ellipsizeMode="middle">Order: {task.order_id}</Text>
+          </View>
+        </View>
+        <StatusBadge status={task.order_status || task.status} />
       </View>
-      <InfoRow label="Order" value={task.order_id} />
-      <InfoRow label="Customer" value={task.customer_name || "-"} />
-      <InfoRow label="Pickup" value={task.pickup_address || "-"} />
-      <InfoRow label="Status" value={task.order_status || task.status || "-"} />
-      <Text style={courierStyles.muted}>
-        Dibuat {formatDate(task.created_at)} • Update{" "}
-        {formatDate(task.updated_at)}
-      </Text>
+
+      <View style={styles.taskCardBody}>
+        <View style={styles.infoRow}>
+          <Ionicons name="person-outline" size={16} color={LaundryColors.textSecondary} />
+          <Text style={styles.infoValue}>{task.customer_name || "Customer"}</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Ionicons name="location-outline" size={16} color={LaundryColors.textSecondary} />
+          <Text style={styles.infoValue} numberOfLines={2}>
+            {isPickup ? (task.pickup_address || "Alamat tidak tersedia") : (task.delivery_address || task.pickup_address || "Alamat tidak tersedia")}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.taskCardFooter}>
+        <Text style={styles.taskDateText}>
+          Tugas Dibuat: {formatDate(task.created_at)}
+        </Text>
+        <Ionicons name="chevron-forward" size={18} color={LaundryColors.textMuted} />
+      </View>
     </TouchableOpacity>
   );
 }
@@ -327,81 +352,112 @@ function TaskDetailModal({
 }) {
   if (!task) return null;
   const actions = getTaskActions(task);
+  const isPickup = task.type === "pickup" || task.current_phase === "pickup";
 
   return (
     <Modal visible transparent animationType="slide">
-      <View style={styles.overlay}>
+      <View style={styles.modalOverlay}>
         <View style={styles.sheet}>
-          <View style={courierStyles.row}>
+          <View style={styles.sheetHeader}>
             <Text style={styles.sheetTitle}>Detail Tugas</Text>
-            <TouchableOpacity onPress={onClose}>
-              <Text style={courierStyles.link}>Tutup</Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+              <Ionicons name="close" size={24} color={LaundryColors.textSecondary} />
             </TouchableOpacity>
           </View>
-          <ScrollView>
-            <Text style={styles.title}>{task.assignment_id}</Text>
-            <StatusBadge status={task.order_status || task.status} />
-            <InfoRow label="Order" value={task.order_id} />
-            <InfoRow
-              label="Current phase"
-              value={task.current_phase || task.type || "-"}
-            />
-            <InfoRow label="Pickup status" value={task.pickup_status || "-"} />
-            <InfoRow
-              label="Delivery status"
-              value={task.delivery_status || "-"}
-            />
-            <InfoRow label="Customer" value={task.customer_name || "-"} />
-            <InfoRow label="Service" value={task.service_name || "-"} />
-            <InfoRow
-              label="Pickup address"
-              value={task.pickup_address || "-"}
-            />
-            <InfoRow
-              label="Delivery address"
-              value={task.delivery_address || "-"}
-            />
-            <PrimaryButton
-              text="Update Lokasi Sekarang"
-              onPress={() => onUpdateLocation(task)}
-              disabled={submitting}
-            />
-            <View style={styles.mapBox}>
-              <Text style={courierStyles.sectionTitle}>Preview Lokasi</Text>
-              <TrackingMap
-                courierLat={currentLocation?.lat}
-                courierLng={currentLocation?.lng}
-                pickupLat={task.pickup_lat}
-                pickupLng={task.pickup_lng}
-                ownerLat={task.owner_lat}
-                ownerLng={task.owner_lng}
-                height={210}
-                showRouteLine
-              />
+
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+            <View style={styles.detailCard}>
+              <View style={styles.taskTitleRow}>
+                <View style={[styles.typeIconBox, { backgroundColor: isPickup ? "#FEF3C7" : "#EBF5FF" }]}>
+                  <Ionicons name={isPickup ? "arrow-up" : "arrow-down"} size={20} color={isPickup ? "#D97706" : "#2563EB"} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.taskTitleBig}>{task.assignment_id}</Text>
+                  <Text style={styles.taskTypeBig}>{isPickup ? "PICKUP" : "DELIVERY"}</Text>
+                </View>
+                <StatusBadge status={task.order_status || task.status} />
+              </View>
             </View>
-            <PrimaryButton
-              text={autoTaskId === task.assignment_id ? "Matikan Update Lokasi" : "Aktifkan Auto Update Lokasi"}
-              onPress={() => autoTaskId === task.assignment_id ? onStopAutoLocation() : onStartAutoLocation(task)}
-              disabled={submitting}
-            />
-            {actions.length === 0 ? (
-              <Text style={courierStyles.muted}>
-                Tidak ada action untuk status ini.
-              </Text>
-            ) : (
-              actions.map((action) => (
-                <PrimaryButton
-                  key={action.status}
-                  text={action.label}
-                  onPress={() => onUpdateStatus(task, action.status)}
+
+            <View style={styles.detailBox}>
+              <DetailRow label="Order ID" value={task.order_id} />
+              <DetailRow label="Customer" value={task.customer_name || "-"} />
+              <DetailRow label="Layanan" value={task.service_name || "-"} />
+              <DetailRow label="Alamat Pickup" value={task.pickup_address || "-"} />
+              <DetailRow label="Alamat Delivery" value={task.delivery_address || "-"} />
+            </View>
+
+            <View style={styles.locationControlsBox}>
+              <Text style={styles.locationControlsTitle}>Kontrol Lokasi</Text>
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                <TouchableOpacity 
+                  style={[styles.locationBtn, { flex: 1, backgroundColor: LaundryColors.roleKurirBg }]} 
+                  onPress={() => onUpdateLocation(task)}
                   disabled={submitting}
+                >
+                  <Ionicons name="locate" size={18} color={LaundryColors.roleKurirIcon} />
+                  <Text style={styles.locationBtnText}>Update Sekali</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[styles.locationBtn, { flex: 1, backgroundColor: autoTaskId === task.assignment_id ? "#FEE2E2" : "#ECFDF5" }]} 
+                  onPress={() => autoTaskId === task.assignment_id ? onStopAutoLocation() : onStartAutoLocation(task)}
+                  disabled={submitting}
+                >
+                  <Ionicons name={autoTaskId === task.assignment_id ? "stop-circle" : "radio"} size={18} color={autoTaskId === task.assignment_id ? "#EF4444" : "#10B981"} />
+                  <Text style={[styles.locationBtnText, { color: autoTaskId === task.assignment_id ? "#EF4444" : "#10B981" }]}>
+                    {autoTaskId === task.assignment_id ? "Stop Auto" : "Auto Update"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.mapContainer}>
+              <Text style={styles.mapTitle}>Live Location</Text>
+              <View style={styles.mapWrapper}>
+                <TrackingMap
+                  courierLat={currentLocation?.lat}
+                  courierLng={currentLocation?.lng}
+                  pickupLat={task.pickup_lat}
+                  pickupLng={task.pickup_lng}
+                  ownerLat={task.owner_lat}
+                  ownerLng={task.owner_lng}
+                  height={200}
+                  showRouteLine
                 />
-              ))
-            )}
+              </View>
+            </View>
+
+            <View style={styles.actionSection}>
+              {actions.length === 0 ? (
+                <View style={styles.noActionBox}>
+                  <Ionicons name="checkmark-done-circle-outline" size={24} color={LaundryColors.textSecondary} />
+                  <Text style={styles.noActionText}>Tidak ada aksi tambahan untuk status ini</Text>
+                </View>
+              ) : (
+                actions.map((action) => (
+                  <PrimaryButton
+                    key={action.status}
+                    text={action.label}
+                    onPress={() => onUpdateStatus(task, action.status)}
+                    disabled={submitting}
+                  />
+                ))
+              )}
+            </View>
           </ScrollView>
         </View>
       </View>
     </Modal>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.detailRow}>
+      <Text style={styles.detailLabel}>{label}</Text>
+      <Text style={styles.detailValue} numberOfLines={2}>{value}</Text>
+    </View>
   );
 }
 
@@ -425,14 +481,9 @@ function getTaskActions(task: CourierTask) {
 }
 
 function StatusBadge({ status }: { status?: string }) {
-  if (!status) return <StatusPill text="-" />;
+  if (!status) return null;
   return (
-    <View
-      style={[
-        styles.statusBadge,
-        { backgroundColor: getStatusBgColor(status) },
-      ]}
-    >
+    <View style={[styles.statusBadge, { backgroundColor: getStatusBgColor(status) }]}>
       <Text style={[styles.statusText, { color: getStatusColor(status) }]}>
         {getStatusLabel(status)}
       </Text>
@@ -441,57 +492,267 @@ function StatusBadge({ status }: { status?: string }) {
 }
 
 const styles = StyleSheet.create({
-  tabs: {
+  tabsContainer: {
     flexDirection: "row",
-    backgroundColor: "#FFF",
-    borderRadius: 14,
-    padding: 4,
-    marginBottom: 12,
+    backgroundColor: "#F8FAFC",
+    borderRadius: 16,
+    padding: 6,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
   },
-  tab: { flex: 1, alignItems: "center", paddingVertical: 10, borderRadius: 12 },
-  tabActive: { backgroundColor: LaundryColors.roleKurirBg },
-  tabText: {
+  tabButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  tabButtonActive: {
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  tabButtonText: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: LaundryColors.textSecondary,
   },
-  tabTextActive: { color: LaundryColors.roleKurirIcon },
-  title: {
-    fontSize: 15,
-    fontWeight: "900",
-    color: LaundryColors.textPrimary,
-    flex: 1,
+  tabButtonTextActive: {
+    color: LaundryColors.roleKurirIcon,
+    fontWeight: "700",
   },
-  overlay: {
+
+  taskCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+    overflow: "hidden",
+  },
+  taskCardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    padding: 16,
+    backgroundColor: "#F8FAFC",
+    borderBottomWidth: 1,
+    borderBottomColor: LaundryColors.inputBorder,
+  },
+  taskTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
     flex: 1,
-    backgroundColor: "rgba(0,0,0,.35)",
+    marginRight: 8,
+  },
+  typeIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  taskTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: LaundryColors.textPrimary,
+  },
+  taskSubtitle: {
+    fontSize: 11,
+    color: LaundryColors.textSecondary,
+    marginTop: 2,
+    fontWeight: "500",
+  },
+  
+  taskCardBody: {
+    padding: 16,
+    gap: 8,
+  },
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+  },
+  infoValue: {
+    flex: 1,
+    fontSize: 13,
+    color: LaundryColors.textPrimary,
+    fontWeight: "500",
+    lineHeight: 18,
+  },
+
+  taskCardFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: LaundryColors.inputBorder,
+  },
+  taskDateText: {
+    fontSize: 11,
+    color: LaundryColors.textMuted,
+    fontWeight: "500",
+  },
+
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  statusText: {
+    fontSize: 10,
+    fontWeight: "700",
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(15,23,42,.4)",
     justifyContent: "flex-end",
   },
   sheet: {
     backgroundColor: LaundryColors.background,
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 22,
-    padding: 16,
-    maxHeight: "90%",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    maxHeight: "92%",
+  },
+  sheetHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
   },
   sheetTitle: {
-    fontSize: 18,
-    fontWeight: "900",
+    fontSize: 20,
+    fontWeight: "700",
     color: LaundryColors.textPrimary,
   },
-  statusBadge: {
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    alignSelf: "flex-start",
+  closeBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#F1F5F9",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  detailCard: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+  },
+  taskTitleBig: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: LaundryColors.textPrimary,
+  },
+  taskTypeBig: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: LaundryColors.textSecondary,
+    marginTop: 2,
+  },
+
+  detailBox: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+    marginBottom: 16,
+  },
+  detailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 6,
+  },
+  detailLabel: {
+    fontSize: 12,
+    color: LaundryColors.textSecondary,
+    fontWeight: "600",
+    flex: 1,
+  },
+  detailValue: {
+    fontSize: 13,
+    color: LaundryColors.textPrimary,
+    fontWeight: "700",
+    flex: 1,
+    textAlign: "right",
+  },
+
+  locationControlsBox: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+    marginBottom: 16,
+  },
+  locationControlsTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: LaundryColors.textPrimary,
+    marginBottom: 12,
+  },
+  locationBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  locationBtnText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: LaundryColors.roleKurirIcon,
+  },
+
+  mapContainer: {
+    marginBottom: 24,
+  },
+  mapTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: LaundryColors.textPrimary,
+    marginBottom: 12,
+  },
+  mapWrapper: {
+    borderRadius: 16,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+  },
+
+  actionSection: {
     marginTop: 8,
   },
-  statusText: { fontSize: 11, fontWeight: "900" },
-  mapBox: { marginVertical: 12, gap: 8 },
+  noActionBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#F8FAFC",
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+  },
+  noActionText: {
+    fontSize: 13,
+    color: LaundryColors.textSecondary,
+    fontWeight: "600",
+  },
 });
-
-
-
-
-
-

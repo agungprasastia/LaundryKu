@@ -365,10 +365,10 @@ export default function CustomerOrdersScreen() {
             onPress={() => openDetail(order)}
           >
             <View style={styles.orderCardTop}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.orderId}>#{order.order_id}</Text>
+              <View style={{ flex: 1, marginRight: 8 }}>
+                <Text style={styles.orderId} numberOfLines={1} ellipsizeMode="middle">#{order.order_id}</Text>
                 {order.service_name ? (
-                  <Text style={styles.orderServiceName}>{order.service_name}</Text>
+                  <Text style={styles.orderServiceName} numberOfLines={1} ellipsizeMode="middle">{order.service_name}</Text>
                 ) : null}
               </View>
               <View style={[styles.statusBadge, { backgroundColor: getStatusBgColor(order.status) }]}>
