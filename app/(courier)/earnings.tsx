@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { RefreshControl, StyleSheet, Text, View, ScrollView } from "react-native";
+import { RefreshControl, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LaundryColors } from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
