@@ -59,12 +59,7 @@ export default function CustomerProfileScreen() {
     try {
       const res = await notificationService.markAsRead(notificationId);
       if (res.success) {
-        // Update local state
-        setNotifications((prev) =>
-          prev.map((n) =>
-            n.notification_id === notificationId ? { ...n, is_read: true } : n
-          )
-        );
+        await fetchNotifications();
       } else {
         crossAlert('Gagal', res.message || 'Gagal menandai notifikasi');
       }

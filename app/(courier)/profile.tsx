@@ -63,13 +63,7 @@ export default function CourierProfileScreen() {
     if (notification.is_read) return;
     try {
       await notificationService.markAsRead(notification.notification_id);
-      setNotifications((current) =>
-        current.map((item) =>
-          item.notification_id === notification.notification_id
-            ? { ...item, is_read: true }
-            : item,
-        ),
-      );
+      await loadNotifications();
     } catch (err) {
       crossAlert("Error", getErrorMessage(err, "Gagal menandai notifikasi"));
     }
