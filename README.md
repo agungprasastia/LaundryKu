@@ -82,58 +82,137 @@ Owner dan courier wajib diverifikasi admin sebelum memakai fitur utama. Jika bel
 ## Struktur Folder Utama
 
 ```text
-app/
-├── index.tsx
-├── _layout.tsx
-├── (auth)/
-├── (admin)/
-├── (customer)/
-├── (owner)/
-├── (courier)/
-└── (tabs)/
-components/
-contexts/
-constants/
-services/
-types/
-utils/
+LaundryKu/
+├── app/
+│   ├── _layout.tsx                 # Root layout, provider, dan Stack Expo Router
+│   ├── index.tsx                   # Welcome screen
+│   ├── (auth)/                     # Login, register, waiting verification
+│   ├── (admin)/                    # Dashboard admin, verifikasi user, pengguna, laporan, profil
+│   ├── (customer)/                 # Dashboard customer, layanan, order, tracking, profil
+│   ├── (owner)/                    # Dashboard owner, service CRUD, order management, wallet, profil
+│   ├── (courier)/                  # Dashboard kurir, tugas, earnings, wallet, profil
+│   └── (tabs)/                     # Route bawaan/legacy jika masih dipakai Expo Router
+├── components/
+│   ├── ProtectedRoute.tsx          # Guard route berdasarkan auth, role, dan verifikasi
+│   ├── TrackingMap.tsx             # Peta tracking WebView + Leaflet + OpenStreetMap
+│   ├── customer/                   # Komponen khusus customer order detail/tracking
+│   ├── owner/                      # Komponen reusable untuk screen owner
+│   └── courier/                    # Komponen reusable untuk screen courier
+├── constants/
+│   ├── colors.ts                   # Warna aplikasi dan warna per role
+│   ├── orderStatus.ts              # Mapping status order, label, warna, timeline
+│   └── __tests__/                  # Test helper constants
+├── contexts/
+│   └── AuthContext.tsx             # Session, user, token, login, register, logout
+├── hooks/
+│   ├── use-color-scheme.ts
+│   └── use-color-scheme.web.ts
+├── services/
+│   ├── api.ts                      # Axios client, token injection, 401 handler
+│   ├── authService.ts
+│   ├── adminService.ts
+│   ├── serviceService.ts
+│   ├── orderService.ts
+│   ├── paymentService.ts
+│   ├── walletService.ts
+│   ├── courierService.ts
+│   ├── ownerService.ts
+│   └── notificationService.ts
+├── types/
+│   ├── api.ts                      # Bentuk response umum API
+│   ├── user.ts                     # User, role, auth payload
+│   ├── order.ts                    # Order, tracking, courier task
+│   ├── service.ts                  # Laundry service DTO
+│   ├── payment.ts                  # Invoice dan payment DTO
+│   ├── wallet.ts                   # Wallet, transaction, withdrawal DTO
+│   └── notification.ts             # Notification DTO
+├── utils/
+│   ├── AlertProvider.tsx           # Modal alert untuk web
+│   ├── crossAlert.ts               # Alert native/web
+│   ├── getErrorMessage.ts          # Parser pesan error API/Axios
+│   └── __tests__/                  # Test helper utils
+├── assets/                         # Font dan gambar
+├── package.json                    # Script dan dependency frontend
+├── tsconfig.json                   # TypeScript config app
+├── tsconfig.spec.json              # TypeScript config Jest
+├── jest.config.js                  # Konfigurasi Jest
+├── .env.example                    # Template env public Expo
+└── README.md
 ```
-
-
 
 ## Frontend Architecture
 
-- `app/_layout.tsx` menjadi root layout dan membungkus app dengan `AlertProvider`, `AuthProvider`, theme React Navigation, dan Expo Router `Stack`.
-- Struktur route memakai Expo Router role-based group: `(auth)`, `(admin)`, `(customer)`, `(owner)`, dan `(courier)`.
-- `contexts/AuthContext.tsx` mengelola session, login, register, logout, refresh profile, dan auto-load token saat app dibuka.
-- Token auth disimpan melalui `services/api.ts`: in-memory cache + SecureStore di native, localStorage di web.
-- `components/ProtectedRoute.tsx` menjaga screen berdasarkan role dan mengarahkan owner/courier yang belum verified ke waiting verification.
-- Semua integrasi API dipusatkan di `services/*Service.ts`; screen tidak memanggil Axios langsung.
-- DTO TypeScript ada di `types/` untuk user, order, payment, wallet, service, notification, dan response API.
-- Error message reusable ada di `utils/getErrorMessage.ts`; alert cross-platform ada di `utils/crossAlert.ts` dan `utils/AlertProvider.tsx`.
-- Mapping status order memakai `constants/orderStatus.ts`, sehingga label, warna badge, dan timeline tetap konsisten.
-- Tracking map memakai `components/TrackingMap.tsx` dengan WebView + Leaflet + OpenStreetMap, tanpa Google Maps API key.
-- Jest saat ini dipakai untuk helper murni seperti `constants/orderStatus` dan `utils/getErrorMessage`.
+Frontend LaundryKu disusun dengan routing berdasarkan role, session terpusat, API service layer, dan tipe data utama menggunakan TypeScript.
 
-## Best Practice yang Sudah Diterapkan
+### Routing dan Role Guard
 
-- API call dipusatkan di service layer, bukan tersebar langsung di screen.
-- Token disimpan di SecureStore untuk native dan tidak hardcoded di source code.
-- Route utama dilindungi berdasarkan role melalui `ProtectedRoute`.
-- Owner dan courier memakai verification gate sebelum fitur utama berjalan.
-- TypeScript strict digunakan untuk app code melalui `tsconfig.json`.
-- Helper error digunakan untuk mengubah Axios/backend error menjadi pesan yang lebih aman untuk user.
-- Command kualitas tersedia: `npm run lint`, `npm run typecheck`, dan `npm test -- --runInBand`.
-- Dummy payment hanya untuk development melalui `EXPO_PUBLIC_USE_DUMMY_PAYMENT=true`.
-- GPS memakai `expo-location`; input latitude/longitude manual hanya muncul jika `EXPO_PUBLIC_ALLOW_MANUAL_COORDS=true`.
-- Google login/register tetap Coming Soon karena backend belum menyediakan OAuth.
+- `app/_layout.tsx` adalah root layout. File ini memasang `AlertProvider`, `AuthProvider`, theme React Navigation, dan Expo Router `Stack`.
+- Route dipisah dengan Expo Router group:
+  - `(auth)` untuk login, register, dan waiting verification.
+  - `(admin)` untuk dashboard admin, verifikasi, pengguna, laporan, dan profil.
+  - `(customer)` untuk layanan, order, tracking, payment, notifikasi, dan profil.
+  - `(owner)` untuk layanan laundry, order management, wallet, dan profil mitra.
+  - `(courier)` untuk tugas pickup/delivery, update lokasi, earnings, wallet, dan profil kurir.
+- `components/ProtectedRoute.tsx` menjadi role guard. User yang belum login diarahkan ke login, user dengan role salah diarahkan ke dashboard role masing-masing.
+- Owner dan courier yang belum diverifikasi diarahkan ke waiting verification atau melihat verification gate, sehingga screen utama tidak memanggil endpoint protected berulang.
+
+### Session dan Token
+
+- `contexts/AuthContext.tsx` mengelola login, register, logout, refresh profile, load session, dan update profile.
+- `services/api.ts` menyimpan token di in-memory cache agar langsung tersedia setelah login.
+- Di native, token disimpan di SecureStore. Di web, token disimpan di localStorage sebagai fallback platform.
+- Axios interceptor otomatis menambahkan `Authorization: Bearer <token>`.
+- Response `401` ditangani terpusat lewat callback ke `AuthContext`, lalu session lokal dibersihkan.
+
+### API Integration
+
+- Semua request frontend masuk lewat `services/*Service.ts`; screen tidak memanggil Axios langsung.
+- `services/api.ts` adalah satu-satunya Axios client dan membaca base URL dari `EXPO_PUBLIC_API_URL`.
+- Setiap domain punya service sendiri, misalnya `authService`, `orderService`, `paymentService`, `walletService`, `courierService`, `ownerService`, `adminService`, dan `notificationService`.
+- Payload dan response utama memakai DTO di folder `types/` agar kontrak data lebih mudah dijelaskan dan dicek TypeScript.
+
+### UI Helper dan Domain Helper
+
+- `constants/colors.ts` menyimpan warna utama dan warna per role.
+- `constants/orderStatus.ts` menyimpan urutan 9 status order, label Indonesia, warna badge, dan helper timeline.
+- `utils/getErrorMessage.ts` menyederhanakan error Axios/backend menjadi pesan yang aman ditampilkan ke user.
+- `utils/crossAlert.ts` dan `utils/AlertProvider.tsx` membuat alert tetap jalan di native dan web.
+- `components/TrackingMap.tsx` memakai WebView + Leaflet + OpenStreetMap, sehingga tracking map tidak membutuhkan Google Maps API key.
+- Komponen helper owner/courier/customer yang bukan route ditempatkan di `components/`, bukan di dalam `app/`, agar tidak dibaca sebagai route oleh Expo Router.
+
+## Implementasi Utama
+
+| Area | Implementasi |
+| --- | --- |
+| Routing | Expo Router group dipisah berdasarkan role. |
+| Auth | Session dikelola terpusat di `AuthContext`. |
+| Token | Token native memakai SecureStore, web memakai localStorage fallback. |
+| Route Guard | `ProtectedRoute` menjaga akses berdasarkan login, role, dan status verifikasi. |
+| API Layer | Semua API call dipusatkan di `services/*Service.ts`. |
+| Type Safety | TypeScript strict aktif; DTO utama ada di `types/`. |
+| Error Handling | Error helper dan cross-platform alert dipakai untuk pesan user-facing. |
+| Status Mapping | Status order memakai helper terpusat di `constants/orderStatus.ts`. |
+| Map/Tracking | GPS memakai `expo-location`; peta memakai OpenStreetMap, bukan Google Maps API. |
+| Payment Development | Dummy payment dikontrol env `EXPO_PUBLIC_USE_DUMMY_PAYMENT`. |
+| Quality Check | Tersedia `npm run lint`, `npm run typecheck`, dan `npm test -- --runInBand`. |
+| Testing | Jest mencakup helper murni seperti order status dan error message. |
+
+Catatan:
+
+- Google login/register sengaja tetap **Coming Soon** karena backend belum menyediakan OAuth.
+- Input koordinat manual hanya aktif jika `EXPO_PUBLIC_ALLOW_MANUAL_COORDS=true`; user normal memakai GPS.
+- `.env` lokal tidak boleh dikomit; gunakan `.env.example` sebagai template public env.
 
 ## Catatan MVP
 
-- Project ini MVP/demo untuk presentasi, bukan production-ready app.
-- Beberapa screen masih besar dan bisa dipecah setelah demo jika development dilanjutkan.
-- Testing saat ini masih minimal: helper/unit test, belum UI test atau E2E besar.
-- Production hardening seperti Error Boundary, Sentry/crash reporting, offline cache, API retry/backoff, runtime DTO validation, dan E2E bisa ditambahkan nanti.
+Project ini masih berada pada tahap MVP. Struktur utama sudah mencakup role-based routing, context untuk auth, service layer untuk API, DTO TypeScript, helper error, dan command quality check.
+
+Pengembangan lanjutan yang bisa dilakukan:
+
+- Memecah beberapa screen besar menjadi komponen dan custom hook yang lebih kecil.
+- Menambah cakupan testing untuk flow UI dan integrasi antar screen.
+- Menambahkan Error Boundary, crash reporting, offline cache, API retry/backoff, dan runtime DTO validation jika aplikasi dikembangkan lebih lanjut.
+- Menambahkan OAuth Google setelah backend menyediakan endpoint dan konfigurasi OAuth.
 
 ## Struktur Modular Baru
 
