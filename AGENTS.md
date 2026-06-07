@@ -8,17 +8,18 @@
 ## Commands
 
 - Install: `npm install`
-- Dev server: `npx expo start` (`--web` / `--android` as needed)
+- Dev server: `npx expo start` (`--web` / `--android` / `--ios` as needed). If wrappers misparse Expo flags, rerun directly as `npx expo start --clear --web`.
 - Lint: `npm run lint` (`expo lint`)
-- Typecheck: `npx tsc --noEmit` (there is no package script for this)
-- There is no configured test runner in `package.json`; use typecheck + lint + manual Expo smoke for verification.
-- If an RTK wrapper misparses `npx expo ...`, rerun the Expo command directly with `npx expo ...`.
+- Typecheck app code: `npm run typecheck` or `npx tsc --noEmit`
+- Tests: `npm test -- --runInBand`; Jest uses `tsconfig.spec.json` for test globals.
+- Main `tsconfig.json` deliberately excludes `__tests__` and `*.test.*`; do not remove those excludes unless you also keep `npx tsc --noEmit` green.
 
 ## Environment
 
 - Required `.env` keys are public Expo vars:
   - `EXPO_PUBLIC_API_URL=http://localhost:3000`
   - `EXPO_PUBLIC_USE_DUMMY_PAYMENT=true` for dummy payment UI.
+  - `EXPO_PUBLIC_ALLOW_MANUAL_COORDS=true` only when showing the development manual-coordinate fallback.
 - Android emulator backend URL should be `http://10.0.2.2:3000`; physical devices need the laptop LAN IP.
 - Backend API must be running before meaningful manual QA; frontend defaults to `http://localhost:3000` in `services/api.ts`.
 
@@ -39,11 +40,14 @@
 - Use `utils/crossAlert.ts` for alerts so web and native both work; root layout already mounts `AlertProvider`.
 - Customer pickup location uses `expo-location`; keep manual coordinate input gated behind `EXPO_PUBLIC_ALLOW_MANUAL_COORDS=true`.
 - For unverified owner/courier screens, show verification-required UI and avoid repeatedly calling protected endpoints that will 403.
+- Google auth is intentionally not implemented; keep login/register Google buttons as explicit Coming Soon unless backend/OAuth support is added.
+- Owner service active state is controlled via the existing deactivate/delete flow; do not add a fake `is_active` toggle unless the backend update contract is verified.
+- Customer order tracking polls every 8s only while detail modal is open; courier auto-location updates every 12s and must clear its interval on stop/unmount/task completion.
 
 ## Verification expectations
 
-- After TS/TSX changes, run `npx tsc --noEmit` and `lsp_diagnostics` on changed files.
-- For UI or routing changes, start Metro with `npx expo start --clear`; success is reaching `Waiting on http://localhost:8081`.
+- After TS/TSX changes, run `npm run lint`, `npm run typecheck`, `npm test -- --runInBand`, and `lsp_diagnostics` on changed files.
+- For UI or routing changes, start Metro with `npx expo start --clear --web`; success is reaching `Waiting on http://localhost:8081`.
 - Current Expo smoke may warn that patch versions should be updated; that warning is compatibility noise unless package versions are part of the task.
 
 ## Files not to treat as source
