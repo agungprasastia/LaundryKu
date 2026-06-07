@@ -24,7 +24,7 @@ import * as ownerService from "@/services/ownerService";
 import * as walletService from "@/services/walletService";
 import { Order } from "@/types/order";
 import { Wallet } from "@/types/wallet";
-import { VerificationGate, ErrorState } from "./_components";
+import { VerificationGate, ErrorState } from "@/components/owner/roleComponents";
 
 const money = (n?: number) => "Rp " + Number(n || 0).toLocaleString("id-ID");
 const date = (v?: string) =>

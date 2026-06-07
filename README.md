@@ -100,12 +100,48 @@ utils/
 ```
 
 
+
+## Frontend Architecture
+
+- `app/_layout.tsx` menjadi root layout dan membungkus app dengan `AlertProvider`, `AuthProvider`, theme React Navigation, dan Expo Router `Stack`.
+- Struktur route memakai Expo Router role-based group: `(auth)`, `(admin)`, `(customer)`, `(owner)`, dan `(courier)`.
+- `contexts/AuthContext.tsx` mengelola session, login, register, logout, refresh profile, dan auto-load token saat app dibuka.
+- Token auth disimpan melalui `services/api.ts`: in-memory cache + SecureStore di native, localStorage di web.
+- `components/ProtectedRoute.tsx` menjaga screen berdasarkan role dan mengarahkan owner/courier yang belum verified ke waiting verification.
+- Semua integrasi API dipusatkan di `services/*Service.ts`; screen tidak memanggil Axios langsung.
+- DTO TypeScript ada di `types/` untuk user, order, payment, wallet, service, notification, dan response API.
+- Error message reusable ada di `utils/getErrorMessage.ts`; alert cross-platform ada di `utils/crossAlert.ts` dan `utils/AlertProvider.tsx`.
+- Mapping status order memakai `constants/orderStatus.ts`, sehingga label, warna badge, dan timeline tetap konsisten.
+- Tracking map memakai `components/TrackingMap.tsx` dengan WebView + Leaflet + OpenStreetMap, tanpa Google Maps API key.
+- Jest saat ini dipakai untuk helper murni seperti `constants/orderStatus` dan `utils/getErrorMessage`.
+
+## Best Practice yang Sudah Diterapkan
+
+- API call dipusatkan di service layer, bukan tersebar langsung di screen.
+- Token disimpan di SecureStore untuk native dan tidak hardcoded di source code.
+- Route utama dilindungi berdasarkan role melalui `ProtectedRoute`.
+- Owner dan courier memakai verification gate sebelum fitur utama berjalan.
+- TypeScript strict digunakan untuk app code melalui `tsconfig.json`.
+- Helper error digunakan untuk mengubah Axios/backend error menjadi pesan yang lebih aman untuk user.
+- Command kualitas tersedia: `npm run lint`, `npm run typecheck`, dan `npm test -- --runInBand`.
+- Dummy payment hanya untuk development melalui `EXPO_PUBLIC_USE_DUMMY_PAYMENT=true`.
+- GPS memakai `expo-location`; input latitude/longitude manual hanya muncul jika `EXPO_PUBLIC_ALLOW_MANUAL_COORDS=true`.
+- Google login/register tetap Coming Soon karena backend belum menyediakan OAuth.
+
+## Catatan MVP
+
+- Project ini MVP/demo untuk presentasi, bukan production-ready app.
+- Beberapa screen masih besar dan bisa dipecah setelah demo jika development dilanjutkan.
+- Testing saat ini masih minimal: helper/unit test, belum UI test atau E2E besar.
+- Production hardening seperti Error Boundary, Sentry/crash reporting, offline cache, API retry/backoff, runtime DTO validation, dan E2E bisa ditambahkan nanti.
+
 ## Struktur Modular Baru
 
 - Shared error parsing ada di `utils/getErrorMessage.ts` dan menerima `unknown` error/AxiosError.
 - Test helper murni ada di `constants/__tests__/` dan `utils/__tests__/`.
-- Customer order detail mulai dipecah ke `app/(customer)/components/StatusTimeline.tsx` dan `TrackingSection.tsx`.
+- Customer order detail memakai komponen `components/customer/StatusTimeline.tsx` dan `components/customer/TrackingSection.tsx`.
 - DTO wallet/earnings/tracking diperketat agar mengurangi `any/as any` tanpa mengubah endpoint backend.
+
 ## Fitur Backend yang Sudah Terhubung
 
 ### Auth dan Session

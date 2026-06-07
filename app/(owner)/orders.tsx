@@ -32,7 +32,7 @@ import {
   ErrorState,
   PrimaryButton,
   ownerStyles,
-} from "./_components";
+} from "@/components/owner/roleComponents";
 
 const money = (n?: number) =>
   n == null ? "-" : "Rp " + Number(n).toLocaleString("id-ID");

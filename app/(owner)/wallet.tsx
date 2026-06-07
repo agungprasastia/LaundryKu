@@ -26,7 +26,7 @@ import {
   OwnerScreen,
   VerificationGate,
   PrimaryButton,
-} from "./_components";
+} from "@/components/owner/roleComponents";
 
 type WithdrawForm = {
   amount: string;
@@ -134,8 +134,12 @@ export default function OwnerWalletScreen() {
 
   const submitWithdraw = async () => {
     const amount = Number(form.amount);
-    const hasBankInfo = !!form.bank_account_number && !!form.bank_name;
-    const hasEWalletInfo = !!form.e_wallet_number && !!form.e_wallet_provider;
+    const bankName = form.bank_name.trim();
+    const bankAccountNumber = form.bank_account_number.trim();
+    const eWalletProvider = form.e_wallet_provider.trim();
+    const eWalletNumber = form.e_wallet_number.trim();
+    const hasBankInfo = !!bankAccountNumber && !!bankName;
+    const hasEWalletInfo = !!eWalletNumber && !!eWalletProvider;
 
     if (!amount || amount <= 0)
       return crossAlert("Validasi", "Nominal withdraw wajib angka lebih dari 0");
@@ -155,13 +159,13 @@ export default function OwnerWalletScreen() {
     const payload: WithdrawPayload = withdrawMethod === "bank"
       ? {
           amount,
-          bank_account_number: form.bank_account_number,
-          bank_name: form.bank_name,
+          bank_account_number: bankAccountNumber,
+          bank_name: bankName,
         }
       : {
           amount,
-          e_wallet_number: form.e_wallet_number,
-          e_wallet_provider: form.e_wallet_provider,
+          e_wallet_number: eWalletNumber,
+          e_wallet_provider: eWalletProvider,
         };
 
     setSubmitting(true);

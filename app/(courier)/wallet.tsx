@@ -26,7 +26,7 @@ import {
   LoadingState,
   PrimaryButton,
   VerificationGate,
-} from "./_components";
+} from "@/components/courier/roleComponents";
 
 type Method = "bank" | "ewallet";
 const emptyForm = {

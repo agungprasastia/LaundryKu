@@ -27,7 +27,7 @@ import {
   getErrorMessage,
   isVerified,
   VerificationGate,
-} from "./_components";
+} from "@/components/courier/roleComponents";
 import { getStatusBgColor, getStatusColor, getStatusLabel } from "@/constants/orderStatus";
 
 export default function CourierBerandaScreen() {

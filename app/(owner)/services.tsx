@@ -27,7 +27,7 @@ import {
   PrimaryButton,
   VerificationGate,
   ownerStyles,
-} from "./_components";
+} from "@/components/owner/roleComponents";
 
 type ServiceForm = {
   service_id: string;

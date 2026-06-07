@@ -16,7 +16,7 @@ import {
   isVerified,
   LoadingState,
   courierStyles,
-} from "./_components";
+} from "@/components/courier/roleComponents";
 
 export default function CourierProfileScreen() {
   const router = useRouter();

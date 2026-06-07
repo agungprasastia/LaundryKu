@@ -31,7 +31,7 @@ import {
   LoadingState,
   PrimaryButton,
   VerificationGate,
-} from "./_components";
+} from "@/components/courier/roleComponents";
 
 type Tab = "active" | "history";
 

@@ -22,8 +22,8 @@ import * as orderService from '@/services/orderService';
 import * as paymentService from '@/services/paymentService';
 import { Order, OrderTracking } from '@/types/order';
 import { Invoice } from '@/types/payment';
-import { StatusTimeline } from './components/StatusTimeline';
-import { TrackingSection } from './components/TrackingSection';
+import { StatusTimeline } from '@/components/customer/StatusTimeline';
+import { TrackingSection } from '@/components/customer/TrackingSection';
 
 const IS_DUMMY_PAYMENT = process.env.EXPO_PUBLIC_USE_DUMMY_PAYMENT === 'true';
 

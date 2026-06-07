@@ -14,7 +14,7 @@ import {
   isVerified,
   LoadingState,
   VerificationGate,
-} from "./_components";
+} from "@/components/courier/roleComponents";
 
 export default function CourierEarningsScreen() {
   const { user } = useAuth();

@@ -22,7 +22,7 @@ import {
   LoadingState,
   OwnerScreen,
   ownerStyles,
-} from "./_components";
+} from "@/components/owner/roleComponents";
 
 export default function OwnerProfileScreen() {
   const router = useRouter();
