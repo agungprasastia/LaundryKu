@@ -118,8 +118,8 @@ export default function AdminBerandaScreen() {
     { icon: 'checkmark-circle', label: 'Verifikasi\nMitra', color: '#2563EB', bg: '#EBF5FF', onPress: () => router.push('/(admin)/verifikasi') },
     { icon: 'checkmark-circle', label: 'Verifikasi\nKurir', color: '#2563EB', bg: '#EBF5FF', onPress: () => router.push('/(admin)/verifikasi') },
     { icon: 'people', label: 'Kelola\nPengguna', color: '#2563EB', bg: '#EBF5FF', onPress: () => router.push('/(admin)/pengguna') },
+    { icon: 'wallet', label: 'Wallet\nPlatform', color: '#2563EB', bg: '#EBF5FF', onPress: () => router.push('/(admin)/wallet') },
     { icon: 'desktop', label: 'Laporan\nAnalytics', color: '#2563EB', bg: '#EBF5FF', onPress: () => router.push('/(admin)/laporan') },
-    { icon: 'person', label: 'Profil', color: '#2563EB', bg: '#EBF5FF', onPress: () => router.push('/(admin)/profil') },
   ];
 
   const handleUnavailableFeature = () => {

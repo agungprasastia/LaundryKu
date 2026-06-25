@@ -63,6 +63,15 @@ export default function AdminLayout() {
           }}
         />
         <Tabs.Screen
+          name="wallet"
+          options={{
+            title: 'Wallet',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="wallet-outline" size={22} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="profil"
           options={{
             title: 'Profil',
