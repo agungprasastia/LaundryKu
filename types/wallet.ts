@@ -72,8 +72,8 @@ export type WithdrawPayload = BankWithdrawPayload | EWalletWithdrawPayload;
  * Process withdrawal payload (admin)
  */
 export interface ProcessWithdrawalPayload {
-  status: "success" | "failed" | "approved" | "rejected";
-  notes?: string;
+  status: "success" | "failed";
+  note?: string;
 }
 
 

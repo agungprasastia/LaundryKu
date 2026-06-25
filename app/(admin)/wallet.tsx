@@ -15,7 +15,6 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { crossAlert } from "@/utils/crossAlert";
 import * as adminService from "@/services/adminService";
-import * as walletService from "@/services/walletService";
 import { Wallet, WalletTransaction, Withdrawal, WithdrawalStatus, WithdrawPayload } from "@/types/wallet";
 import { LaundryColors } from "@/constants/colors";
 
@@ -118,7 +117,7 @@ export default function AdminWalletScreen() {
   // Process withdrawal modal
   const [selectedWithdrawal, setSelectedWithdrawal] = useState<Withdrawal | null>(null);
   const [processModalOpen, setProcessModalOpen] = useState(false);
-  const [processAction, setProcessAction] = useState<"approved" | "rejected">("approved");
+  const [processAction, setProcessAction] = useState<"success" | "failed">("success");
   const [processNotes, setProcessNotes] = useState("");
   const [processing, setProcessing] = useState(false);
 
@@ -174,12 +173,12 @@ export default function AdminWalletScreen() {
     loadData();
   }, [loadData]);
 
-  const availableBalance = Number(wallet?.available_balance ?? wallet?.balance ?? 0);
+  const availableBalance = Number(wallet?.available_balance ?? 0);
   const pendingBalance = Number(wallet?.pending_balance ?? 0);
-  const totalBalance = Number(wallet?.balance ?? 0);
+  const totalBalance = Number(wallet?.balance ?? (availableBalance + pendingBalance));
 
   // ─── Process Withdrawal ──────────────────────────
-  const openProcessModal = (item: Withdrawal, action: "approved" | "rejected") => {
+  const openProcessModal = (item: Withdrawal, action: "success" | "failed") => {
     setSelectedWithdrawal(item);
     setProcessAction(action);
     setProcessNotes("");
@@ -199,11 +198,11 @@ export default function AdminWalletScreen() {
     try {
       await adminService.processWithdrawal(selectedWithdrawal.withdraw_id, {
         status: processAction,
-        notes: processNotes.trim() || undefined,
+        note: processNotes.trim() || undefined,
       });
       crossAlert(
         "Berhasil",
-        processAction === "approved"
+        processAction === "success"
           ? "Penarikan telah disetujui"
           : "Penarikan telah ditolak"
       );
@@ -231,7 +230,7 @@ export default function AdminWalletScreen() {
   };
 
   const submitAdminWithdraw = async () => {
-    const amount = Number(withdrawForm.amount);
+    const amount = Number(withdrawForm.amount.replace(/\./g, ""));
     const bankName = withdrawForm.bank_name.trim();
     const bankAccountNumber = withdrawForm.bank_account_number.trim();
     const eWalletProvider = withdrawForm.e_wallet_provider.trim();
@@ -256,7 +255,7 @@ export default function AdminWalletScreen() {
 
     setSubmittingWithdraw(true);
     try {
-      await walletService.requestWithdraw(payload);
+      await adminService.requestAdminWithdraw(payload);
       crossAlert("Berhasil", "Permintaan penarikan berhasil diajukan");
       closeWithdrawModal();
       loadData();
@@ -387,8 +386,8 @@ export default function AdminWalletScreen() {
                   <PendingWithdrawalCard
                     key={item.withdraw_id}
                     item={item}
-                    onApprove={() => openProcessModal(item, "approved")}
-                    onReject={() => openProcessModal(item, "rejected")}
+                    onApprove={() => openProcessModal(item, "success")}
+                    onReject={() => openProcessModal(item, "failed")}
                   />
                 ))
               )}
@@ -441,7 +440,7 @@ export default function AdminWalletScreen() {
           <View style={styles.sheet}>
             <View style={styles.sheetHeaderRow}>
               <Text style={styles.sheetTitle}>
-                {processAction === "approved" ? "Setujui Penarikan" : "Tolak Penarikan"}
+                {processAction === "success" ? "Setujui Penarikan" : "Tolak Penarikan"}
               </Text>
               <TouchableOpacity onPress={closeProcessModal}>
                 <Ionicons name="close-circle" size={28} color={LaundryColors.textMuted} />
@@ -490,7 +489,7 @@ export default function AdminWalletScreen() {
                       value={processNotes}
                       onChangeText={setProcessNotes}
                       placeholder={
-                        processAction === "approved"
+                        processAction === "success"
                           ? "Catatan persetujuan..."
                           : "Alasan penolakan..."
                       }
@@ -512,7 +511,7 @@ export default function AdminWalletScreen() {
                     <TouchableOpacity
                       style={[
                         styles.confirmBtn,
-                        processAction === "rejected" && styles.confirmBtnReject,
+                        processAction === "failed" && styles.confirmBtnReject,
                       ]}
                       onPress={submitProcess}
                       disabled={processing}
@@ -523,12 +522,12 @@ export default function AdminWalletScreen() {
                       ) : (
                         <>
                           <Ionicons
-                            name={processAction === "approved" ? "checkmark-circle" : "close-circle"}
+                            name={processAction === "success" ? "checkmark-circle" : "close-circle"}
                             size={18}
                             color="#FFF"
                           />
                           <Text style={styles.confirmBtnText}>
-                            {processAction === "approved" ? "Setujui" : "Tolak"}
+                            {processAction === "success" ? "Setujui" : "Tolak"}
                           </Text>
                         </>
                       )}

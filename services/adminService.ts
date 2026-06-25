@@ -1,7 +1,7 @@
 import apiClient from './api';
 import { AdminAnalytics, AdminDashboardMetrics, ApiResponse } from '@/types/api';
 import { PendingUser } from '@/types/user';
-import { ProcessWithdrawalPayload, Wallet, WalletTransaction, Withdrawal } from '@/types/wallet';
+import { ProcessWithdrawalPayload, Wallet, WalletTransaction, Withdrawal, WithdrawPayload } from '@/types/wallet';
 
 /**
  * GET /admin/dashboard/metrics
@@ -37,6 +37,14 @@ export async function verifyUser(
  */
 export async function getAdminWallet(): Promise<ApiResponse<Wallet>> {
   const response = await apiClient.get('/admin/wallets/me');
+  return response.data;
+}
+
+/**
+ * POST /admin/wallets/me/withdraw
+ */
+export async function requestAdminWithdraw(payload: WithdrawPayload): Promise<ApiResponse<Withdrawal>> {
+  const response = await apiClient.post('/admin/wallets/me/withdraw', payload);
   return response.data;
 }
 
