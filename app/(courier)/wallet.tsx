@@ -108,7 +108,7 @@ export default function CourierWalletScreen() {
   };
 
   const submitWithdraw = async () => {
-    const amount = Number(form.amount);
+    const amount = Number(form.amount.replace(/\./g, ""));
     
     if (!amount || amount <= 0)
       return crossAlert("Validasi", "Nominal penarikan wajib lebih dari 0");
@@ -234,7 +234,7 @@ export default function CourierWalletScreen() {
 }
 
 function TransactionCard({ item }: { item: WalletTransaction }) {
-  const isIncome = item.type.toLowerCase() === "income" || item.amount > 0;
+  const isIncome = item.type === "credit" || item.amount > 0;
   return (
     <View style={styles.listItemCard}>
       <View style={[styles.listIconBox, { backgroundColor: isIncome ? "#ECFDF5" : "#FEF2F2" }]}>
@@ -277,8 +277,8 @@ function WithdrawalCard({ item }: { item: Withdrawal }) {
         <Text style={styles.listTitle} numberOfLines={1}>
           Penarikan Saldo
         </Text>
-        <Text style={styles.listMeta} numberOfLines={1}>
-          {item.bank_name ? `${item.bank_name} - ${item.account_number}` : item.e_wallet_provider ? `${item.e_wallet_provider} - ${item.account_number}` : "-"}
+        <Text style={styles.listMeta}>
+          {item.bank_name ? `${item.bank_name} - ${item.bank_account_number || ""}` : item.e_wallet_provider ? `${item.e_wallet_provider} - ${item.e_wallet_number || ""}` : "-"}
         </Text>
         <Text style={styles.listMeta}>{formatDate(item.created_at)}</Text>
       </View>

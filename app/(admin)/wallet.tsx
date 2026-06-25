@@ -18,6 +18,8 @@ import * as adminService from "@/services/adminService";
 import { Wallet, WalletTransaction, Withdrawal, WithdrawalStatus, WithdrawPayload } from "@/types/wallet";
 import { LaundryColors } from "@/constants/colors";
 
+const ADMIN_BLUE = LaundryColors.primary;
+
 // ─── Helpers ────────────────────────────────────────
 function formatMoney(amount: number | undefined | null): string {
   const n = Number(amount ?? 0);
@@ -842,7 +844,6 @@ function WithdrawalHistoryCard({ item }: { item: Withdrawal }) {
 }
 
 // ─── Styles ─────────────────────────────────────────
-const ADMIN_BLUE = LaundryColors.primary;
 
 const styles = StyleSheet.create({
   container: {
