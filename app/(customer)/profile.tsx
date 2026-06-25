@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Modal,
+  TextInput,
 } from 'react-native';
 import { crossAlert } from '@/utils/crossAlert';
 import { useRouter } from 'expo-router';
@@ -20,13 +22,44 @@ import { Notification } from '@/types/notification';
 
 export default function CustomerProfileScreen() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, updateProfile } = useAuth();
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notifLoading, setNotifLoading] = useState(true);
   const [notifError, setNotifError] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [markingRead, setMarkingRead] = useState<string | null>(null);
+
+  const [editModal, setEditModal] = useState(false);
+  const [form, setForm] = useState({
+    full_name: "",
+    address: "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  const handleEditProfile = () => {
+    setForm({
+      full_name: user?.full_name || "",
+      address: user?.address || "",
+    });
+    setEditModal(true);
+  };
+
+  const saveProfile = async () => {
+    setSaving(true);
+    try {
+      await updateProfile({
+        full_name: form.full_name,
+        address: form.address,
+      });
+      crossAlert("Berhasil", "Profil diperbarui");
+      setEditModal(false);
+    } catch (e: any) {
+      crossAlert("Error", getErrorMessage(e, "Gagal memperbarui profil"));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -114,6 +147,9 @@ export default function CustomerProfileScreen() {
       >
         {/* ─── Profile Card ─── */}
         <View style={styles.profileCard}>
+          <TouchableOpacity onPress={handleEditProfile} style={{ position: 'absolute', top: 16, right: 16, padding: 8, backgroundColor: '#EFF6FF', borderRadius: 12 }}>
+            <Ionicons name="pencil" size={16} color={LaundryColors.primary} />
+          </TouchableOpacity>
           <View style={styles.avatar}>
             <Ionicons name="person" size={36} color="#FFFFFF" />
           </View>
@@ -238,6 +274,54 @@ export default function CustomerProfileScreen() {
 
         <View style={{ height: 30 }} />
       </ScrollView>
+
+      {/* EDIT PROFILE MODAL */}
+      <Modal visible={editModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Profil</Text>
+              <TouchableOpacity onPress={() => setEditModal(false)}>
+                <Ionicons name="close" size={24} color={LaundryColors.textPrimary} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={{ gap: 16 }}>
+              <View>
+                <Text style={{ fontSize: 13, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Nama Lengkap</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Masukkan nama lengkap..."
+                  value={form.full_name}
+                  onChangeText={(t) => setForm({ ...form, full_name: t })}
+                />
+              </View>
+              <View>
+                <Text style={{ fontSize: 13, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Alamat Rumah / Pengiriman</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Masukkan alamat lengkap..."
+                  value={form.address}
+                  onChangeText={(t) => setForm({ ...form, address: t })}
+                  multiline
+                />
+              </View>
+            </View>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalButtonPrimary]}
+                onPress={saveProfile}
+                disabled={saving}
+              >
+                <Text style={styles.modalButtonText}>
+                  {saving ? "Menyimpan..." : "Simpan Perubahan"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -342,6 +426,56 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#FECACA', marginTop: 24,
   },
   logoutText: { fontSize: 15, fontWeight: '700', color: LaundryColors.error },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(15,23,42,.4)",
+    justifyContent: "flex-end",
+  },
+  modalContainer: {
+    backgroundColor: "#F8FAFC",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    maxHeight: "92%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: LaundryColors.textPrimary,
+  },
+  modalFooter: {
+    marginTop: 24,
+  },
+  modalButton: {
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+  modalButtonPrimary: {
+    backgroundColor: LaundryColors.primary,
+  },
+  modalButtonText: {
+    color: "#FFF",
+    fontWeight: "700",
+    fontSize: 15,
+  },
+  input: {
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+    borderRadius: 14,
+    padding: 16,
+    fontSize: 16,
+    fontWeight: "600",
+    color: LaundryColors.textPrimary,
+  },
 });
 
 

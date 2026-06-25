@@ -1,8 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
+  Modal,
   RefreshControl,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -12,6 +14,7 @@ import { LaundryColors } from "@/constants/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/contexts/AuthContext";
 import * as notificationService from "@/services/notificationService";
+import * as Location from "expo-location";
 import { Notification } from "@/types/notification";
 import {
   EmptyState,
@@ -26,11 +29,19 @@ import {
 
 export default function OwnerProfileScreen() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, updateProfile } = useAuth();
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  
+  const [editModal, setEditModal] = useState(false);
+  const [form, setForm] = useState({
+    address: "",
+    lat: "",
+    lng: "",
+  });
+  const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -71,6 +82,56 @@ export default function OwnerProfileScreen() {
       }
     } catch (e: any) {
       crossAlert("Error", getErrorMessage(e, "Error"));
+    }
+  };
+
+  const handleEditProfile = () => {
+    setForm({
+      address: user?.address || "",
+      lat: user?.lat ? String(user.lat) : "",
+      lng: user?.lng ? String(user.lng) : "",
+    });
+    setEditModal(true);
+  };
+
+  const saveProfile = async () => {
+    setSaving(true);
+    try {
+      const payload: any = { address: form.address };
+      if (form.lat && form.lng) {
+        payload.lat = Number(form.lat);
+        payload.lng = Number(form.lng);
+      }
+      await updateProfile(payload);
+      crossAlert("Berhasil", "Profil diperbarui");
+      setEditModal(false);
+    } catch (e: any) {
+      crossAlert("Error", getErrorMessage(e, "Gagal memperbarui profil"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const [gettingLocation, setGettingLocation] = useState(false);
+
+  const getLocation = async () => {
+    setGettingLocation(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        crossAlert("Akses Ditolak", "Izin akses lokasi dibutuhkan untuk fitur ini.");
+        return;
+      }
+      const location = await Location.getCurrentPositionAsync({});
+      setForm(prev => ({
+        ...prev,
+        lat: String(location.coords.latitude),
+        lng: String(location.coords.longitude)
+      }));
+    } catch (e: any) {
+      crossAlert("Gagal", getErrorMessage(e, "Tidak dapat mengambil lokasi GPS"));
+    } finally {
+      setGettingLocation(false);
     }
   };
 
@@ -120,7 +181,12 @@ export default function OwnerProfileScreen() {
 
       {/* PROFILE DETAILS */}
       <View style={styles.detailsCard}>
-        <Text style={styles.detailsHeading}>Informasi Akun</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <Text style={[styles.detailsHeading, { marginBottom: 0 }]}>Informasi Akun</Text>
+          <TouchableOpacity onPress={handleEditProfile} style={{ paddingHorizontal: 12, paddingVertical: 6, backgroundColor: '#EFF6FF', borderRadius: 12 }}>
+            <Text style={{ color: LaundryColors.roleMitraIcon, fontWeight: '600', fontSize: 12 }}>Edit Profil</Text>
+          </TouchableOpacity>
+        </View>
         
         <View style={styles.detailRow}>
           <View style={styles.detailIconBox}>
@@ -209,11 +275,136 @@ export default function OwnerProfileScreen() {
         <Ionicons name="log-out-outline" size={20} color={LaundryColors.error} />
         <Text style={styles.logoutButtonText}>Keluar Akun</Text>
       </TouchableOpacity>
+      {/* EDIT PROFILE MODAL */}
+      <Modal visible={editModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Profil</Text>
+              <TouchableOpacity onPress={() => setEditModal(false)}>
+                <Ionicons name="close" size={24} color={LaundryColors.textPrimary} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={{ gap: 16 }}>
+              <View>
+                <Text style={{ fontSize: 13, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Alamat Outlet</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Masukkan alamat lengkap..."
+                  value={form.address}
+                  onChangeText={(t) => setForm({ ...form, address: t })}
+                  multiline
+                />
+              </View>
+
+              <View style={{ flexDirection: 'row', gap: 12 }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 13, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Latitude</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="-6.200000"
+                    value={form.lat}
+                    onChangeText={(t) => setForm({ ...form, lat: t })}
+                    keyboardType="numeric"
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 13, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Longitude</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="106.816666"
+                    value={form.lng}
+                    onChangeText={(t) => setForm({ ...form, lng: t })}
+                    keyboardType="numeric"
+                  />
+                </View>
+              </View>
+              
+              <TouchableOpacity
+                onPress={getLocation}
+                disabled={gettingLocation}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingVertical: 4 }}
+              >
+                <Ionicons name="location" size={16} color={LaundryColors.primary} />
+                <Text style={{ fontSize: 13, fontWeight: "600", color: LaundryColors.primary }}>
+                  {gettingLocation ? "Mengambil lokasi..." : "Ambil dari GPS Saat Ini"}
+                </Text>
+              </TouchableOpacity>
+              
+              <Text style={{ fontSize: 11, color: LaundryColors.textMuted }}>
+                * Kosongkan Latitude & Longitude jika tidak ingin diubah.
+              </Text>
+            </View>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalButtonPrimary]}
+                onPress={saveProfile}
+                disabled={saving}
+              >
+                <Text style={styles.modalButtonText}>
+                  {saving ? "Menyimpan..." : "Simpan Perubahan"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </OwnerScreen>
   );
 }
 
 const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(15,23,42,.4)",
+    justifyContent: "flex-end",
+  },
+  modalContainer: {
+    backgroundColor: "#F8FAFC",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    maxHeight: "92%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: LaundryColors.textPrimary,
+  },
+  modalFooter: {
+    marginTop: 24,
+  },
+  modalButton: {
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+  modalButtonPrimary: {
+    backgroundColor: LaundryColors.roleMitraIcon,
+  },
+  modalButtonText: {
+    color: "#FFF",
+    fontWeight: "700",
+    fontSize: 15,
+  },
+  input: {
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+    borderRadius: 14,
+    padding: 16,
+    fontSize: 16,
+    fontWeight: "600",
+    color: LaundryColors.textPrimary,
+  },
   profileHeaderCard: {
     alignItems: "center",
     backgroundColor: "#FFFFFF",

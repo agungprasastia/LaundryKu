@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { RefreshControl, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { RefreshControl, StyleSheet, Text, TouchableOpacity, View, Modal, TextInput } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { crossAlert } from "@/utils/crossAlert";
@@ -20,11 +20,45 @@ import {
 
 export default function CourierProfileScreen() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, updateProfile } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+
+  const [editModal, setEditModal] = useState(false);
+  const [form, setForm] = useState({
+    vehicle_name: "",
+    vehicle_plate_number: "",
+    address: "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  const handleEditProfile = () => {
+    setForm({
+      vehicle_name: user?.vehicle_name || "",
+      vehicle_plate_number: user?.vehicle_plate_number || "",
+      address: user?.address || "",
+    });
+    setEditModal(true);
+  };
+
+  const saveProfile = async () => {
+    setSaving(true);
+    try {
+      await updateProfile({
+        vehicle_name: form.vehicle_name,
+        vehicle_plate_number: form.vehicle_plate_number,
+        address: form.address,
+      });
+      crossAlert("Berhasil", "Profil diperbarui");
+      setEditModal(false);
+    } catch (e: any) {
+      crossAlert("Error", getErrorMessage(e, "Gagal memperbarui profil"));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const loadNotifications = useCallback(async () => {
     try {
@@ -110,7 +144,12 @@ export default function CourierProfileScreen() {
 
       {/* PROFILE DETAILS */}
       <View style={styles.detailsCard}>
-        <Text style={styles.detailsHeading}>Informasi Kendaraan & Akun</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <Text style={[styles.detailsHeading, { marginBottom: 0 }]}>Informasi Kendaraan & Akun</Text>
+          <TouchableOpacity onPress={handleEditProfile} style={{ paddingHorizontal: 12, paddingVertical: 6, backgroundColor: '#FFF7ED', borderRadius: 12 }}>
+            <Text style={{ color: LaundryColors.roleKurirIcon, fontWeight: '600', fontSize: 12 }}>Edit Profil</Text>
+          </TouchableOpacity>
+        </View>
         
         <View style={styles.detailRow}>
           <View style={styles.detailIconBox}>
@@ -199,11 +238,117 @@ export default function CourierProfileScreen() {
         <Ionicons name="log-out-outline" size={20} color={LaundryColors.error} />
         <Text style={styles.logoutButtonText}>Keluar Akun</Text>
       </TouchableOpacity>
+
+      {/* EDIT PROFILE MODAL */}
+      <Modal visible={editModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Profil</Text>
+              <TouchableOpacity onPress={() => setEditModal(false)}>
+                <Ionicons name="close" size={24} color={LaundryColors.textPrimary} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={{ gap: 16 }}>
+              <View>
+                <Text style={{ fontSize: 13, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Kendaraan (Cth: Honda Beat)</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Masukkan tipe kendaraan..."
+                  value={form.vehicle_name}
+                  onChangeText={(t) => setForm({ ...form, vehicle_name: t })}
+                />
+              </View>
+              <View>
+                <Text style={{ fontSize: 13, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Plat Nomor</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Masukkan plat nomor..."
+                  value={form.vehicle_plate_number}
+                  onChangeText={(t) => setForm({ ...form, vehicle_plate_number: t })}
+                />
+              </View>
+              <View>
+                <Text style={{ fontSize: 13, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Alamat Rumah</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Masukkan alamat lengkap..."
+                  value={form.address}
+                  onChangeText={(t) => setForm({ ...form, address: t })}
+                  multiline
+                />
+              </View>
+            </View>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalButtonPrimary]}
+                onPress={saveProfile}
+                disabled={saving}
+              >
+                <Text style={styles.modalButtonText}>
+                  {saving ? "Menyimpan..." : "Simpan Perubahan"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </CourierScreen>
   );
 }
 
 const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(15,23,42,.4)",
+    justifyContent: "flex-end",
+  },
+  modalContainer: {
+    backgroundColor: "#F8FAFC",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    maxHeight: "92%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: LaundryColors.textPrimary,
+  },
+  modalFooter: {
+    marginTop: 24,
+  },
+  modalButton: {
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+  modalButtonPrimary: {
+    backgroundColor: LaundryColors.roleKurirIcon,
+  },
+  modalButtonText: {
+    color: "#FFF",
+    fontWeight: "700",
+    fontSize: 15,
+  },
+  input: {
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
+    borderRadius: 14,
+    padding: 16,
+    fontSize: 16,
+    fontWeight: "600",
+    color: LaundryColors.textPrimary,
+  },
   profileHeaderCard: {
     alignItems: "center",
     backgroundColor: "#FFFFFF",
