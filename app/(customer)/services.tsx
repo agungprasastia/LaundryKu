@@ -616,7 +616,7 @@ export default function CustomerServicesScreen() {
                   {showDatePicker && (
                     <DateTimePicker
                       value={pickupDate || new Date()}
-                      mode="datetime"
+                      mode={Platform.OS === 'ios' ? 'datetime' : 'date'}
                       display="default"
                       onChange={onDateChange}
                       minimumDate={new Date()}
