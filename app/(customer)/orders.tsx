@@ -387,7 +387,7 @@ export default function CustomerOrdersScreen() {
               ) : null}
               <View style={styles.orderDetailRow}>
                 <Ionicons name="calendar-outline" size={14} color={LaundryColors.textMuted} />
-                <Text style={styles.orderDetailText}>{formatDate(order.created_at)}</Text>
+                <Text style={styles.orderDetailText}>{formatDate(order.pickup_scheduled_at || order.created_at)}</Text>
                 {(order.total_amount ?? order.total_price) != null ? (
                   <Text style={styles.orderAmount}>{formatPrice(order.total_amount ?? order.total_price)}</Text>
                 ) : null}
@@ -448,6 +448,14 @@ export default function CustomerOrdersScreen() {
                       <Text style={styles.detailLabel}>Alamat Pickup</Text>
                       <Text style={[styles.detailValue, { flex: 1, textAlign: 'right' }]} numberOfLines={2}>
                         {detailOrder.pickup_address}
+                      </Text>
+                    </View>
+                  ) : null}
+                  {detailOrder.pickup_scheduled_at ? (
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Jadwal Pickup</Text>
+                      <Text style={[styles.detailValue, { flex: 1, textAlign: 'right' }]}>
+                        {formatDate(detailOrder.pickup_scheduled_at)}
                       </Text>
                     </View>
                   ) : null}

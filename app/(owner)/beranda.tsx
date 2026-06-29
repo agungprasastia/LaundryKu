@@ -281,7 +281,7 @@ function OrderCard({ order, onPress }: { order: Order; onPress: () => void }) {
         <Text style={styles.orderService}>{order.service_name || order.service?.name || "Layanan Reguler"}</Text>
         <View style={styles.orderMeta}>
           <Ionicons name="calendar-outline" size={14} color={LaundryColors.textSecondary} />
-          <Text style={styles.orderDate}>{date(order.created_at)}</Text>
+          <Text style={styles.orderDate}>{date(order.pickup_scheduled_at || order.created_at)}</Text>
         </View>
       </View>
       <View style={styles.orderFooter}>

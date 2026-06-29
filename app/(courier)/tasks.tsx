@@ -320,7 +320,7 @@ function TaskCard({
 
       <View style={styles.taskCardFooter}>
         <Text style={styles.taskDateText}>
-          Tugas Dibuat: {formatDate(task.created_at)}
+          Jadwal Pickup: {formatDate(task.pickup_scheduled_at || task.created_at)}
         </Text>
         <Ionicons name="chevron-forward" size={18} color={LaundryColors.textMuted} />
       </View>

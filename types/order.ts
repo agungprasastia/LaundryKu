@@ -146,6 +146,7 @@ export interface CourierTask {
   delivery_status?: string;
   order_status?: OrderStatus | string;
   pickup_address?: string;
+  pickup_scheduled_at?: string;
   pickup_lat?: number;
   pickup_lng?: number;
   owner_lat?: number;

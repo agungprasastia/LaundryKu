@@ -235,7 +235,7 @@ export default function OwnerOrdersScreen() {
             
             <View style={styles.footerRow}>
               <Text style={styles.price}>{money(o.total_amount ?? o.total_price)}</Text>
-              <Text style={styles.muted}>{date(o.created_at)}</Text>
+              <Text style={styles.muted}>{date(o.pickup_scheduled_at || o.created_at)}</Text>
             </View>
           </TouchableOpacity>
         ))
@@ -265,6 +265,7 @@ export default function OwnerOrdersScreen() {
                   <View style={styles.infoBox}>
                     <Info k="Customer" v={detail.customer_name || detail.customer_id} />
                     <Info k="Service" v={detail.service_name || detail.service?.name || detail.service_id} />
+                    <Info k="Pickup Scheduled" v={detail.pickup_scheduled_at ? date(detail.pickup_scheduled_at) : "-"} />
                     <Info k="Pickup Address" v={detail.pickup_address} />
                     <Info k="Distance" v={detail.distance_km != null ? num(detail.distance_km) + " km" : "-"} />
                     <Info k="Weight" v={detail.weight_kg != null ? num(detail.weight_kg) + " kg" : "-"} />

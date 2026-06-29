@@ -52,6 +52,7 @@ export default function CustomerServicesScreen() {
   const [pickupScheduledAt, setPickupScheduledAt] = useState('');
   const [pickupDate, setPickupDate] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [pickerMode, setPickerMode] = useState<'date' | 'time' | 'datetime'>('date');
   const [submitting, setSubmitting] = useState(false);
 
   // GPS location state
@@ -192,26 +193,52 @@ export default function CustomerServicesScreen() {
   };
 
   const onDateChange = (event: any, selectedDate?: Date) => {
-    // Hindari crash "Cannot read property 'dismiss' of undefined" di Android saat unmount
-    if (Platform.OS === 'android') {
-      setTimeout(() => setShowDatePicker(false), 100);
-    } else {
-      setShowDatePicker(false);
-    }
-
     if (event?.type === 'dismissed') {
+      setShowDatePicker(false);
       return;
     }
 
-    if (selectedDate) {
-      setPickupDate(selectedDate);
-      const yy = selectedDate.getFullYear();
-      const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
-      const dd = String(selectedDate.getDate()).padStart(2, '0');
-      const hh = String(selectedDate.getHours()).padStart(2, '0');
-      const min = String(selectedDate.getMinutes()).padStart(2, '0');
-      const ss = String(selectedDate.getSeconds()).padStart(2, '0');
-      setPickupScheduledAt(`${yy}-${mm}-${dd} ${hh}:${min}:${ss}`);
+    if (Platform.OS === 'android') {
+      if (pickerMode === 'date') {
+        if (selectedDate) {
+          setPickupDate(selectedDate);
+          setPickerMode('time');
+        }
+        return;
+      }
+      
+      // Jika mode time selesai
+      if (selectedDate) {
+        // Gabungkan tanggal yang disimpan sebelumnya dengan jam dari picker saat ini
+        const finalDate = pickupDate ? new Date(pickupDate) : new Date();
+        finalDate.setHours(selectedDate.getHours());
+        finalDate.setMinutes(selectedDate.getMinutes());
+        finalDate.setSeconds(selectedDate.getSeconds());
+        
+        setPickupDate(finalDate);
+        setShowDatePicker(false);
+        
+        const yy = finalDate.getFullYear();
+        const mm = String(finalDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(finalDate.getDate()).padStart(2, '0');
+        const hh = String(finalDate.getHours()).padStart(2, '0');
+        const min = String(finalDate.getMinutes()).padStart(2, '0');
+        const ss = String(finalDate.getSeconds()).padStart(2, '0');
+        setPickupScheduledAt(`${yy}-${mm}-${dd} ${hh}:${min}:${ss}`);
+      }
+    } else {
+      // iOS
+      setShowDatePicker(false);
+      if (selectedDate) {
+        setPickupDate(selectedDate);
+        const yy = selectedDate.getFullYear();
+        const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(selectedDate.getDate()).padStart(2, '0');
+        const hh = String(selectedDate.getHours()).padStart(2, '0');
+        const min = String(selectedDate.getMinutes()).padStart(2, '0');
+        const ss = String(selectedDate.getSeconds()).padStart(2, '0');
+        setPickupScheduledAt(`${yy}-${mm}-${dd} ${hh}:${min}:${ss}`);
+      }
     }
   };
 
@@ -606,7 +633,12 @@ export default function CustomerServicesScreen() {
                 <>
                   <TouchableOpacity 
                     style={[styles.input, { justifyContent: 'center' }]} 
-                    onPress={() => !submitting && setShowDatePicker(true)}
+                    onPress={() => {
+                      if (!submitting) {
+                        setPickerMode(Platform.OS === 'ios' ? 'datetime' : 'date');
+                        setShowDatePicker(true);
+                      }
+                    }}
                     activeOpacity={0.7}
                   >
                     <Text style={{ color: pickupScheduledAt ? LaundryColors.textPrimary : LaundryColors.inputPlaceholder }}>
@@ -616,7 +648,7 @@ export default function CustomerServicesScreen() {
                   {showDatePicker && (
                     <DateTimePicker
                       value={pickupDate || new Date()}
-                      mode={Platform.OS === 'ios' ? 'datetime' : 'date'}
+                      mode={Platform.OS === 'ios' ? 'datetime' : pickerMode as 'date' | 'time'}
                       display="default"
                       onChange={onDateChange}
                       minimumDate={new Date()}
