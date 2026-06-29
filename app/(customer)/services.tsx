@@ -22,6 +22,7 @@ import { LaundryService } from '@/types/service';
 import { CreateOrderPayload } from '@/types/order';
 import * as Location from 'expo-location';
 import Constants from 'expo-constants';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 // Dev mode: allow manual coordinate input (only when explicitly enabled)
 const ALLOW_MANUAL_COORDS =
@@ -48,6 +49,8 @@ export default function CustomerServicesScreen() {
   const [pickupLat, setPickupLat] = useState<number | null>(null);
   const [pickupLng, setPickupLng] = useState<number | null>(null);
   const [pickupScheduledAt, setPickupScheduledAt] = useState('');
+  const [pickupDate, setPickupDate] = useState<Date | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   // GPS location state
@@ -104,6 +107,7 @@ export default function CustomerServicesScreen() {
     setPickupLat(null);
     setPickupLng(null);
     setPickupScheduledAt('');
+    setPickupDate(null);
     setLocationStatus('idle');
     setLocationError('');
     setShowManualCoords(false);
@@ -122,6 +126,7 @@ export default function CustomerServicesScreen() {
     setPickupLat(null);
     setPickupLng(null);
     setPickupScheduledAt('');
+    setPickupDate(null);
     setLocationStatus('idle');
     setLocationError('');
     setShowManualCoords(false);
@@ -180,6 +185,37 @@ export default function CustomerServicesScreen() {
     setPickupLng(lng);
     setLocationStatus('success');
     setShowManualCoords(false);
+  };
+
+  const onDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setPickupDate(selectedDate);
+      const yy = selectedDate.getFullYear();
+      const mm = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const dd = String(selectedDate.getDate()).padStart(2, '0');
+      const hh = String(selectedDate.getHours()).padStart(2, '0');
+      const min = String(selectedDate.getMinutes()).padStart(2, '0');
+      const ss = String(selectedDate.getSeconds()).padStart(2, '0');
+      setPickupScheduledAt(`${yy}-${mm}-${dd} ${hh}:${min}:${ss}`);
+    }
+  };
+
+  const onWebDateChange = (e: any) => {
+    const val = e.target.value;
+    if (val) {
+      const parsed = new Date(val);
+      setPickupDate(parsed);
+      const yy = parsed.getFullYear();
+      const mm = String(parsed.getMonth() + 1).padStart(2, '0');
+      const dd = String(parsed.getDate()).padStart(2, '0');
+      const hh = String(parsed.getHours()).padStart(2, '0');
+      const min = String(parsed.getMinutes()).padStart(2, '0');
+      setPickupScheduledAt(`${yy}-${mm}-${dd} ${hh}:${min}:00`);
+    } else {
+      setPickupDate(null);
+      setPickupScheduledAt('');
+    }
   };
 
   const validateOrderForm = (): string | null => {
@@ -531,17 +567,50 @@ export default function CustomerServicesScreen() {
               )}
 
               <Text style={styles.inputLabel}>Jadwal Pickup *</Text>
-              <TextInput
-                style={styles.input}
-                value={pickupScheduledAt}
-                onChangeText={setPickupScheduledAt}
-                placeholder="2026-06-05 13:00:00"
-                placeholderTextColor={LaundryColors.inputPlaceholder}
-                editable={!submitting}
-              />
-              <Text style={styles.inputHint}>
-                Format: YYYY-MM-DD HH:mm:ss
-              </Text>
+              
+              {Platform.OS === 'web' ? (
+                <View style={[styles.input, { paddingHorizontal: 0, paddingVertical: 0, overflow: 'hidden' }]}>
+                  {React.createElement('input', {
+                    type: 'datetime-local',
+                    value: pickupDate ? new Date(pickupDate.getTime() - pickupDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '',
+                    onChange: onWebDateChange,
+                    disabled: submitting,
+                    style: {
+                      border: 'none',
+                      outline: 'none',
+                      width: '100%',
+                      height: '100%',
+                      padding: '12px 14px',
+                      fontSize: '14px',
+                      color: LaundryColors.textPrimary,
+                      backgroundColor: 'transparent',
+                      fontFamily: 'inherit',
+                      boxSizing: 'border-box'
+                    }
+                  })}
+                </View>
+              ) : (
+                <>
+                  <TouchableOpacity 
+                    style={[styles.input, { justifyContent: 'center' }]} 
+                    onPress={() => !submitting && setShowDatePicker(true)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={{ color: pickupScheduledAt ? LaundryColors.textPrimary : LaundryColors.inputPlaceholder }}>
+                      {pickupScheduledAt || 'Pilih Jadwal Pickup'}
+                    </Text>
+                  </TouchableOpacity>
+                  {showDatePicker && (
+                    <DateTimePicker
+                      value={pickupDate || new Date()}
+                      mode="datetime"
+                      display="default"
+                      onChange={onDateChange}
+                      minimumDate={new Date()}
+                    />
+                  )}
+                </>
+              )}
 
               <TouchableOpacity
                 style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
