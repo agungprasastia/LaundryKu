@@ -21,7 +21,7 @@ export default function CustomerLayout() {
             paddingTop: 6,
           },
           tabBarLabelStyle: {
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: '600',
           },
         }}

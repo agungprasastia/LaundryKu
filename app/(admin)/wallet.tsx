@@ -322,7 +322,7 @@ export default function AdminWalletScreen() {
             <View style={styles.walletHeaderRow}>
               <Text style={styles.walletLabel}>Saldo Platform</Text>
               <View style={styles.walletIconBox}>
-                <Ionicons name="wallet" size={22} color="#FFFFFF" />
+                <Ionicons name="wallet" size={22} color={LaundryColors.textWhite} />
               </View>
             </View>
             <Text style={styles.walletValue}>{formatMoney(totalBalance)}</Text>
@@ -520,13 +520,13 @@ export default function AdminWalletScreen() {
                       activeOpacity={0.8}
                     >
                       {processing ? (
-                        <ActivityIndicator size="small" color="#FFF" />
+                        <ActivityIndicator size="small" color={LaundryColors.textWhite} />
                       ) : (
                         <>
                           <Ionicons
                             name={processAction === "success" ? "checkmark-circle" : "close-circle"}
                             size={18}
-                            color="#FFF"
+                            color={LaundryColors.textWhite}
                           />
                           <Text style={styles.confirmBtnText}>
                             {processAction === "success" ? "Setujui" : "Tolak"}
@@ -684,7 +684,7 @@ export default function AdminWalletScreen() {
                 activeOpacity={0.8}
               >
                 {submittingWithdraw ? (
-                  <ActivityIndicator size="small" color="#FFF" />
+                  <ActivityIndicator size="small" color={LaundryColors.textWhite} />
                 ) : (
                   <Text style={styles.submitWithdrawBtnText}>Ajukan Penarikan</Text>
                 )}
@@ -760,7 +760,7 @@ function PendingWithdrawalCard({
           onPress={onReject}
           activeOpacity={0.8}
         >
-          <Ionicons name="close" size={16} color="#EF4444" />
+          <Ionicons name="close" size={16} color={LaundryColors.error} />
           <Text style={styles.rejectActionText}>Tolak</Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -768,7 +768,7 @@ function PendingWithdrawalCard({
           onPress={onApprove}
           activeOpacity={0.8}
         >
-          <Ionicons name="checkmark" size={16} color="#FFF" />
+          <Ionicons name="checkmark" size={16} color={LaundryColors.textWhite} />
           <Text style={styles.approveActionText}>Setujui</Text>
         </TouchableOpacity>
       </View>
@@ -868,7 +868,7 @@ const styles = StyleSheet.create({
 
   /* Header */
   header: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.textWhite,
     paddingTop: Platform.OS === "ios" ? 56 : 40,
     paddingBottom: 16,
     paddingHorizontal: 20,
@@ -933,7 +933,7 @@ const styles = StyleSheet.create({
     right: -30,
     width: 120,
     height: 120,
-    borderRadius: 60,
+    borderRadius: 9999,
     backgroundColor: "rgba(255,255,255,0.08)",
   },
   decoCircle2: {
@@ -942,7 +942,7 @@ const styles = StyleSheet.create({
     left: -20,
     width: 80,
     height: 80,
-    borderRadius: 40,
+    borderRadius: 9999,
     backgroundColor: "rgba(255,255,255,0.06)",
   },
   walletHeaderRow: {
@@ -964,9 +964,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   walletValue: {
-    fontSize: 34,
+    fontSize: 32,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: LaundryColors.textWhite,
     marginTop: 8,
     marginBottom: 20,
   },
@@ -987,7 +987,7 @@ const styles = StyleSheet.create({
   },
   walletMetaValue: {
     fontSize: 16,
-    color: "#FFFFFF",
+    color: LaundryColors.textWhite,
     fontWeight: "700",
     marginTop: 2,
   },
@@ -997,8 +997,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginHorizontal: 20,
     marginTop: 24,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 14,
+    backgroundColor: LaundryColors.textWhite,
+    borderRadius: 16,
     padding: 4,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
@@ -1009,7 +1009,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 10,
-    borderRadius: 10,
+    borderRadius: 12,
     gap: 6,
   },
   tabBtnActive: {
@@ -1021,11 +1021,11 @@ const styles = StyleSheet.create({
     color: LaundryColors.textSecondary,
   },
   tabBtnTextActive: {
-    color: "#FFFFFF",
+    color: LaundryColors.textWhite,
   },
   tabBadge: {
     backgroundColor: "#FEF2F2",
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 6,
     paddingVertical: 2,
     minWidth: 20,
@@ -1037,10 +1037,10 @@ const styles = StyleSheet.create({
   tabBadgeText: {
     fontSize: 10,
     fontWeight: "700",
-    color: "#EF4444",
+    color: LaundryColors.error,
   },
   tabBadgeTextActive: {
-    color: "#FFFFFF",
+    color: LaundryColors.textWhite,
   },
 
   /* Tab Content */
@@ -1062,14 +1062,14 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   emptySubtitle: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textSecondary,
     textAlign: "center",
   },
 
   /* Pending Withdrawal Card */
   pendingCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.textWhite,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -1083,7 +1083,7 @@ const styles = StyleSheet.create({
   pendingAvatarBox: {
     width: 44,
     height: 44,
-    borderRadius: 14,
+    borderRadius: 16,
     backgroundColor: "#EBF5FF",
     alignItems: "center",
     justifyContent: "center",
@@ -1094,7 +1094,7 @@ const styles = StyleSheet.create({
     paddingRight: 8,
   },
   pendingName: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: LaundryColors.textPrimary,
   },
@@ -1104,7 +1104,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   pendingDate: {
-    fontSize: 11,
+    fontSize: 12,
     color: LaundryColors.textMuted,
     marginTop: 2,
   },
@@ -1116,8 +1116,8 @@ const styles = StyleSheet.create({
   pendingCardActions: {
     flexDirection: "row",
     gap: 10,
-    marginTop: 14,
-    paddingTop: 14,
+    marginTop: 16,
+    paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: LaundryColors.inputBorder,
   },
@@ -1128,15 +1128,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 6,
     paddingVertical: 10,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1.5,
     borderColor: "#FECACA",
     backgroundColor: "#FEF2F2",
   },
   rejectActionText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "700",
-    color: "#EF4444",
+    color: LaundryColors.error,
   },
   approveActionBtn: {
     flex: 1,
@@ -1145,20 +1145,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 6,
     paddingVertical: 10,
-    borderRadius: 10,
-    backgroundColor: "#10B981",
+    borderRadius: 12,
+    backgroundColor: LaundryColors.success,
   },
   approveActionText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: LaundryColors.textWhite,
   },
 
   /* List item (transactions & withdrawal history) */
   listItemCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.textWhite,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -1168,7 +1168,7 @@ const styles = StyleSheet.create({
   listIconBox: {
     width: 44,
     height: 44,
-    borderRadius: 14,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -1178,17 +1178,17 @@ const styles = StyleSheet.create({
     paddingRight: 8,
   },
   listTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: LaundryColors.textPrimary,
   },
   listMeta: {
     fontSize: 12,
     color: LaundryColors.textSecondary,
-    marginTop: 3,
+    marginTop: 4,
   },
   listAmount: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: LaundryColors.textPrimary,
   },
@@ -1230,7 +1230,7 @@ const styles = StyleSheet.create({
 
   /* Detail box in modal */
   detailBox: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.textWhite,
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -1246,12 +1246,12 @@ const styles = StyleSheet.create({
     borderBottomColor: LaundryColors.inputBorder,
   },
   detailLabel: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textSecondary,
     fontWeight: "500",
   },
   detailValue: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textPrimary,
     fontWeight: "600",
     maxWidth: "60%",
@@ -1268,13 +1268,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   inputLabel: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textPrimary,
     fontWeight: "700",
     marginBottom: 8,
   },
   notesInput: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.textWhite,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
     borderRadius: 12,
@@ -1294,7 +1294,7 @@ const styles = StyleSheet.create({
   },
   cancelBtn: {
     flex: 1,
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderRadius: 12,
     borderWidth: 1.5,
     borderColor: LaundryColors.inputBorder,
@@ -1309,20 +1309,20 @@ const styles = StyleSheet.create({
   confirmBtn: {
     flex: 1,
     flexDirection: "row",
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderRadius: 12,
-    backgroundColor: "#10B981",
+    backgroundColor: LaundryColors.success,
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
   },
   confirmBtnReject: {
-    backgroundColor: "#EF4444",
+    backgroundColor: LaundryColors.error,
   },
   confirmBtnText: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: LaundryColors.textWhite,
   },
 
   /* Wallet Card extras */
@@ -1335,7 +1335,7 @@ const styles = StyleSheet.create({
   withdrawBtn: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.textWhite,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 99,
@@ -1351,14 +1351,14 @@ const styles = StyleSheet.create({
   withdrawAvailableBox: {
     backgroundColor: "#EBF5FF",
     padding: 16,
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: "#BFDBFE",
     marginBottom: 20,
     alignItems: "center",
   },
   withdrawAvailableLabel: {
-    fontSize: 13,
+    fontSize: 14,
     color: "#1E40AF",
     fontWeight: "600",
   },
@@ -1369,13 +1369,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   withdrawInput: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.textWhite,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 15,
+    paddingVertical: 16,
+    fontSize: 16,
     fontWeight: "600",
     color: LaundryColors.textPrimary,
   },
@@ -1394,14 +1394,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: LaundryColors.surfaceSlate,
   },
   methodTabActive: {
     borderColor: ADMIN_BLUE,
     backgroundColor: "#EBF5FF",
   },
   methodTabText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "700",
     color: LaundryColors.textSecondary,
   },
@@ -1409,7 +1409,7 @@ const styles = StyleSheet.create({
     color: ADMIN_BLUE,
   },
   methodContentBox: {
-    backgroundColor: "#F8FAFC",
+    backgroundColor: LaundryColors.surfaceSlate,
     padding: 16,
     borderRadius: 16,
     borderWidth: 1,
@@ -1425,8 +1425,8 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   submitWithdrawBtnText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: LaundryColors.textWhite,
   },
 });

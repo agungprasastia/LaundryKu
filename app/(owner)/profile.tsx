@@ -288,7 +288,7 @@ export default function OwnerProfileScreen() {
 
             <View style={{ gap: 16 }}>
               <View>
-                <Text style={{ fontSize: 13, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Alamat Outlet</Text>
+                <Text style={{ fontSize: 14, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Alamat Outlet</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="Masukkan alamat lengkap..."
@@ -300,7 +300,7 @@ export default function OwnerProfileScreen() {
 
               <View style={{ flexDirection: 'row', gap: 12 }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 13, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Latitude</Text>
+                  <Text style={{ fontSize: 14, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Latitude</Text>
                   <TextInput
                     style={styles.input}
                     placeholder="-6.200000"
@@ -310,7 +310,7 @@ export default function OwnerProfileScreen() {
                   />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 13, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Longitude</Text>
+                  <Text style={{ fontSize: 14, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Longitude</Text>
                   <TextInput
                     style={styles.input}
                     placeholder="106.816666"
@@ -327,12 +327,12 @@ export default function OwnerProfileScreen() {
                 style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingVertical: 4 }}
               >
                 <Ionicons name="location" size={16} color={LaundryColors.primary} />
-                <Text style={{ fontSize: 13, fontWeight: "600", color: LaundryColors.primary }}>
+                <Text style={{ fontSize: 14, fontWeight: "600", color: LaundryColors.primary }}>
                   {gettingLocation ? "Mengambil lokasi..." : "Ambil dari GPS Saat Ini"}
                 </Text>
               </TouchableOpacity>
               
-              <Text style={{ fontSize: 11, color: LaundryColors.textMuted }}>
+              <Text style={{ fontSize: 12, color: LaundryColors.textMuted }}>
                 * Kosongkan Latitude & Longitude jika tidak ingin diubah.
               </Text>
             </View>
@@ -383,8 +383,8 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   modalButton: {
-    paddingVertical: 14,
-    borderRadius: 14,
+    paddingVertical: 16,
+    borderRadius: 16,
     alignItems: "center",
   },
   modalButtonPrimary: {
@@ -393,13 +393,13 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: LaundryColors.textWhite,
     fontWeight: "700",
-    fontSize: 15,
+    fontSize: 16,
   },
   input: {
     backgroundColor: LaundryColors.backgroundWhite,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 16,
     fontSize: 16,
     fontWeight: "600",
@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   profileName: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "700",
     color: LaundryColors.textPrimary,
   },
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   statusPill: {
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 6,
     borderRadius: 99,
     marginTop: 12,
@@ -498,7 +498,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   detailValue: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: LaundryColors.textPrimary,
   },
@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
     borderColor: LaundryColors.errorBorder,
   },
   logoutButtonText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: LaundryColors.error,
   },
@@ -540,7 +540,7 @@ const styles = StyleSheet.create({
     borderRadius: 99,
   },
   unreadBadgeText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "700",
     color: LaundryColors.textWhite,
   },
@@ -562,7 +562,7 @@ const styles = StyleSheet.create({
   notifIconBox: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 24,
     backgroundColor: LaundryColors.surfaceGray,
     alignItems: "center",
     justifyContent: "center",
@@ -582,7 +582,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   notifTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: LaundryColors.textSecondary,
     flex: 1,
@@ -593,12 +593,12 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   notifTime: {
-    fontSize: 11,
+    fontSize: 12,
     color: LaundryColors.textMuted,
     fontWeight: "500",
   },
   notifMessage: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textSecondary,
     lineHeight: 20,
   },
@@ -607,6 +607,6 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
     backgroundColor: LaundryColors.roleMitraIcon,
-    marginTop: 18,
+    marginTop: 20,
   },
 });

@@ -143,7 +143,7 @@ export default function PenggunaScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.textWhite,
     paddingTop: Platform.OS === 'ios' ? 56 : 40,
     paddingBottom: 16,
     paddingHorizontal: 20,
@@ -176,24 +176,24 @@ const styles = StyleSheet.create({
 
   emptyContainer: { alignItems: 'center', paddingTop: 60, gap: 8 },
   emptyTitle: { fontSize: 18, fontWeight: '700', color: LaundryColors.textPrimary },
-  emptyDesc: { fontSize: 13, color: LaundryColors.textSecondary },
+  emptyDesc: { fontSize: 14, color: LaundryColors.textSecondary },
 
   userCard: {
-    backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14, marginBottom: 10,
+    backgroundColor: LaundryColors.textWhite, borderRadius: 16, padding: 16, marginBottom: 10,
     borderWidth: 1, borderColor: LaundryColors.inputBorder,
   },
   userCardRow: { flexDirection: 'row', alignItems: 'center' },
   userAvatar: {
-    width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center', marginRight: 12,
+    width: 42, height: 42, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginRight: 12,
   },
   userInfo: { flex: 1, marginRight: 8 },
   userName: { fontSize: 14, fontWeight: '700', color: LaundryColors.textPrimary },
-  userEmail: { fontSize: 11, color: LaundryColors.textSecondary, marginTop: 2 },
+  userEmail: { fontSize: 12, color: LaundryColors.textSecondary, marginTop: 2 },
   userMeta: { alignItems: 'flex-end', gap: 4 },
-  roleBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+  roleBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
   roleBadgeText: { fontSize: 10, fontWeight: '700' },
-  statusBadge: { backgroundColor: '#FFF7ED', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
-  statusBadgeText: { fontSize: 10, fontWeight: '600', color: '#F97316' },
+  statusBadge: { backgroundColor: '#FFF7ED', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+  statusBadgeText: { fontSize: 10, fontWeight: '600', color: LaundryColors.warning },
 });
 
 

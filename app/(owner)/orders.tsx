@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 16, fontWeight: "700", color: LaundryColors.textPrimary },
   customerName: { fontSize: 16, fontWeight: "700", color: LaundryColors.textPrimary, marginTop: 4 },
   serviceName: { fontSize: 14, color: LaundryColors.textSecondary, marginTop: 2 },
-  price: { fontSize: 15, fontWeight: "700", color: LaundryColors.roleMitraIcon },
+  price: { fontSize: 16, fontWeight: "700", color: LaundryColors.roleMitraIcon },
   divider: { height: 1, backgroundColor: LaundryColors.inputBorder, marginVertical: 12 },
   metaRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 12, paddingRight: 16 },
   footerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: LaundryColors.inputBorder },
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     alignSelf: "flex-start",
   },
-  badgeText: { fontSize: 11, fontWeight: "700" },
+  badgeText: { fontSize: 12, fontWeight: "700" },
   
   overlay: {
     flex: 1,
@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
     borderColor: LaundryColors.inputBorder,
   },
   infoRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 6 },
-  infoLabel: { fontSize: 13, color: LaundryColors.textSecondary, fontWeight: "600" },
+  infoLabel: { fontSize: 14, color: LaundryColors.textSecondary, fontWeight: "600" },
   infoValue: { fontSize: 14, color: LaundryColors.textPrimary, fontWeight: "700", textAlign: "right", flex: 1, marginLeft: 16 },
   
   sectionHeading: { fontSize: 16, fontWeight: "700", color: LaundryColors.textPrimary, marginTop: 20, marginBottom: 10 },
@@ -525,7 +525,7 @@ const styles = StyleSheet.create({
   timelineDot: {
     width: 12,
     height: 12,
-    borderRadius: 6,
+    borderRadius: 8,
     backgroundColor: LaundryColors.inputBorder,
     marginTop: 4,
   },
@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
     backgroundColor: LaundryColors.backgroundWhite,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 16,
     fontSize: 16,
     fontWeight: "600",

@@ -80,7 +80,7 @@ export default function AdminBerandaScreen() {
       value: metrics?.total_users?.toString() || '0',
       change: metrics?.users_change || '',
       changeSub: metrics?.users_change ? 'vs kemarin' : '',
-      color: '#2563EB',
+      color: LaundryColors.primary,
       bg: '#EBF5FF',
     },
     {
@@ -89,7 +89,7 @@ export default function AdminBerandaScreen() {
       value: metrics?.total_orders?.toString() || '0',
       change: metrics?.orders_change || '',
       changeSub: metrics?.orders_change ? 'vs kemarin' : '',
-      color: '#10B981',
+      color: LaundryColors.success,
       bg: '#ECFDF5',
     },
     {
@@ -98,7 +98,7 @@ export default function AdminBerandaScreen() {
       value: metrics?.active_couriers?.toString() || '0',
       change: metrics?.couriers_change || '',
       changeSub: metrics?.couriers_change ? 'vs kemarin' : '',
-      color: '#F97316',
+      color: LaundryColors.warning,
       bg: '#FFF7ED',
     },
     {
@@ -109,17 +109,17 @@ export default function AdminBerandaScreen() {
         : (metrics?.gmv != null ? `Rp ${Number(metrics.gmv).toLocaleString('id-ID')}` : 'Rp 0'),
       change: metrics?.revenue_change || '',
       changeSub: metrics?.revenue_change ? 'vs kemarin' : '',
-      color: '#EF4444',
+      color: LaundryColors.error,
       bg: '#FEF2F2',
     },
   ];
 
   const quickActions = [
-    { icon: 'checkmark-circle', label: 'Verifikasi\nMitra', color: '#2563EB', bg: '#EBF5FF', onPress: () => router.push('/(admin)/verifikasi') },
-    { icon: 'checkmark-circle', label: 'Verifikasi\nKurir', color: '#2563EB', bg: '#EBF5FF', onPress: () => router.push('/(admin)/verifikasi') },
-    { icon: 'people', label: 'Kelola\nPengguna', color: '#2563EB', bg: '#EBF5FF', onPress: () => router.push('/(admin)/pengguna') },
-    { icon: 'wallet', label: 'Wallet\nPlatform', color: '#2563EB', bg: '#EBF5FF', onPress: () => router.push('/(admin)/wallet') },
-    { icon: 'desktop', label: 'Laporan\nAnalytics', color: '#2563EB', bg: '#EBF5FF', onPress: () => router.push('/(admin)/laporan') },
+    { icon: 'checkmark-circle', label: 'Verifikasi\nMitra', color: LaundryColors.primary, bg: '#EBF5FF', onPress: () => router.push('/(admin)/verifikasi') },
+    { icon: 'checkmark-circle', label: 'Verifikasi\nKurir', color: LaundryColors.primary, bg: '#EBF5FF', onPress: () => router.push('/(admin)/verifikasi') },
+    { icon: 'people', label: 'Kelola\nPengguna', color: LaundryColors.primary, bg: '#EBF5FF', onPress: () => router.push('/(admin)/pengguna') },
+    { icon: 'wallet', label: 'Wallet\nPlatform', color: LaundryColors.primary, bg: '#EBF5FF', onPress: () => router.push('/(admin)/wallet') },
+    { icon: 'desktop', label: 'Laporan\nAnalytics', color: LaundryColors.primary, bg: '#EBF5FF', onPress: () => router.push('/(admin)/laporan') },
   ];
 
   const handleUnavailableFeature = () => {
@@ -127,10 +127,10 @@ export default function AdminBerandaScreen() {
   };
 
   const systemStatuses = [
-    { label: 'API', status: 'Normal', color: '#10B981' },
-    { label: 'Payment', status: 'Normal', color: '#10B981' },
-    { label: 'Maps', status: 'Normal', color: '#10B981' },
-    { label: 'Notification', status: 'Normal', color: '#10B981' },
+    { label: 'API', status: 'Normal', color: LaundryColors.success },
+    { label: 'Payment', status: 'Normal', color: LaundryColors.success },
+    { label: 'Maps', status: 'Normal', color: LaundryColors.success },
+    { label: 'Notification', status: 'Normal', color: LaundryColors.success },
   ];
 
   if (loading) {
@@ -156,7 +156,7 @@ export default function AdminBerandaScreen() {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <View style={styles.avatar}>
-              <Ionicons name="person" size={24} color="#FFFFFF" />
+              <Ionicons name="person" size={24} color={LaundryColors.textWhite} />
             </View>
             <View>
               <Text style={styles.headerGreeting}>
@@ -202,7 +202,7 @@ export default function AdminBerandaScreen() {
                 <Text style={styles.statValue}>{stat.value}</Text>
                 {stat.change ? (
                   <Text style={styles.statChange}>
-                    <Text style={{ color: '#10B981' }}>{stat.change}</Text>
+                    <Text style={{ color: LaundryColors.success }}>{stat.change}</Text>
                     {'  '}
                     <Text style={{ color: LaundryColors.textMuted }}>{stat.changeSub}</Text>
                   </Text>
@@ -291,7 +291,7 @@ export default function AdminBerandaScreen() {
               {systemStatuses.map((sys, i) => (
                 <View key={i} style={styles.systemStatusItem}>
                   <View style={[styles.systemStatusDot, { backgroundColor: sys.color }]}>
-                    <Ionicons name="checkmark" size={14} color="#FFFFFF" />
+                    <Ionicons name="checkmark" size={14} color={LaundryColors.textWhite} />
                   </View>
                   <Text style={styles.systemStatusLabel}>{sys.label}</Text>
                   <Text style={[styles.systemStatusValue, { color: sys.color }]}>{sys.status}</Text>
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   emptyText: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textSecondary,
     fontWeight: '500',
   },
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.textWhite,
     paddingTop: Platform.OS === 'ios' ? 56 : 40,
     paddingBottom: 16,
     paddingHorizontal: 20,
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
   avatar: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 24,
     backgroundColor: LaundryColors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
   notifButton: {
     width: 42,
     height: 42,
-    borderRadius: 21,
+    borderRadius: 24,
     backgroundColor: LaundryColors.background,
     alignItems: 'center',
     justifyContent: 'center',
@@ -416,9 +416,9 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#EF4444',
+    backgroundColor: LaundryColors.error,
     borderWidth: 1.5,
-    borderColor: '#FFFFFF',
+    borderColor: LaundryColors.textWhite,
   },
 
   /* Section headers */
@@ -441,12 +441,12 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   filterText: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textSecondary,
     fontWeight: '500',
   },
   linkText: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.primary,
     fontWeight: '600',
   },
@@ -462,22 +462,22 @@ const styles = StyleSheet.create({
     width: '48%',
     flexGrow: 1,
     flexBasis: '45%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.textWhite,
     borderRadius: 16,
-    padding: 14,
+    padding: 16,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
   },
   statIconWrap: {
     width: 38,
     height: 38,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
   },
   statLabel: {
-    fontSize: 11,
+    fontSize: 12,
     color: LaundryColors.textSecondary,
     fontWeight: '500',
     marginBottom: 2,
@@ -486,17 +486,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '800',
     color: LaundryColors.textPrimary,
-    marginBottom: 3,
+    marginBottom: 4,
   },
   statChange: {
-    fontSize: 9,
+    fontSize: 10,
     lineHeight: 13,
   },
 
   /* Quick Actions */
   quickActionsCard: {
     marginHorizontal: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.textWhite,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
@@ -513,7 +513,7 @@ const styles = StyleSheet.create({
   quickActionIcon: {
     width: 44,
     height: 44,
-    borderRadius: 14,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
@@ -529,7 +529,7 @@ const styles = StyleSheet.create({
   /* Pending Verifications */
   pendingCard: {
     marginHorizontal: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.textWhite,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
@@ -538,7 +538,7 @@ const styles = StyleSheet.create({
   pendingItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 14,
+    padding: 16,
   },
   pendingItemBorder: {
     borderBottomWidth: 1,
@@ -547,7 +547,7 @@ const styles = StyleSheet.create({
   pendingAvatar: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
@@ -556,12 +556,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   pendingName: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
     color: LaundryColors.textPrimary,
   },
   pendingRole: {
-    fontSize: 11,
+    fontSize: 12,
     color: LaundryColors.textSecondary,
     marginTop: 1,
   },
@@ -578,11 +578,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF7ED',
     borderRadius: 8,
     paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingVertical: 4,
   },
   pendingBadgeText: {
-    fontSize: 9,
-    color: '#F97316',
+    fontSize: 10,
+    color: LaundryColors.warning,
     fontWeight: '600',
   },
   cekButton: {
@@ -590,7 +590,7 @@ const styles = StyleSheet.create({
     borderColor: LaundryColors.primary,
     borderRadius: 8,
     paddingHorizontal: 16,
-    paddingVertical: 5,
+    paddingVertical: 4,
   },
   cekButtonText: {
     fontSize: 12,
@@ -601,7 +601,7 @@ const styles = StyleSheet.create({
   /* System Status */
   systemStatusCard: {
     marginHorizontal: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.textWhite,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
@@ -618,7 +618,7 @@ const styles = StyleSheet.create({
   systemStatusDot: {
     width: 28,
     height: 28,
-    borderRadius: 14,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -628,7 +628,7 @@ const styles = StyleSheet.create({
     color: LaundryColors.textPrimary,
   },
   systemStatusValue: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '500',
   },
 });

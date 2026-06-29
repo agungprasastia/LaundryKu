@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: '#E2E8F0',
+    borderColor: LaundryColors.divider,
     backgroundColor: LaundryColors.backgroundWhite,
     alignItems: 'center',
     justifyContent: 'center',

@@ -279,7 +279,7 @@ export default function LoginScreen() {
                 disabled={loading}
               >
                 {loading ? (
-                  <ActivityIndicator size="small" color="#FFFFFF" />
+                  <ActivityIndicator size="small" color={LaundryColors.textWhite} />
                 ) : (
                   <>
                     <Ionicons name="log-in-outline" size={22} color={LaundryColors.textWhite} />
@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
     left: -20,
     width: 80,
     height: 80,
-    borderRadius: 40,
+    borderRadius: 9999,
     backgroundColor: 'rgba(37, 99, 235, 0.04)',
   },
   headerBubble3: {
@@ -427,7 +427,7 @@ const styles = StyleSheet.create({
     color: LaundryColors.primary,
   },
   logoSubtext: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textSecondary,
     textAlign: 'center',
     marginTop: 4,
@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
   decorativeItem: {
     width: 48,
     height: 48,
-    borderRadius: 14,
+    borderRadius: 16,
     backgroundColor: 'rgba(37, 99, 235, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -463,14 +463,14 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   welcomeTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '700',
     color: LaundryColors.textPrimary,
     textAlign: 'center',
     marginBottom: 6,
   },
   welcomeSubtitle: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textSecondary,
     textAlign: 'center',
     lineHeight: 19,
@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.error,
     fontWeight: '500',
     lineHeight: 18,
@@ -511,10 +511,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: LaundryColors.inputBg,
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1.5,
     borderColor: LaundryColors.inputBorder,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     height: 52,
   },
   inputIcon: {
@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 16,
     color: LaundryColors.textPrimary,
   },
   eyeButton: {
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   forgotText: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textLink,
     fontWeight: '600',
   },
@@ -544,7 +544,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: LaundryColors.primary,
-    borderRadius: 14,
+    borderRadius: 16,
     height: 54,
     marginTop: 8,
     gap: 8,
@@ -587,14 +587,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: LaundryColors.backgroundWhite,
-    borderRadius: 14,
+    borderRadius: 16,
     height: 52,
     borderWidth: 1.5,
     borderColor: LaundryColors.googleBorder,
     gap: 10,
   },
   googleButtonText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
     color: LaundryColors.textPrimary,
   },
@@ -626,8 +626,8 @@ const styles = StyleSheet.create({
   },
   roleCard: {
     flex: 1,
-    borderRadius: 14,
-    paddingVertical: 14,
+    borderRadius: 16,
+    paddingVertical: 16,
     paddingHorizontal: 10,
     alignItems: 'center',
     borderWidth: 1,
@@ -636,7 +636,7 @@ const styles = StyleSheet.create({
   roleIconCircle: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
@@ -662,7 +662,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   termsText: {
-    fontSize: 11,
+    fontSize: 12,
     color: LaundryColors.textMuted,
     textAlign: 'center',
     lineHeight: 17,

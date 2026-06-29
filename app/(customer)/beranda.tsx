@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
   },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
   avatar: {
-    width: 44, height: 44, borderRadius: 22,
+    width: 44, height: 44, borderRadius: 24,
     backgroundColor: LaundryColors.primary,
     alignItems: 'center', justifyContent: 'center',
   },
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
   headerSub: { fontSize: 12, color: LaundryColors.textSecondary, marginTop: 1 },
 
   notifButton: {
-    width: 42, height: 42, borderRadius: 21,
+    width: 42, height: 42, borderRadius: 24,
     backgroundColor: LaundryColors.background,
     alignItems: 'center', justifyContent: 'center',
     position: 'relative',
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
     backgroundColor: LaundryColors.error, alignItems: 'center', justifyContent: 'center',
     paddingHorizontal: 4, borderWidth: 1.5, borderColor: LaundryColors.backgroundWhite,
   },
-  notifBadgeText: { fontSize: 9, fontWeight: '700', color: LaundryColors.textWhite },
+  notifBadgeText: { fontSize: 10, fontWeight: '700', color: LaundryColors.textWhite },
 
   /* Error */
   errorBanner: {
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20, marginTop: 20, marginBottom: 12,
   },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: LaundryColors.textPrimary },
-  linkText: { fontSize: 13, color: LaundryColors.primary, fontWeight: '600' },
+  linkText: { fontSize: 14, color: LaundryColors.primary, fontWeight: '600' },
 
   /* Quick Actions */
   quickActionsCard: {
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
   quickActionsRow: { flexDirection: 'row', justifyContent: 'space-around' },
   quickActionItem: { alignItems: 'center', flex: 1 },
   quickActionIcon: {
-    width: 48, height: 48, borderRadius: 14,
+    width: 48, height: 48, borderRadius: 16,
     alignItems: 'center', justifyContent: 'center', marginBottom: 6,
   },
   quickActionLabel: {
@@ -398,18 +398,18 @@ const styles = StyleSheet.create({
     padding: 24, alignItems: 'center', gap: 8,
     borderWidth: 1, borderColor: LaundryColors.inputBorder,
   },
-  emptyText: { fontSize: 13, color: LaundryColors.textSecondary, fontWeight: '500' },
+  emptyText: { fontSize: 14, color: LaundryColors.textSecondary, fontWeight: '500' },
   emptyButton: {
-    backgroundColor: LaundryColors.primary, borderRadius: 10,
+    backgroundColor: LaundryColors.primary, borderRadius: 12,
     paddingHorizontal: 20, paddingVertical: 8, marginTop: 4,
   },
-  emptyButtonText: { fontSize: 13, fontWeight: '700', color: LaundryColors.textWhite },
+  emptyButtonText: { fontSize: 14, fontWeight: '700', color: LaundryColors.textWhite },
 
   /* Service card */
   serviceCard: {
     flexDirection: 'row', alignItems: 'center',
     marginHorizontal: 20, marginBottom: 8, backgroundColor: LaundryColors.backgroundWhite,
-    borderRadius: 14, padding: 14,
+    borderRadius: 16, padding: 16,
     borderWidth: 1, borderColor: LaundryColors.inputBorder,
   },
   serviceIconWrap: {
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
   },
   serviceInfo: { flex: 1 },
   serviceName: { fontSize: 14, fontWeight: '700', color: LaundryColors.textPrimary },
-  serviceDesc: { fontSize: 11, color: LaundryColors.textSecondary, marginTop: 2 },
+  serviceDesc: { fontSize: 12, color: LaundryColors.textSecondary, marginTop: 2 },
   servicePriceWrap: { alignItems: 'flex-end' },
   servicePrice: { fontSize: 14, fontWeight: '800', color: LaundryColors.primary },
   servicePriceUnit: { fontSize: 10, color: LaundryColors.textMuted },
@@ -427,23 +427,23 @@ const styles = StyleSheet.create({
   /* Order card */
   orderCard: {
     marginHorizontal: 20, marginBottom: 8, backgroundColor: LaundryColors.backgroundWhite,
-    borderRadius: 14, padding: 14,
+    borderRadius: 16, padding: 16,
     borderWidth: 1, borderColor: LaundryColors.inputBorder,
   },
   orderCardTop: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
   },
-  orderId: { fontSize: 13, fontWeight: '700', color: LaundryColors.textPrimary },
-  orderServiceName: { fontSize: 11, color: LaundryColors.textSecondary, marginTop: 2 },
-  statusBadge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+  orderId: { fontSize: 14, fontWeight: '700', color: LaundryColors.textPrimary },
+  orderServiceName: { fontSize: 12, color: LaundryColors.textSecondary, marginTop: 2 },
+  statusBadge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
   statusBadgeText: { fontSize: 10, fontWeight: '600' },
   orderCardBottom: {
     marginTop: 10, paddingTop: 10, borderTopWidth: 1,
     borderTopColor: LaundryColors.inputBorder, gap: 4,
   },
-  orderDetailRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  orderDetailText: { fontSize: 11, color: LaundryColors.textSecondary, flex: 1 },
-  orderAmount: { fontSize: 13, fontWeight: '700', color: LaundryColors.primary },
+  orderDetailRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  orderDetailText: { fontSize: 12, color: LaundryColors.textSecondary, flex: 1 },
+  orderAmount: { fontSize: 14, fontWeight: '700', color: LaundryColors.primary },
 
   /* Extracted inline styles */
   animatedContent: {},

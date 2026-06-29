@@ -344,28 +344,28 @@ const styles = StyleSheet.create({
     alignItems: 'center', borderWidth: 1, borderColor: LaundryColors.inputBorder,
   },
   avatar: {
-    width: 72, height: 72, borderRadius: 36,
+    width: 72, height: 72, borderRadius: 9999,
     backgroundColor: LaundryColors.primary,
     alignItems: 'center', justifyContent: 'center', marginBottom: 12,
   },
   name: { fontSize: 20, fontWeight: '700', color: LaundryColors.textPrimary },
-  email: { fontSize: 13, color: LaundryColors.textSecondary, marginTop: 4 },
+  email: { fontSize: 14, color: LaundryColors.textSecondary, marginTop: 4 },
   infoBadgeRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
   roleBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: LaundryColors.rolePelangganBg,
-    paddingHorizontal: 12, paddingVertical: 5, borderRadius: 8,
+    paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8,
   },
-  roleBadgeText: { fontSize: 11, fontWeight: '700', color: LaundryColors.primary },
+  roleBadgeText: { fontSize: 12, fontWeight: '700', color: LaundryColors.primary },
 
   detailsList: {
     width: '100%', marginTop: 20, paddingTop: 16,
-    borderTopWidth: 1, borderTopColor: LaundryColors.inputBorder, gap: 14,
+    borderTopWidth: 1, borderTopColor: LaundryColors.inputBorder, gap: 16,
   },
   detailItem: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   detailContent: { flex: 1 },
   detailLabel: { fontSize: 10, color: LaundryColors.textMuted, fontWeight: '500' },
-  detailValue: { fontSize: 13, color: LaundryColors.textPrimary, fontWeight: '500', marginTop: 1 },
+  detailValue: { fontSize: 14, color: LaundryColors.textPrimary, fontWeight: '500', marginTop: 1 },
 
   /* Section */
   sectionHeader: { marginTop: 24, marginBottom: 12 },
@@ -391,10 +391,10 @@ const styles = StyleSheet.create({
     alignItems: 'center', gap: 8,
     borderWidth: 1, borderColor: LaundryColors.inputBorder,
   },
-  emptyNotifText: { fontSize: 13, color: LaundryColors.textSecondary },
+  emptyNotifText: { fontSize: 14, color: LaundryColors.textSecondary },
 
   notifCard: {
-    backgroundColor: LaundryColors.backgroundWhite, borderRadius: 14, padding: 14,
+    backgroundColor: LaundryColors.backgroundWhite, borderRadius: 16, padding: 16,
     marginBottom: 8, borderWidth: 1, borderColor: LaundryColors.inputBorder,
   },
   notifCardUnread: {
@@ -405,11 +405,11 @@ const styles = StyleSheet.create({
   notifDot: {
     width: 8, height: 8, borderRadius: 4,
     backgroundColor: LaundryColors.primary,
-    marginTop: 5,
+    marginTop: 4,
     borderWidth: 1, borderColor: LaundryColors.primary,
   },
   notifContent: { flex: 1 },
-  notifTitle: { fontSize: 13, fontWeight: '700', color: LaundryColors.textPrimary },
+  notifTitle: { fontSize: 14, fontWeight: '700', color: LaundryColors.textPrimary },
   notifMessage: { fontSize: 12, color: LaundryColors.textSecondary, marginTop: 2, lineHeight: 18 },
   notifDate: { fontSize: 10, color: LaundryColors.textMuted, marginTop: 4 },
 
@@ -417,15 +417,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end',
     gap: 4, marginTop: 8,
   },
-  markReadText: { fontSize: 11, fontWeight: '600', color: LaundryColors.primary },
+  markReadText: { fontSize: 12, fontWeight: '600', color: LaundryColors.primary },
 
   /* Logout */
   logoutButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: LaundryColors.errorBg, borderRadius: 14, height: 50, gap: 8,
+    backgroundColor: LaundryColors.errorBg, borderRadius: 16, height: 50, gap: 8,
     borderWidth: 1, borderColor: LaundryColors.errorBorder, marginTop: 24,
   },
-  logoutText: { fontSize: 15, fontWeight: '700', color: LaundryColors.error },
+  logoutText: { fontSize: 16, fontWeight: '700', color: LaundryColors.error },
 
   modalOverlay: {
     flex: 1,
@@ -454,8 +454,8 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   modalButton: {
-    paddingVertical: 14,
-    borderRadius: 14,
+    paddingVertical: 16,
+    borderRadius: 16,
     alignItems: "center",
   },
   modalButtonPrimary: {
@@ -464,13 +464,13 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: LaundryColors.textWhite,
     fontWeight: "700",
-    fontSize: 15,
+    fontSize: 16,
   },
   input: {
     backgroundColor: LaundryColors.backgroundWhite,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 16,
     fontSize: 16,
     fontWeight: "600",
@@ -485,7 +485,7 @@ const styles = StyleSheet.create({
   bottomSpacer: { height: 30 },
   formGap: { gap: 16 },
   formLabel: {
-    fontSize: 13, fontWeight: '500',
+    fontSize: 14, fontWeight: '500',
     color: LaundryColors.textSecondary, marginBottom: 6,
   },
 });

@@ -120,7 +120,7 @@ export default function VerifikasiScreen() {
         {/* Success banner */}
         {successMsg ? (
           <View style={styles.successBanner}>
-            <Ionicons name="checkmark-circle" size={18} color="#10B981" />
+            <Ionicons name="checkmark-circle" size={18} color={LaundryColors.success} />
             <Text style={styles.successText}>{successMsg}</Text>
           </View>
         ) : null}
@@ -154,7 +154,7 @@ export default function VerifikasiScreen() {
               <View style={[styles.userAvatar, {
                 backgroundColor: user.role === 'owner' ? LaundryColors.roleMitraBg : LaundryColors.roleKurirBg
               }]}>
-                <Text style={{ fontSize: 22 }}>
+                <Text style={{ fontSize: 24 }}>
                   {user.role === 'owner' ? '🏪' : '🚚'}
                 </Text>
               </View>
@@ -181,8 +181,8 @@ export default function VerifikasiScreen() {
                 </Text>
               </View>
               <View style={styles.detailRow}>
-                <Ionicons name="shield-outline" size={14} color="#F97316" />
-                <Text style={[styles.detailText, { color: '#F97316' }]}>
+                <Ionicons name="shield-outline" size={14} color={LaundryColors.warning} />
+                <Text style={[styles.detailText, { color: LaundryColors.warning }]}>
                   Menunggu Verifikasi
                 </Text>
               </View>
@@ -207,7 +207,7 @@ export default function VerifikasiScreen() {
                     onPress={() => doVerify(user.user_id)}
                     activeOpacity={0.8}
                   >
-                    <Ionicons name="checkmark-circle" size={16} color="#FFFFFF" />
+                    <Ionicons name="checkmark-circle" size={16} color={LaundryColors.textWhite} />
                     <Text style={styles.confirmVerifyText}>Ya, Verifikasi</Text>
                   </TouchableOpacity>
                 </View>
@@ -221,12 +221,12 @@ export default function VerifikasiScreen() {
               >
                 {verifyingId === user.user_id ? (
                   <>
-                    <ActivityIndicator size="small" color="#FFFFFF" />
+                    <ActivityIndicator size="small" color={LaundryColors.textWhite} />
                     <Text style={styles.verifyButtonText}>Memverifikasi...</Text>
                   </>
                 ) : (
                   <>
-                    <Ionicons name="checkmark-circle" size={18} color="#FFFFFF" />
+                    <Ionicons name="checkmark-circle" size={18} color={LaundryColors.textWhite} />
                     <Text style={styles.verifyButtonText}>Verifikasi</Text>
                   </>
                 )}
@@ -244,7 +244,7 @@ export default function VerifikasiScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.textWhite,
     paddingTop: Platform.OS === 'ios' ? 56 : 40,
     paddingBottom: 16,
     paddingHorizontal: 20,
@@ -279,18 +279,18 @@ const styles = StyleSheet.create({
   emptyIcon: {
     width: 90,
     height: 90,
-    borderRadius: 45,
+    borderRadius: 9999,
     backgroundColor: '#ECFDF5',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
   },
   emptyTitle: { fontSize: 18, fontWeight: '700', color: LaundryColors.textPrimary },
-  emptyDesc: { fontSize: 13, color: LaundryColors.textSecondary, textAlign: 'center' },
+  emptyDesc: { fontSize: 14, color: LaundryColors.textSecondary, textAlign: 'center' },
 
   // User card
   userCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.textWhite,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -310,14 +310,14 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   userInfo: { flex: 1, marginRight: 8 },
-  userName: { fontSize: 15, fontWeight: '700', color: LaundryColors.textPrimary },
+  userName: { fontSize: 16, fontWeight: '700', color: LaundryColors.textPrimary },
   userEmail: { fontSize: 12, color: LaundryColors.textSecondary, marginTop: 2 },
   roleBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
   },
-  roleBadgeText: { fontSize: 11, fontWeight: '700' },
+  roleBadgeText: { fontSize: 12, fontWeight: '700' },
   userCardDetails: {
     marginTop: 12,
     paddingTop: 12,
@@ -334,11 +334,11 @@ const styles = StyleSheet.create({
     backgroundColor: LaundryColors.success,
     borderRadius: 12,
     height: 44,
-    marginTop: 14,
+    marginTop: 16,
     gap: 6,
   },
   verifyButtonDisabled: { backgroundColor: '#86EFAC' },
-  verifyButtonText: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
+  verifyButtonText: { fontSize: 14, fontWeight: '700', color: LaundryColors.textWhite },
 
   // Success banner
   successBanner: {
@@ -352,19 +352,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#A7F3D0',
   },
-  successText: { flex: 1, fontSize: 13, color: '#059669', fontWeight: '600' },
+  successText: { flex: 1, fontSize: 14, color: LaundryColors.successDark, fontWeight: '600' },
 
   // Inline confirmation
   confirmContainer: {
-    marginTop: 14,
+    marginTop: 16,
     backgroundColor: '#FFF7ED',
     borderRadius: 12,
-    padding: 14,
+    padding: 16,
     borderWidth: 1,
     borderColor: '#FED7AA',
   },
   confirmText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
     color: '#92400E',
     textAlign: 'center',
@@ -378,22 +378,22 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F3F4F6',
-    borderRadius: 10,
+    backgroundColor: LaundryColors.surfaceGray,
+    borderRadius: 12,
     height: 40,
     borderWidth: 1,
     borderColor: '#D1D5DB',
   },
-  cancelButtonText: { fontSize: 13, fontWeight: '600', color: '#6B7280' },
+  cancelButtonText: { fontSize: 14, fontWeight: '600', color: '#6B7280' },
   confirmVerifyButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: LaundryColors.success,
-    borderRadius: 10,
+    borderRadius: 12,
     height: 40,
     gap: 4,
   },
-  confirmVerifyText: { fontSize: 13, fontWeight: '700', color: '#FFFFFF' },
+  confirmVerifyText: { fontSize: 14, fontWeight: '700', color: LaundryColors.textWhite },
 });

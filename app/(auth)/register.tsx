@@ -455,7 +455,7 @@ export default function RegisterScreen() {
                 disabled={!agreeTerms || loading}
               >
                 {loading ? (
-                  <ActivityIndicator size="small" color="#FFFFFF" />
+                  <ActivityIndicator size="small" color={LaundryColors.textWhite} />
                 ) : (
                   <>
                     <Text style={styles.registerButtonText}>Daftar</Text>
@@ -532,7 +532,7 @@ const styles = StyleSheet.create({
     left: -20,
     width: 80,
     height: 80,
-    borderRadius: 40,
+    borderRadius: 9999,
     backgroundColor: 'rgba(37, 99, 235, 0.04)',
   },
   headerBubble3: {
@@ -619,14 +619,14 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   formTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '700',
     color: LaundryColors.textPrimary,
     textAlign: 'center',
     marginBottom: 4,
   },
   formSubtitle: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textSecondary,
     textAlign: 'center',
     lineHeight: 19,
@@ -647,7 +647,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.error,
     fontWeight: '500',
     lineHeight: 18,
@@ -655,7 +655,7 @@ const styles = StyleSheet.create({
 
   // Input
   inputGroup: {
-    marginBottom: 14,
+    marginBottom: 16,
   },
   inputLabel: {
     fontSize: 14,
@@ -667,10 +667,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: LaundryColors.inputBg,
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1.5,
     borderColor: LaundryColors.inputBorder,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     height: 52,
   },
   inputIcon: {
@@ -678,7 +678,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 16,
     color: LaundryColors.textPrimary,
   },
   eyeButton: {
@@ -692,7 +692,7 @@ const styles = StyleSheet.create({
   },
   roleCard: {
     flex: 1,
-    borderRadius: 14,
+    borderRadius: 16,
     paddingVertical: 16,
     alignItems: 'center',
     borderWidth: 1.5,
@@ -707,7 +707,7 @@ const styles = StyleSheet.create({
     top: -6,
     right: -6,
     backgroundColor: LaundryColors.backgroundWhite,
-    borderRadius: 10,
+    borderRadius: 12,
     zIndex: 2,
   },
   roleCardName: {
@@ -720,14 +720,14 @@ const styles = StyleSheet.create({
   termsCheckRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 18,
+    marginBottom: 20,
     marginTop: 4,
     gap: 10,
   },
   checkbox: {
     width: 22,
     height: 22,
-    borderRadius: 6,
+    borderRadius: 8,
     borderWidth: 2,
     borderColor: LaundryColors.inputBorder,
     alignItems: 'center',
@@ -740,7 +740,7 @@ const styles = StyleSheet.create({
   },
   termsCheckText: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textSecondary,
     lineHeight: 19,
   },
@@ -755,7 +755,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: LaundryColors.primary,
-    borderRadius: 14,
+    borderRadius: 16,
     height: 54,
     gap: 8,
     shadowColor: LaundryColors.primary,
@@ -778,7 +778,7 @@ const styles = StyleSheet.create({
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 18,
+    marginVertical: 20,
   },
   dividerLine: {
     flex: 1,
@@ -797,14 +797,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: LaundryColors.backgroundWhite,
-    borderRadius: 14,
+    borderRadius: 16,
     height: 52,
     borderWidth: 1.5,
     borderColor: LaundryColors.googleBorder,
     gap: 10,
   },
   googleButtonText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
     color: LaundryColors.textPrimary,
   },
@@ -814,7 +814,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 18,
+    marginTop: 20,
     marginBottom: 8,
   },
   loginLinkText: {

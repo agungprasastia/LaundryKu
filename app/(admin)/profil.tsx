@@ -41,10 +41,10 @@ export default function ProfilScreen() {
 
   const menuItems = [
     { icon: 'person-outline', label: 'Edit Profil', color: LaundryColors.primary },
-    { icon: 'notifications-outline', label: 'Notifikasi', color: '#F97316' },
+    { icon: 'notifications-outline', label: 'Notifikasi', color: LaundryColors.warning },
     { icon: 'settings-outline', label: 'Pengaturan', color: '#8B5CF6' },
-    { icon: 'help-circle-outline', label: 'Bantuan', color: '#10B981' },
-    { icon: 'information-circle-outline', label: 'Tentang Aplikasi', color: '#64748B' },
+    { icon: 'help-circle-outline', label: 'Bantuan', color: LaundryColors.success },
+    { icon: 'information-circle-outline', label: 'Tentang Aplikasi', color: LaundryColors.textSecondary },
   ];
 
   return (
@@ -57,7 +57,7 @@ export default function ProfilScreen() {
         {/* Profile Card */}
         <View style={styles.profileCard}>
           <View style={styles.avatarLarge}>
-            <Ionicons name="person" size={36} color="#FFFFFF" />
+            <Ionicons name="person" size={36} color={LaundryColors.textWhite} />
           </View>
           <Text style={styles.profileName}>{user?.full_name || 'Admin'}</Text>
           <Text style={styles.profileEmail}>{user?.email || '-'}</Text>
@@ -103,7 +103,7 @@ export default function ProfilScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.textWhite,
     paddingTop: Platform.OS === 'ios' ? 56 : 40,
     paddingBottom: 16,
     paddingHorizontal: 20,
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
 
   // Profile card
   profileCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.textWhite,
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
@@ -124,32 +124,32 @@ const styles = StyleSheet.create({
     borderColor: LaundryColors.inputBorder,
   },
   avatarLarge: {
-    width: 72, height: 72, borderRadius: 36,
+    width: 72, height: 72, borderRadius: 9999,
     backgroundColor: LaundryColors.primary,
     alignItems: 'center', justifyContent: 'center', marginBottom: 12,
   },
   profileName: { fontSize: 18, fontWeight: '700', color: LaundryColors.textPrimary, marginBottom: 4 },
-  profileEmail: { fontSize: 13, color: LaundryColors.textSecondary, marginBottom: 10 },
+  profileEmail: { fontSize: 14, color: LaundryColors.textSecondary, marginBottom: 10 },
   roleBadge: {
     backgroundColor: LaundryColors.rolePelangganBg,
-    paddingHorizontal: 14, paddingVertical: 5, borderRadius: 8,
+    paddingHorizontal: 16, paddingVertical: 4, borderRadius: 8,
   },
   roleBadgeText: { fontSize: 12, fontWeight: '700', color: LaundryColors.primary },
 
   // Menu
   menuCard: {
-    backgroundColor: '#FFFFFF', borderRadius: 16,
+    backgroundColor: LaundryColors.textWhite, borderRadius: 16,
     borderWidth: 1, borderColor: LaundryColors.inputBorder, marginBottom: 16,
     overflow: 'hidden',
   },
   menuItem: {
-    flexDirection: 'row', alignItems: 'center', padding: 14, gap: 12,
+    flexDirection: 'row', alignItems: 'center', padding: 16, gap: 12,
   },
   menuItemBorder: {
     borderBottomWidth: 1, borderBottomColor: LaundryColors.inputBorder,
   },
   menuIcon: {
-    width: 36, height: 36, borderRadius: 10,
+    width: 36, height: 36, borderRadius: 12,
     alignItems: 'center', justifyContent: 'center',
   },
   menuLabel: { flex: 1, fontSize: 14, fontWeight: '600', color: LaundryColors.textPrimary },
@@ -157,12 +157,12 @@ const styles = StyleSheet.create({
   // Logout
   logoutButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: '#FEF2F2', borderRadius: 14, height: 50, gap: 8,
+    backgroundColor: '#FEF2F2', borderRadius: 16, height: 50, gap: 8,
     borderWidth: 1, borderColor: '#FECACA',
   },
-  logoutText: { fontSize: 15, fontWeight: '700', color: LaundryColors.error },
+  logoutText: { fontSize: 16, fontWeight: '700', color: LaundryColors.error },
 
   versionText: {
-    textAlign: 'center', fontSize: 11, color: LaundryColors.textMuted, marginTop: 16,
+    textAlign: 'center', fontSize: 12, color: LaundryColors.textMuted, marginTop: 16,
   },
 });

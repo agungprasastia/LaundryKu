@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
     color: LaundryColors.textPrimary,
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textSecondary,
     marginTop: 2,
   },
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: LaundryColors.error,
     borderWidth: 1,
-    borderColor: "#FFF",
+    borderColor: LaundryColors.textWhite,
   },
 
   body: { paddingBottom: 40 },
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   metricValueBig: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: "700",
     color: LaundryColors.textPrimary,
     marginTop: 4,
@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
   metricIconSmBg: {
     width: 32,
     height: 32,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -521,12 +521,12 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   orderIdText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: LaundryColors.textPrimary,
   },
   badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  badgeText: { fontSize: 11, fontWeight: "700" },
+  badgeText: { fontSize: 12, fontWeight: "700" },
   orderDivider: {
     height: 1,
     backgroundColor: LaundryColors.inputBorder,
@@ -552,7 +552,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   orderDate: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textSecondary,
   },
   orderFooter: {
@@ -564,7 +564,7 @@ const styles = StyleSheet.create({
     borderTopColor: LaundryColors.inputBorder,
   },
   orderPriceLabel: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textSecondary,
     fontWeight: "600",
   },

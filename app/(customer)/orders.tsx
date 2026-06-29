@@ -556,10 +556,10 @@ export default function CustomerOrdersScreen() {
                             activeOpacity={0.8}
                           >
                             {paymentLoading ? (
-                              <ActivityIndicator size="small" color="#FFFFFF" />
+                              <ActivityIndicator size="small" color={LaundryColors.textWhite} />
                             ) : (
                               <>
-                                <Ionicons name="card" size={18} color="#FFFFFF" />
+                                <Ionicons name="card" size={18} color={LaundryColors.textWhite} />
                                 <Text style={styles.actionButtonText}>Bayar Sekarang</Text>
                               </>
                             )}
@@ -575,10 +575,10 @@ export default function CustomerOrdersScreen() {
                             activeOpacity={0.8}
                           >
                             {callbackLoading ? (
-                              <ActivityIndicator size="small" color="#F97316" />
+                              <ActivityIndicator size="small" color={LaundryColors.warning} />
                             ) : (
                               <>
-                                <Ionicons name="flask" size={18} color="#F97316" />
+                                <Ionicons name="flask" size={18} color={LaundryColors.warning} />
                                 <Text style={styles.dummyButtonText}>Simulasi Payment Success</Text>
                               </>
                             )}
@@ -605,10 +605,10 @@ export default function CustomerOrdersScreen() {
                     activeOpacity={0.8}
                   >
                     {completeLoading ? (
-                      <ActivityIndicator size="small" color="#FFFFFF" />
+                      <ActivityIndicator size="small" color={LaundryColors.textWhite} />
                     ) : (
                       <>
-                        <Ionicons name="checkmark-done-circle" size={20} color="#FFFFFF" />
+                        <Ionicons name="checkmark-done-circle" size={20} color={LaundryColors.textWhite} />
                         <Text style={styles.completeButtonText}>Konfirmasi Selesai</Text>
                       </>
                     )}
@@ -654,7 +654,7 @@ const styles = StyleSheet.create({
   tabActive: {
     backgroundColor: LaundryColors.primary, borderColor: LaundryColors.primary,
   },
-  tabText: { fontSize: 13, fontWeight: '600', color: LaundryColors.textSecondary },
+  tabText: { fontSize: 14, fontWeight: '600', color: LaundryColors.textSecondary },
   tabTextActive: { color: LaundryColors.textWhite },
 
   /* Error */
@@ -669,11 +669,11 @@ const styles = StyleSheet.create({
   /* Empty */
   emptyContainer: { alignItems: 'center', paddingTop: 60, gap: 8 },
   emptyIcon: {
-    width: 90, height: 90, borderRadius: 45,
+    width: 90, height: 90, borderRadius: 9999,
     backgroundColor: LaundryColors.rolePelangganBg, alignItems: 'center', justifyContent: 'center', marginBottom: 8,
   },
   emptyTitle: { fontSize: 18, fontWeight: '700', color: LaundryColors.textPrimary },
-  emptyDesc: { fontSize: 13, color: LaundryColors.textSecondary, textAlign: 'center' },
+  emptyDesc: { fontSize: 14, color: LaundryColors.textSecondary, textAlign: 'center' },
 
   /* Order card */
   orderCard: {
@@ -684,7 +684,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
   },
   orderId: { fontSize: 14, fontWeight: '700', color: LaundryColors.textPrimary },
-  orderServiceName: { fontSize: 11, color: LaundryColors.textSecondary, marginTop: 2 },
+  orderServiceName: { fontSize: 12, color: LaundryColors.textSecondary, marginTop: 2 },
   statusBadge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
   statusBadgeText: { fontSize: 10, fontWeight: '600' },
   orderCardBottom: {
@@ -721,14 +721,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 1, borderTopColor: LaundryColors.inputBorder,
   },
   detailSectionTitle: {
-    fontSize: 15, fontWeight: '700', color: LaundryColors.textPrimary, marginBottom: 10,
+    fontSize: 16, fontWeight: '700', color: LaundryColors.textPrimary, marginBottom: 10,
   },
   detailRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingVertical: 6,
   },
   detailLabel: { fontSize: 12, color: LaundryColors.textSecondary },
-  detailValue: { fontSize: 13, fontWeight: '600', color: LaundryColors.textPrimary },
+  detailValue: { fontSize: 14, fontWeight: '600', color: LaundryColors.textPrimary },
 
   /* Action buttons */
   actionButton: {
@@ -745,19 +745,19 @@ const styles = StyleSheet.create({
     height: 46, marginTop: 8, gap: 6,
     borderWidth: 1, borderColor: '#FDBA74',
   },
-  dummyButtonText: { fontSize: 13, fontWeight: '700', color: LaundryColors.warning },
+  dummyButtonText: { fontSize: 14, fontWeight: '700', color: LaundryColors.warning },
 
   retryButton: {
     alignItems: 'center', paddingVertical: 10,
   },
-  retryButtonText: { fontSize: 13, fontWeight: '700', color: LaundryColors.primary },
+  retryButtonText: { fontSize: 14, fontWeight: '700', color: LaundryColors.primary },
 
   completeButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: LaundryColors.success, borderRadius: 14,
+    backgroundColor: LaundryColors.success, borderRadius: 16,
     height: 50, marginTop: 20, gap: 8,
   },
-  completeButtonText: { fontSize: 15, fontWeight: '700', color: LaundryColors.textWhite },
+  completeButtonText: { fontSize: 16, fontWeight: '700', color: LaundryColors.textWhite },
 });
 
 

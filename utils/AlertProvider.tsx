@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     padding: 40,
   },
   dialogCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.textWhite,
     borderRadius: 18,
     paddingTop: 24,
     paddingHorizontal: 24,
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     backgroundColor: LaundryColors.primary,
   },
   dialogButtonCancel: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: LaundryColors.surfaceGray,
     borderWidth: 1,
     borderColor: '#E5E7EB',
   },

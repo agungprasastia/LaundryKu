@@ -92,7 +92,7 @@ export default function LaporanScreen() {
             {/* GMV Card */}
             <View style={styles.highlightCard}>
               <View style={styles.highlightIconWrap}>
-                <Ionicons name="trending-up" size={28} color="#FFFFFF" />
+                <Ionicons name="trending-up" size={28} color={LaundryColors.textWhite} />
               </View>
               <Text style={styles.highlightLabel}>Gross Merchandise Value (GMV)</Text>
               <Text style={styles.highlightValue}>
@@ -104,7 +104,7 @@ export default function LaporanScreen() {
             <View style={styles.statsGrid}>
               <View style={styles.statCard}>
                 <View style={[styles.statIcon, { backgroundColor: '#ECFDF5' }]}>
-                  <Ionicons name="cube" size={20} color="#10B981" />
+                  <Ionicons name="cube" size={20} color={LaundryColors.success} />
                 </View>
                 <Text style={styles.statLabel}>Total Order</Text>
                 <Text style={styles.statValue}>
@@ -114,7 +114,7 @@ export default function LaporanScreen() {
 
               <View style={styles.statCard}>
                 <View style={[styles.statIcon, { backgroundColor: '#EBF5FF' }]}>
-                  <Ionicons name="cash" size={20} color="#2563EB" />
+                  <Ionicons name="cash" size={20} color={LaundryColors.primary} />
                 </View>
                 <Text style={styles.statLabel}>Total Komisi</Text>
                 <Text style={styles.statValue}>
@@ -124,7 +124,7 @@ export default function LaporanScreen() {
 
               <View style={styles.statCard}>
                 <View style={[styles.statIcon, { backgroundColor: '#FFF7ED' }]}>
-                  <Ionicons name="people" size={20} color="#F97316" />
+                  <Ionicons name="people" size={20} color={LaundryColors.warning} />
                 </View>
                 <Text style={styles.statLabel}>Total User</Text>
                 <Text style={styles.statValue}>
@@ -185,7 +185,7 @@ export default function LaporanScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.textWhite,
     paddingTop: Platform.OS === 'ios' ? 56 : 40,
     paddingBottom: 16,
     paddingHorizontal: 20,
@@ -214,12 +214,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   highlightIconWrap: {
-    width: 50, height: 50, borderRadius: 25,
+    width: 50, height: 50, borderRadius: 24,
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center', justifyContent: 'center', marginBottom: 10,
   },
-  highlightLabel: { fontSize: 13, color: 'rgba(255,255,255,0.8)', fontWeight: '500', marginBottom: 4 },
-  highlightValue: { fontSize: 26, fontWeight: '800', color: '#FFFFFF' },
+  highlightLabel: { fontSize: 14, color: 'rgba(255,255,255,0.8)', fontWeight: '500', marginBottom: 4 },
+  highlightValue: { fontSize: 24, fontWeight: '800', color: LaundryColors.textWhite },
 
   // Stats grid
   statsGrid: {
@@ -227,31 +227,31 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flexGrow: 1, flexBasis: '45%',
-    backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14,
+    backgroundColor: LaundryColors.textWhite, borderRadius: 16, padding: 16,
     borderWidth: 1, borderColor: LaundryColors.inputBorder,
   },
   statIcon: {
-    width: 36, height: 36, borderRadius: 10,
+    width: 36, height: 36, borderRadius: 12,
     alignItems: 'center', justifyContent: 'center', marginBottom: 8,
   },
-  statLabel: { fontSize: 11, color: LaundryColors.textSecondary, fontWeight: '500', marginBottom: 2 },
+  statLabel: { fontSize: 12, color: LaundryColors.textSecondary, fontWeight: '500', marginBottom: 2 },
   statValue: { fontSize: 18, fontWeight: '800', color: LaundryColors.textPrimary },
 
   // Additional
   additionalCard: {
-    backgroundColor: '#FFFFFF', borderRadius: 14, padding: 16,
+    backgroundColor: LaundryColors.textWhite, borderRadius: 16, padding: 16,
     borderWidth: 1, borderColor: LaundryColors.inputBorder,
   },
-  additionalTitle: { fontSize: 15, fontWeight: '700', color: LaundryColors.textPrimary, marginBottom: 12 },
+  additionalTitle: { fontSize: 16, fontWeight: '700', color: LaundryColors.textPrimary, marginBottom: 12 },
   additionalRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: LaundryColors.inputBorder,
   },
-  additionalLabel: { fontSize: 13, color: LaundryColors.textSecondary },
+  additionalLabel: { fontSize: 14, color: LaundryColors.textSecondary },
   additionalValue: { fontSize: 14, fontWeight: '700', color: LaundryColors.textPrimary },
 
   // Empty
   emptyContainer: { alignItems: 'center', paddingTop: 60, gap: 8 },
   emptyTitle: { fontSize: 18, fontWeight: '700', color: LaundryColors.textPrimary },
-  emptyDesc: { fontSize: 13, color: LaundryColors.textSecondary },
+  emptyDesc: { fontSize: 14, color: LaundryColors.textSecondary },
 });

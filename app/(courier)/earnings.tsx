@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   totalCardValue: {
-    fontSize: 34,
+    fontSize: 32,
     fontWeight: "700",
     color: LaundryColors.textWhite,
     marginTop: 8,
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   statIconBox: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 12,
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
   historyIconBox: {
     width: 44,
     height: 44,
-    borderRadius: 14,
+    borderRadius: 16,
     backgroundColor: LaundryColors.surfaceSlate,
     alignItems: "center",
     justifyContent: "center",
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   historyTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: LaundryColors.textPrimary,
   },

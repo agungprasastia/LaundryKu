@@ -379,7 +379,7 @@ export default function CustomerServicesScreen() {
                 onPress={() => handleOrderPress(svc)}
                 activeOpacity={0.7}
               >
-                <Ionicons name="cart" size={16} color="#FFFFFF" />
+                <Ionicons name="cart" size={16} color={LaundryColors.textWhite} />
                 <Text style={styles.orderButtonText}>Pesan Sekarang</Text>
               </TouchableOpacity>
             </View>
@@ -427,7 +427,7 @@ export default function CustomerServicesScreen() {
                   onPress={() => handleOrderPress(selectedService)}
                   activeOpacity={0.8}
                 >
-                  <Ionicons name="cart" size={20} color="#FFFFFF" />
+                  <Ionicons name="cart" size={20} color={LaundryColors.textWhite} />
                   <Text style={styles.modalOrderButtonText}>Pesan Layanan Ini</Text>
                 </TouchableOpacity>
               </ScrollView>
@@ -483,7 +483,7 @@ export default function CustomerServicesScreen() {
                 {locationStatus === 'loading' ? (
                   <ActivityIndicator size="small" color={LaundryColors.primary} />
                 ) : locationStatus === 'success' ? (
-                  <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+                  <Ionicons name="checkmark-circle" size={20} color={LaundryColors.success} />
                 ) : (
                   <Ionicons name="location" size={20} color={LaundryColors.primary} />
                 )}
@@ -522,7 +522,7 @@ export default function CustomerServicesScreen() {
                       onPress={() => setShowManualCoords(true)}
                       activeOpacity={0.7}
                     >
-                      <Ionicons name="code-slash" size={14} color="#9CA3AF" />
+                      <Ionicons name="code-slash" size={14} color={LaundryColors.textMuted} />
                       <Text style={styles.devToggleText}>Input Koordinat Manual (Development)</Text>
                     </TouchableOpacity>
                   ) : (
@@ -530,7 +530,7 @@ export default function CustomerServicesScreen() {
                       <View style={styles.devManualHeader}>
                         <Text style={styles.devManualTitle}>🛠 Manual Coordinates</Text>
                         <TouchableOpacity onPress={() => setShowManualCoords(false)}>
-                          <Ionicons name="close" size={18} color="#9CA3AF" />
+                          <Ionicons name="close" size={18} color={LaundryColors.textMuted} />
                         </TouchableOpacity>
                       </View>
                       <View style={styles.inputRow}>
@@ -622,10 +622,10 @@ export default function CustomerServicesScreen() {
                 activeOpacity={0.8}
               >
                 {submitting ? (
-                  <ActivityIndicator size="small" color="#FFFFFF" />
+                  <ActivityIndicator size="small" color={LaundryColors.textWhite} />
                 ) : (
                   <>
-                    <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
+                    <Ionicons name="checkmark-circle" size={20} color={LaundryColors.textWhite} />
                     <Text style={styles.submitButtonText}>Buat Pesanan</Text>
                   </>
                 )}
@@ -667,11 +667,11 @@ const styles = StyleSheet.create({
   /* Empty */
   emptyContainer: { alignItems: 'center', paddingTop: 60, gap: 8 },
   emptyIcon: {
-    width: 90, height: 90, borderRadius: 45,
+    width: 90, height: 90, borderRadius: 9999,
     backgroundColor: LaundryColors.rolePelangganBg, alignItems: 'center', justifyContent: 'center', marginBottom: 8,
   },
   emptyTitle: { fontSize: 18, fontWeight: '700', color: LaundryColors.textPrimary },
-  emptyDesc: { fontSize: 13, color: LaundryColors.textSecondary, textAlign: 'center' },
+  emptyDesc: { fontSize: 14, color: LaundryColors.textSecondary, textAlign: 'center' },
 
   /* Service card */
   serviceCard: {
@@ -680,14 +680,14 @@ const styles = StyleSheet.create({
   },
   serviceCardHeader: { flexDirection: 'row', alignItems: 'center' },
   serviceIconWrap: {
-    width: 44, height: 44, borderRadius: 14,
+    width: 44, height: 44, borderRadius: 16,
     backgroundColor: LaundryColors.rolePelangganBg, alignItems: 'center', justifyContent: 'center', marginRight: 12,
   },
   serviceMainInfo: { flex: 1 },
-  serviceName: { fontSize: 15, fontWeight: '700', color: LaundryColors.textPrimary },
+  serviceName: { fontSize: 16, fontWeight: '700', color: LaundryColors.textPrimary },
   serviceId: { fontSize: 10, color: LaundryColors.textMuted, marginTop: 2 },
   servicePriceTag: { alignItems: 'flex-end' },
-  servicePrice: { fontSize: 15, fontWeight: '800', color: LaundryColors.primary },
+  servicePrice: { fontSize: 16, fontWeight: '800', color: LaundryColors.primary },
   servicePriceUnit: { fontSize: 10, color: LaundryColors.textMuted },
   serviceDesc: {
     fontSize: 12, color: LaundryColors.textSecondary,
@@ -702,13 +702,13 @@ const styles = StyleSheet.create({
   detailButton: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     borderWidth: 1.5, borderColor: LaundryColors.primary,
-    borderRadius: 10, paddingHorizontal: 14, paddingVertical: 8,
+    borderRadius: 12, paddingHorizontal: 16, paddingVertical: 8,
   },
   detailButtonText: { fontSize: 12, fontWeight: '700', color: LaundryColors.primary },
   orderButton: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: LaundryColors.primary,
-    borderRadius: 10, paddingHorizontal: 14, paddingVertical: 8,
+    borderRadius: 12, paddingHorizontal: 16, paddingVertical: 8,
   },
   orderButtonText: { fontSize: 12, fontWeight: '700', color: LaundryColors.textWhite },
 
@@ -735,20 +735,20 @@ const styles = StyleSheet.create({
     alignSelf: 'center', marginBottom: 12,
   },
   detailName: { fontSize: 20, fontWeight: '700', color: LaundryColors.textPrimary, textAlign: 'center' },
-  detailId: { fontSize: 11, color: LaundryColors.textMuted, textAlign: 'center', marginTop: 4 },
+  detailId: { fontSize: 12, color: LaundryColors.textMuted, textAlign: 'center', marginTop: 4 },
   detailSection: {
     marginTop: 16, paddingTop: 16,
     borderTopWidth: 1, borderTopColor: LaundryColors.inputBorder,
   },
   detailLabel: { fontSize: 12, fontWeight: '600', color: LaundryColors.textSecondary, marginBottom: 4 },
   detailValue: { fontSize: 14, color: LaundryColors.textPrimary, lineHeight: 20 },
-  detailPriceValue: { fontSize: 22, fontWeight: '800', color: LaundryColors.primary },
+  detailPriceValue: { fontSize: 24, fontWeight: '800', color: LaundryColors.primary },
   modalOrderButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: LaundryColors.primary, borderRadius: 14,
+    backgroundColor: LaundryColors.primary, borderRadius: 16,
     height: 50, marginTop: 24, gap: 8,
   },
-  modalOrderButtonText: { fontSize: 15, fontWeight: '700', color: LaundryColors.textWhite },
+  modalOrderButtonText: { fontSize: 16, fontWeight: '700', color: LaundryColors.textWhite },
 
   /* Order form */
   orderFormServiceInfo: {
@@ -758,13 +758,13 @@ const styles = StyleSheet.create({
   orderFormServiceName: { fontSize: 14, fontWeight: '700', color: LaundryColors.primary },
 
   inputLabel: {
-    fontSize: 13, fontWeight: '600', color: LaundryColors.textPrimary,
+    fontSize: 14, fontWeight: '600', color: LaundryColors.textPrimary,
     marginBottom: 6, marginTop: 12,
   },
   input: {
     backgroundColor: LaundryColors.inputBg,
     borderWidth: 1, borderColor: LaundryColors.inputBorder,
-    borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12,
+    borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12,
     fontSize: 14, color: LaundryColors.textPrimary,
   },
   inputRow: { flexDirection: 'row', gap: 12 },
@@ -777,7 +777,7 @@ const styles = StyleSheet.create({
   locationButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 10, borderWidth: 1.5, borderColor: LaundryColors.primary,
-    borderRadius: 12, paddingVertical: 14, borderStyle: 'dashed',
+    borderRadius: 12, paddingVertical: 16, borderStyle: 'dashed',
     backgroundColor: '#F0F7FF',
   },
   locationButtonSuccess: {
@@ -793,7 +793,7 @@ const styles = StyleSheet.create({
     color: LaundryColors.success,
   },
   locationCoords: {
-    fontSize: 11, color: LaundryColors.textMuted, textAlign: 'center',
+    fontSize: 12, color: LaundryColors.textMuted, textAlign: 'center',
     marginTop: 6, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
   locationErrorText: {
@@ -809,10 +809,10 @@ const styles = StyleSheet.create({
     gap: 6, paddingVertical: 8,
   },
   devToggleText: {
-    fontSize: 11, color: LaundryColors.textMuted, fontStyle: 'italic',
+    fontSize: 12, color: LaundryColors.textMuted, fontStyle: 'italic',
   },
   devManualBox: {
-    backgroundColor: LaundryColors.roleKurirBg, borderRadius: 10, padding: 12,
+    backgroundColor: LaundryColors.roleKurirBg, borderRadius: 12, padding: 12,
     borderWidth: 1, borderColor: '#FDE68A',
   },
   devManualHeader: {
@@ -823,12 +823,12 @@ const styles = StyleSheet.create({
     fontSize: 12, fontWeight: '600', color: LaundryColors.amberDark,
   },
   devLabel: {
-    fontSize: 11, fontWeight: '600', color: LaundryColors.amberDark, marginBottom: 4,
+    fontSize: 12, fontWeight: '600', color: LaundryColors.amberDark, marginBottom: 4,
   },
   devInput: {
     backgroundColor: LaundryColors.backgroundWhite, borderWidth: 1, borderColor: '#FDE68A',
     borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8,
-    fontSize: 13, color: LaundryColors.amberDark,
+    fontSize: 14, color: LaundryColors.amberDark,
   },
   devApplyButton: {
     backgroundColor: LaundryColors.amber, borderRadius: 8,
@@ -840,9 +840,9 @@ const styles = StyleSheet.create({
 
   submitButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: LaundryColors.primary, borderRadius: 14,
+    backgroundColor: LaundryColors.primary, borderRadius: 16,
     height: 50, marginTop: 20, marginBottom: 20, gap: 8,
   },
   submitButtonDisabled: { backgroundColor: LaundryColors.primaryLight },
-  submitButtonText: { fontSize: 15, fontWeight: '700', color: LaundryColors.textWhite },
+  submitButtonText: { fontSize: 16, fontWeight: '700', color: LaundryColors.textWhite },
 });

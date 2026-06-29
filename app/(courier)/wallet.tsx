@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
   },
   walletLabel: { fontSize: 14, color: LaundryColors.walletCourierLightText, fontWeight: "600" },
   walletValue: {
-    fontSize: 34,
+    fontSize: 32,
     fontWeight: "700",
     color: LaundryColors.textWhite,
     marginTop: 8,
@@ -484,13 +484,13 @@ const styles = StyleSheet.create({
   listIconBox: {
     width: 44,
     height: 44,
-    borderRadius: 14,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
   },
   listContentBox: { flex: 1, paddingRight: 8 },
-  listTitle: { fontSize: 15, fontWeight: "700", color: LaundryColors.textPrimary },
+  listTitle: { fontSize: 16, fontWeight: "700", color: LaundryColors.textPrimary },
   listMeta: { fontSize: 12, color: LaundryColors.textSecondary, marginTop: 4 },
   listAmount: { fontSize: 16, fontWeight: "700" },
   statusPill: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, marginTop: 6 },
@@ -523,13 +523,13 @@ const styles = StyleSheet.create({
   withdrawAvailableBox: {
     backgroundColor: LaundryColors.roleKurirBg,
     padding: 16,
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: "#FFEDD5",
     marginBottom: 20,
     alignItems: "center",
   },
-  withdrawAvailableLabel: { fontSize: 13, color: LaundryColors.walletCourierDarkLabel, fontWeight: "600" },
+  withdrawAvailableLabel: { fontSize: 14, color: LaundryColors.walletCourierDarkLabel, fontWeight: "600" },
   withdrawAvailableValue: { fontSize: 24, color: LaundryColors.walletCourierDarkValue, fontWeight: "700", marginTop: 4 },
 
   methodTabsRow: { flexDirection: "row", gap: 12, marginBottom: 16 },
@@ -549,7 +549,7 @@ const styles = StyleSheet.create({
     borderColor: LaundryColors.roleKurirIcon,
     backgroundColor: LaundryColors.roleKurirBg,
   },
-  methodTabText: { fontSize: 13, fontWeight: "700", color: LaundryColors.textSecondary },
+  methodTabText: { fontSize: 14, fontWeight: "700", color: LaundryColors.textSecondary },
   methodTabTextActive: { color: LaundryColors.roleKurirIcon },
   
   methodContentBox: {
@@ -563,7 +563,7 @@ const styles = StyleSheet.create({
 
   inputGroup: { marginBottom: 16 },
   inputLabel: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textPrimary,
     fontWeight: "700",
     marginBottom: 8,
@@ -574,8 +574,8 @@ const styles = StyleSheet.create({
     borderColor: LaundryColors.inputBorder,
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 15,
+    paddingVertical: 16,
+    fontSize: 16,
     fontWeight: "600",
     color: LaundryColors.textPrimary,
   },

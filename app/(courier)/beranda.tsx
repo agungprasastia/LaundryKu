@@ -206,7 +206,7 @@ export default function CourierBerandaScreen() {
           <View style={styles.headerRow}>
             <View style={styles.userInfo}>
               <View style={styles.avatar}>
-                <Ionicons name="bicycle" size={24} color="#FFF" />
+                <Ionicons name="bicycle" size={24} color={LaundryColors.textWhite} />
               </View>
               <View>
                 <Text style={styles.greeting}>Halo, {user?.full_name || "Kurir"} 👋</Text>
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
     color: LaundryColors.textPrimary,
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textSecondary,
     marginTop: 2,
   },
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   metricValueBig: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: "700",
     color: LaundryColors.textPrimary,
     marginTop: 4,
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
   metricIconSmBg: {
     width: 32,
     height: 32,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -567,12 +567,12 @@ const styles = StyleSheet.create({
   },
   taskIdText: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: LaundryColors.textPrimary,
   },
   badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  badgeText: { fontSize: 11, fontWeight: "700" },
+  badgeText: { fontSize: 12, fontWeight: "700" },
   taskDivider: {
     height: 1,
     backgroundColor: LaundryColors.inputBorder,
@@ -599,7 +599,7 @@ const styles = StyleSheet.create({
   },
   taskAddress: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textSecondary,
     lineHeight: 18,
   },

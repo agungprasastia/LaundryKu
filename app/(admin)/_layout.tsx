@@ -13,7 +13,7 @@ export default function AdminLayout() {
           tabBarActiveTintColor: LaundryColors.primary,
           tabBarInactiveTintColor: LaundryColors.textMuted,
           tabBarStyle: {
-            backgroundColor: '#FFFFFF',
+            backgroundColor: LaundryColors.textWhite,
             borderTopWidth: 1,
             borderTopColor: LaundryColors.inputBorder,
             height: 65,
@@ -21,7 +21,7 @@ export default function AdminLayout() {
             paddingTop: 6,
           },
           tabBarLabelStyle: {
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: '600',
           },
         }}

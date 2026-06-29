@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   tabButtonText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "700",
     color: LaundryColors.textSecondary,
   },
@@ -556,17 +556,17 @@ const styles = StyleSheet.create({
   typeIconBox: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
   },
   taskTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: LaundryColors.textPrimary,
   },
   taskSubtitle: {
-    fontSize: 11,
+    fontSize: 12,
     color: LaundryColors.textSecondary,
     marginTop: 2,
     fontWeight: "500",
@@ -583,7 +583,7 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textPrimary,
     fontWeight: "500",
     lineHeight: 18,
@@ -599,7 +599,7 @@ const styles = StyleSheet.create({
     borderTopColor: LaundryColors.inputBorder,
   },
   taskDateText: {
-    fontSize: 11,
+    fontSize: 12,
     color: LaundryColors.textMuted,
     fontWeight: "500",
   },
@@ -686,7 +686,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   detailValue: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textPrimary,
     fontWeight: "700",
     flex: 1,
@@ -716,7 +716,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   locationBtnText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "700",
     color: LaundryColors.roleKurirIcon,
   },
@@ -752,7 +752,7 @@ const styles = StyleSheet.create({
     borderColor: LaundryColors.inputBorder,
   },
   noActionText: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textSecondary,
     fontWeight: "600",
   },

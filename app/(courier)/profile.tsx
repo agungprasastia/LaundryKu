@@ -252,7 +252,7 @@ export default function CourierProfileScreen() {
 
             <View style={{ gap: 16 }}>
               <View>
-                <Text style={{ fontSize: 13, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Kendaraan (Cth: Honda Beat)</Text>
+                <Text style={{ fontSize: 14, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Kendaraan (Cth: Honda Beat)</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="Masukkan tipe kendaraan..."
@@ -261,7 +261,7 @@ export default function CourierProfileScreen() {
                 />
               </View>
               <View>
-                <Text style={{ fontSize: 13, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Plat Nomor</Text>
+                <Text style={{ fontSize: 14, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Plat Nomor</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="Masukkan plat nomor..."
@@ -270,7 +270,7 @@ export default function CourierProfileScreen() {
                 />
               </View>
               <View>
-                <Text style={{ fontSize: 13, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Alamat Rumah</Text>
+                <Text style={{ fontSize: 14, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Alamat Rumah</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="Masukkan alamat lengkap..."
@@ -327,8 +327,8 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   modalButton: {
-    paddingVertical: 14,
-    borderRadius: 14,
+    paddingVertical: 16,
+    borderRadius: 16,
     alignItems: "center",
   },
   modalButtonPrimary: {
@@ -337,13 +337,13 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: LaundryColors.textWhite,
     fontWeight: "700",
-    fontSize: 15,
+    fontSize: 16,
   },
   input: {
     backgroundColor: LaundryColors.backgroundWhite,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 16,
     fontSize: 16,
     fontWeight: "600",
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 4,
-    borderColor: "#F8FAFC",
+    borderColor: LaundryColors.surfaceSlate,
   },
   verifiedBadgeIcon: {
     position: "absolute",
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   profileName: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "700",
     color: LaundryColors.textPrimary,
   },
@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   statusPill: {
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 6,
     borderRadius: 99,
     marginTop: 12,
@@ -442,7 +442,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   detailValue: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: LaundryColors.textPrimary,
   },
@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
     borderColor: LaundryColors.errorBorder,
   },
   logoutButtonText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: LaundryColors.error,
   },
@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
     borderRadius: 99,
   },
   unreadBadgeText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "700",
     color: LaundryColors.textWhite,
   },
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
   notifIconBox: {
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 24,
     backgroundColor: LaundryColors.surfaceGray,
     alignItems: "center",
     justifyContent: "center",
@@ -526,7 +526,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   notifTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     color: LaundryColors.textSecondary,
     flex: 1,
@@ -537,12 +537,12 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   notifTime: {
-    fontSize: 11,
+    fontSize: 12,
     color: LaundryColors.textMuted,
     fontWeight: "500",
   },
   notifMessage: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textSecondary,
     lineHeight: 20,
   },
@@ -551,6 +551,6 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
     backgroundColor: LaundryColors.roleKurirIcon,
-    marginTop: 18,
+    marginTop: 20,
   },
 });

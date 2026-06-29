@@ -277,9 +277,9 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 6,
   },
-  logoText: { fontSize: 26, fontWeight: '800', color: LaundryColors.textPrimary, letterSpacing: -0.5 },
+  logoText: { fontSize: 24, fontWeight: '800', color: LaundryColors.textPrimary, letterSpacing: -0.5 },
   logoAccent: { color: LaundryColors.primary },
-  logoSub: { fontSize: 13, color: LaundryColors.textSecondary, marginTop: 2 },
+  logoSub: { fontSize: 14, color: LaundryColors.textSecondary, marginTop: 2 },
 
   /* Illustration */
   illustrationArea: {
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
   illustTruck: {
     width: 60,
     height: 50,
-    borderRadius: 14,
+    borderRadius: 16,
     backgroundColor: 'rgba(37, 99, 235, 0.06)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -406,7 +406,7 @@ const styles = StyleSheet.create({
   },
   welcomeTitleAccent: { color: LaundryColors.primary },
   welcomeDesc: {
-    fontSize: 13,
+    fontSize: 14,
     color: LaundryColors.textSecondary,
     textAlign: 'center',
     lineHeight: 20,
@@ -432,13 +432,13 @@ const styles = StyleSheet.create({
   featureIconWrap: {
     width: 46,
     height: 46,
-    borderRadius: 14,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,
   },
   featureTitle: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     color: LaundryColors.textPrimary,
     textAlign: 'center',
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: LaundryColors.primary,
-    borderRadius: 14,
+    borderRadius: 16,
     height: 54,
     gap: 8,
     shadowColor: LaundryColors.primary,
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: LaundryColors.backgroundWhite,
-    borderRadius: 14,
+    borderRadius: 16,
     height: 54,
     gap: 8,
     borderWidth: 1.5,

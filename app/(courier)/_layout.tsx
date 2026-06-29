@@ -13,14 +13,14 @@ export default function CourierLayout() {
           tabBarActiveTintColor: LaundryColors.roleKurirIcon,
           tabBarInactiveTintColor: LaundryColors.textMuted,
           tabBarStyle: {
-            backgroundColor: "#FFFFFF",
+            backgroundColor: LaundryColors.textWhite,
             borderTopWidth: 1,
             borderTopColor: LaundryColors.inputBorder,
             height: 65,
             paddingBottom: 8,
             paddingTop: 6,
           },
-          tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
+          tabBarLabelStyle: { fontSize: 12, fontWeight: "600" },
         }}
       >
         <Tabs.Screen
