@@ -191,7 +191,7 @@ export default function CustomerServicesScreen() {
     setShowManualCoords(false);
   };
 
-  const onDateChange = (event: any, selectedDate?: Date) => {
+  const onDateChange = (_event: unknown, selectedDate?: Date) => {
     setShowDatePicker(false);
     if (selectedDate) {
       setPickupDate(selectedDate);
@@ -205,7 +205,7 @@ export default function CustomerServicesScreen() {
     }
   };
 
-  const onWebDateChange = (e: any) => {
+  const onWebDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     if (val) {
       const parsed = new Date(val);

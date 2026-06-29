@@ -1,4 +1,4 @@
-import React, { useState, useCallback, createContext, useContext, useEffect } from 'react';
+import React, { useState, useCallback, createContext, useEffect } from 'react';
 import {
   View,
   Text,
@@ -212,6 +212,6 @@ const styles = StyleSheet.create({
     color: LaundryColors.error,
   },
   dialogButtonTextPrimary: {
-    color: '#FFFFFF',
+    color: LaundryColors.textWhite,
   },
 });

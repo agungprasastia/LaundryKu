@@ -31,7 +31,7 @@ let SecureStore: typeof import('expo-secure-store') | null = null;
 if (!isWeb) {
   try {
     SecureStore = require('expo-secure-store');
-  } catch (e) {
+  } catch {
     console.warn('expo-secure-store not available');
   }
 }

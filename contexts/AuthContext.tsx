@@ -67,7 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await clearSession();
         }
       }
-    } catch (error) {
+    } catch {
       // Token expired or invalid
       await clearSession();
     } finally {
