@@ -270,8 +270,8 @@ function WithdrawalCard({ item }: { item: Withdrawal }) {
 
   return (
     <View style={styles.listItemCard}>
-      <View style={[styles.listIconBox, { backgroundColor: "#FFF7ED" }]}>
-        <Ionicons name="card" size={18} color="#F97316" />
+      <View style={[styles.listIconBox, { backgroundColor: LaundryColors.roleKurirBg }]}>
+        <Ionicons name="card" size={18} color={LaundryColors.warning} />
       </View>
       <View style={styles.listContentBox}>
         <Text style={styles.listTitle} numberOfLines={1}>
@@ -444,11 +444,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  walletLabel: { fontSize: 14, color: "#FFEDD5", fontWeight: "600" },
+  walletLabel: { fontSize: 14, color: LaundryColors.walletCourierLightText, fontWeight: "600" },
   walletValue: {
     fontSize: 34,
     fontWeight: "700",
-    color: "#FFF",
+    color: LaundryColors.textWhite,
     marginTop: 8,
     marginBottom: 20,
   },
@@ -459,11 +459,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   walletMetaLabel: { fontSize: 12, color: "rgba(255,255,255,0.7)", fontWeight: "500" },
-  walletMetaValue: { fontSize: 16, color: "#FFF", fontWeight: "700" },
+  walletMetaValue: { fontSize: 16, color: LaundryColors.textWhite, fontWeight: "700" },
   withdrawBtn: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 99,
@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
   listItemCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
   },
   
   withdrawAvailableBox: {
-    backgroundColor: "#FFF7ED",
+    backgroundColor: LaundryColors.roleKurirBg,
     padding: 16,
     borderRadius: 14,
     borderWidth: 1,
@@ -529,8 +529,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     alignItems: "center",
   },
-  withdrawAvailableLabel: { fontSize: 13, color: "#9A3412", fontWeight: "600" },
-  withdrawAvailableValue: { fontSize: 24, color: "#7C2D12", fontWeight: "700", marginTop: 4 },
+  withdrawAvailableLabel: { fontSize: 13, color: LaundryColors.walletCourierDarkLabel, fontWeight: "600" },
+  withdrawAvailableValue: { fontSize: 24, color: LaundryColors.walletCourierDarkValue, fontWeight: "700", marginTop: 4 },
 
   methodTabsRow: { flexDirection: "row", gap: 12, marginBottom: 16 },
   methodTab: {
@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: LaundryColors.surfaceSlate,
   },
   methodTabActive: {
     borderColor: LaundryColors.roleKurirIcon,
@@ -553,7 +553,7 @@ const styles = StyleSheet.create({
   methodTabTextActive: { color: LaundryColors.roleKurirIcon },
   
   methodContentBox: {
-    backgroundColor: "#F8FAFC",
+    backgroundColor: LaundryColors.surfaceSlate,
     padding: 16,
     borderRadius: 16,
     borderWidth: 1,
@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: "#FFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
     borderRadius: 12,

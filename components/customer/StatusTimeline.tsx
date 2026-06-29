@@ -57,7 +57,7 @@ export function StatusTimeline({ order }: { order: Order }) {
                   isCurrent && styles.dotCurrent,
                 ]}
               >
-                {isCompleted ? <Ionicons name="checkmark" size={10} color="#FFFFFF" /> : null}
+                {isCompleted ? <Ionicons name="checkmark" size={10} color={LaundryColors.textWhite} /> : null}
               </View>
 
               <View style={styles.labelWrap}>
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 2,
     borderColor: '#E2E8F0',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.backgroundWhite,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 1,

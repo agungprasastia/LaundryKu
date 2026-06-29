@@ -108,29 +108,29 @@ export default function CustomerBerandaScreen() {
     {
       icon: 'shirt' as const,
       label: 'Lihat\nLayanan',
-      color: '#2563EB',
-      bg: '#EBF5FF',
+      color: LaundryColors.primary,
+      bg: LaundryColors.rolePelangganBg,
       onPress: () => router.push('/(customer)/services'),
     },
     {
       icon: 'cube' as const,
       label: 'Pesanan\nSaya',
-      color: '#10B981',
-      bg: '#ECFDF5',
+      color: LaundryColors.success,
+      bg: LaundryColors.roleMitraBg,
       onPress: () => router.push('/(customer)/orders'),
     },
     {
       icon: 'notifications' as const,
       label: 'Notifikasi',
-      color: '#F97316',
-      bg: '#FFF7ED',
+      color: LaundryColors.warning,
+      bg: LaundryColors.roleKurirBg,
       onPress: () => router.push('/(customer)/profile'),
     },
     {
       icon: 'person' as const,
       label: 'Profil\nSaya',
-      color: '#8B5CF6',
-      bg: '#F5F3FF',
+      color: LaundryColors.purple,
+      bg: LaundryColors.surfacePurple,
       onPress: () => router.push('/(customer)/profile'),
     },
   ];
@@ -146,7 +146,7 @@ export default function CustomerBerandaScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      <StatusBar barStyle="dark-content" backgroundColor={LaundryColors.backgroundWhite} />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -158,7 +158,7 @@ export default function CustomerBerandaScreen() {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <View style={styles.avatar}>
-              <Ionicons name="person" size={24} color="#FFFFFF" />
+              <Ionicons name="person" size={24} color={LaundryColors.textWhite} />
             </View>
             <View>
               <Text style={styles.headerGreeting}>Halo, {user?.full_name || 'Pelanggan'} 👋</Text>
@@ -178,7 +178,7 @@ export default function CustomerBerandaScreen() {
           </TouchableOpacity>
         </View>
 
-        <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+        <Animated.View style={[styles.animatedContent, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
           {/* Error Banner */}
           {error ? (
             <View style={styles.errorBanner}>
@@ -279,7 +279,7 @@ export default function CustomerBerandaScreen() {
                 onPress={() => router.push('/(customer)/orders')}
               >
                 <View style={styles.orderCardTop}>
-                  <View style={{ flex: 1, marginRight: 8 }}>
+                  <View style={styles.orderIdWrap}>
                     <Text style={styles.orderId} numberOfLines={1} ellipsizeMode="middle">#{order.order_id}</Text>
                     {order.service_name ? (
                       <Text style={styles.orderServiceName} numberOfLines={1} ellipsizeMode="middle">{order.service_name}</Text>
@@ -310,7 +310,7 @@ export default function CustomerBerandaScreen() {
             ))
           )}
 
-          <View style={{ height: 20 }} />
+          <View style={styles.bottomSpacer} />
         </Animated.View>
       </ScrollView>
     </View>
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   /* Header */
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.backgroundWhite,
     paddingTop: Platform.OS === 'ios' ? 56 : 40,
     paddingBottom: 16, paddingHorizontal: 20,
   },
@@ -353,16 +353,16 @@ const styles = StyleSheet.create({
   notifBadge: {
     position: 'absolute', top: 6, right: 6,
     minWidth: 18, height: 18, borderRadius: 9,
-    backgroundColor: '#EF4444', alignItems: 'center', justifyContent: 'center',
-    paddingHorizontal: 4, borderWidth: 1.5, borderColor: '#FFFFFF',
+    backgroundColor: LaundryColors.error, alignItems: 'center', justifyContent: 'center',
+    paddingHorizontal: 4, borderWidth: 1.5, borderColor: LaundryColors.backgroundWhite,
   },
-  notifBadgeText: { fontSize: 9, fontWeight: '700', color: '#FFFFFF' },
+  notifBadgeText: { fontSize: 9, fontWeight: '700', color: LaundryColors.textWhite },
 
   /* Error */
   errorBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: '#FEF2F2', marginHorizontal: 20, marginTop: 12,
-    borderRadius: 12, padding: 12, borderWidth: 1, borderColor: '#FECACA',
+    backgroundColor: LaundryColors.errorBg, marginHorizontal: 20, marginTop: 12,
+    borderRadius: 12, padding: 12, borderWidth: 1, borderColor: LaundryColors.errorBorder,
   },
   errorBannerText: { flex: 1, fontSize: 12, color: LaundryColors.error, fontWeight: '500' },
   retryText: { fontSize: 12, color: LaundryColors.primary, fontWeight: '700' },
@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
 
   /* Quick Actions */
   quickActionsCard: {
-    marginHorizontal: 20, backgroundColor: '#FFFFFF',
+    marginHorizontal: 20, backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 16, padding: 16,
     borderWidth: 1, borderColor: LaundryColors.inputBorder,
   },
@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
 
   /* Empty */
   emptyCard: {
-    marginHorizontal: 20, backgroundColor: '#FFFFFF', borderRadius: 16,
+    marginHorizontal: 20, backgroundColor: LaundryColors.backgroundWhite, borderRadius: 16,
     padding: 24, alignItems: 'center', gap: 8,
     borderWidth: 1, borderColor: LaundryColors.inputBorder,
   },
@@ -403,18 +403,18 @@ const styles = StyleSheet.create({
     backgroundColor: LaundryColors.primary, borderRadius: 10,
     paddingHorizontal: 20, paddingVertical: 8, marginTop: 4,
   },
-  emptyButtonText: { fontSize: 13, fontWeight: '700', color: '#FFFFFF' },
+  emptyButtonText: { fontSize: 13, fontWeight: '700', color: LaundryColors.textWhite },
 
   /* Service card */
   serviceCard: {
     flexDirection: 'row', alignItems: 'center',
-    marginHorizontal: 20, marginBottom: 8, backgroundColor: '#FFFFFF',
+    marginHorizontal: 20, marginBottom: 8, backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 14, padding: 14,
     borderWidth: 1, borderColor: LaundryColors.inputBorder,
   },
   serviceIconWrap: {
     width: 40, height: 40, borderRadius: 12,
-    backgroundColor: '#EBF5FF', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: LaundryColors.rolePelangganBg, alignItems: 'center', justifyContent: 'center',
     marginRight: 12,
   },
   serviceInfo: { flex: 1 },
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
 
   /* Order card */
   orderCard: {
-    marginHorizontal: 20, marginBottom: 8, backgroundColor: '#FFFFFF',
+    marginHorizontal: 20, marginBottom: 8, backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 14, padding: 14,
     borderWidth: 1, borderColor: LaundryColors.inputBorder,
   },
@@ -444,6 +444,11 @@ const styles = StyleSheet.create({
   orderDetailRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   orderDetailText: { fontSize: 11, color: LaundryColors.textSecondary, flex: 1 },
   orderAmount: { fontSize: 13, fontWeight: '700', color: LaundryColors.primary },
+
+  /* Extracted inline styles */
+  animatedContent: {},
+  orderIdWrap: { flex: 1, marginRight: 8 },
+  bottomSpacer: { height: 20 },
 });
 
 

@@ -208,7 +208,7 @@ export default function OwnerServicesScreen() {
           <Text style={styles.countText}>{services.length} Layanan</Text>
         </View>
         <TouchableOpacity style={styles.createButton} onPress={openCreateModal} activeOpacity={0.8}>
-          <Ionicons name="add" size={20} color="#FFF" />
+          <Ionicons name="add" size={20} color={LaundryColors.textWhite} />
           <Text style={styles.createButtonText}>Tambah</Text>
         </TouchableOpacity>
       </View>
@@ -427,7 +427,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   countBadge: {
-    backgroundColor: "#F1F5F9",
+    backgroundColor: LaundryColors.surfaceGray,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
@@ -442,10 +442,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     gap: 6,
   },
-  createButtonText: { color: "#FFF", fontWeight: "700", fontSize: 14 },
+  createButtonText: { color: LaundryColors.textWhite, fontWeight: "700", fontSize: 14 },
   
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 20,
     padding: 16,
     marginBottom: 16,
@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
   },
   pricingContainer: {
     flexDirection: "row",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: LaundryColors.surfaceSlate,
     borderRadius: 12,
     padding: 12,
     marginTop: 16,
@@ -511,7 +511,7 @@ const styles = StyleSheet.create({
   },
   editBtnText: { color: LaundryColors.roleMitraIcon, fontWeight: "700", fontSize: 12 },
   deleteBtn: {
-    backgroundColor: "#FEF2F2",
+    backgroundColor: LaundryColors.errorBg,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
@@ -548,7 +548,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#F1F5F9",
+    backgroundColor: LaundryColors.surfaceGray,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -560,7 +560,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: "#FFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
     borderRadius: 14,
@@ -571,14 +571,14 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   inputDisabled: {
-    backgroundColor: "#F8FAFC",
+    backgroundColor: LaundryColors.surfaceSlate,
     color: LaundryColors.textMuted,
   },
   switchRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: LaundryColors.surfaceSlate,
     padding: 16,
     borderRadius: 14,
     borderWidth: 1,

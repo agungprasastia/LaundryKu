@@ -338,7 +338,7 @@ export default function OwnerOrdersScreen() {
                   >
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
                       <View style={styles.avatar}>
-                        <Ionicons name="bicycle" size={20} color="#FFF" />
+                        <Ionicons name="bicycle" size={20} color={LaundryColors.textWhite} />
                       </View>
                       <View>
                         <Text style={styles.title}>{c.full_name}</Text>
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
   sheetTitle: { fontSize: 20, fontWeight: "700", color: LaundryColors.textPrimary },
   
   infoBox: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 16,
     padding: 16,
     marginTop: 16,
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
   mapContainer: { borderRadius: 16, overflow: "hidden", borderWidth: 1, borderColor: LaundryColors.inputBorder },
 
   timelineContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
   },
 
   input: {
-    backgroundColor: "#FFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
     borderRadius: 14,

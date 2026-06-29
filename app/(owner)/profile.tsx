@@ -161,11 +161,11 @@ export default function OwnerProfileScreen() {
       <View style={styles.profileHeaderCard}>
         <View style={styles.avatarContainer}>
           <View style={styles.avatar}>
-            <Ionicons name="business" size={40} color="#FFF" />
+            <Ionicons name="business" size={40} color={LaundryColors.textWhite} />
           </View>
           {isUserVerified && (
             <View style={styles.verifiedBadgeIcon}>
-              <Ionicons name="checkmark-circle" size={24} color="#10B981" />
+              <Ionicons name="checkmark-circle" size={24} color={LaundryColors.success} />
             </View>
           )}
         </View>
@@ -183,7 +183,7 @@ export default function OwnerProfileScreen() {
       <View style={styles.detailsCard}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <Text style={[styles.detailsHeading, { marginBottom: 0 }]}>Informasi Akun</Text>
-          <TouchableOpacity onPress={handleEditProfile} style={{ paddingHorizontal: 12, paddingVertical: 6, backgroundColor: '#EFF6FF', borderRadius: 12 }}>
+          <TouchableOpacity onPress={handleEditProfile} style={{ paddingHorizontal: 12, paddingVertical: 6, backgroundColor: LaundryColors.surfaceBlueTint, borderRadius: 12 }}>
             <Text style={{ color: LaundryColors.roleMitraIcon, fontWeight: '600', fontSize: 12 }}>Edit Profil</Text>
           </TouchableOpacity>
         </View>
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContainer: {
-    backgroundColor: "#F8FAFC",
+    backgroundColor: LaundryColors.surfaceSlate,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 20,
@@ -391,12 +391,12 @@ const styles = StyleSheet.create({
     backgroundColor: LaundryColors.roleMitraIcon,
   },
   modalButtonText: {
-    color: "#FFF",
+    color: LaundryColors.textWhite,
     fontWeight: "700",
     fontSize: 15,
   },
   input: {
-    backgroundColor: "#FFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
     borderRadius: 14,
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
   },
   profileHeaderCard: {
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 24,
     padding: 24,
     marginBottom: 20,
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-    backgroundColor: "#FFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 12,
   },
   profileName: {
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
   },
 
   detailsCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 20,
     padding: 20,
     marginBottom: 20,
@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: LaundryColors.surfaceSlate,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -514,12 +514,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 10,
-    backgroundColor: "#FEF2F2",
+    backgroundColor: LaundryColors.errorBg,
     borderRadius: 16,
     paddingVertical: 16,
     marginBottom: 32,
     borderWidth: 1,
-    borderColor: "#FECACA",
+    borderColor: LaundryColors.errorBorder,
   },
   logoutButtonText: {
     fontSize: 15,
@@ -542,13 +542,13 @@ const styles = StyleSheet.create({
   unreadBadgeText: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#FFF",
+    color: LaundryColors.textWhite,
   },
 
   notificationCard: {
     flexDirection: "row",
     alignItems: "flex-start",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -556,20 +556,20 @@ const styles = StyleSheet.create({
     borderColor: LaundryColors.inputBorder,
   },
   notificationCardUnread: {
-    backgroundColor: "#F8FAFC",
+    backgroundColor: LaundryColors.surfaceSlate,
     borderColor: "#DBEAFE",
   },
   notifIconBox: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#F1F5F9",
+    backgroundColor: LaundryColors.surfaceGray,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
   },
   notifIconBoxUnread: {
-    backgroundColor: "#EBF5FF",
+    backgroundColor: LaundryColors.rolePelangganBg,
   },
   notifContentBox: {
     flex: 1,

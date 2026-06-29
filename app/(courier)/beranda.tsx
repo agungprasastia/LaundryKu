@@ -142,29 +142,29 @@ export default function CourierBerandaScreen() {
     {
       icon: "bicycle" as const,
       label: "Tugas",
-      color: "#F59E0B",
+      color: LaundryColors.amber,
       bg: "#FEF3C7",
       onPress: () => router.push("/(courier)/tasks"),
     },
     {
       icon: "location" as const,
       label: "Lokasi",
-      color: "#EF4444",
+      color: LaundryColors.error,
       bg: "#FEE2E2",
       onPress: updateLocation,
     },
     {
       icon: "stats-chart" as const,
       label: "Pendapatan",
-      color: "#10B981",
-      bg: "#ECFDF5",
+      color: LaundryColors.success,
+      bg: LaundryColors.roleMitraBg,
       onPress: () => router.push("/(courier)/earnings"),
     },
     {
       icon: "wallet" as const,
       label: "Wallet",
-      color: "#8B5CF6",
-      bg: "#F5F3FF",
+      color: LaundryColors.purple,
+      bg: LaundryColors.surfacePurple,
       onPress: () => router.push("/(courier)/wallet"),
     },
   ];
@@ -194,7 +194,7 @@ export default function CourierBerandaScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      <StatusBar barStyle="dark-content" backgroundColor={LaundryColors.backgroundWhite} />
       
       <ScrollView
         contentContainerStyle={styles.body}
@@ -229,18 +229,18 @@ export default function CourierBerandaScreen() {
           {/* METRICS */}
           <View style={styles.metricsWrapper}>
             <View style={styles.metricCardBig}>
-              <View style={[styles.metricIconBg, { backgroundColor: "#FFF7ED" }]}>
-                <Ionicons name="cash" size={24} color="#F97316" />
+              <View style={[styles.metricIconBg, { backgroundColor: LaundryColors.roleKurirBg }]}>
+                <Ionicons name="cash" size={24} color={LaundryColors.warning} />
               </View>
               <Text style={styles.metricLabelBig}>Total Pendapatan</Text>
               <Text style={styles.metricValueBig}>{formatMoney(earnings?.total_earnings ?? 0)}</Text>
             </View>
             <View style={styles.metricsGridRow}>
-              <MetricBox title="Tugas Aktif" value={String(tasks.length)} icon="bicycle" color="#2563EB" bg="#EBF5FF" />
-              <MetricBox title="Tugas Selesai" value={String(earnings?.completed_tasks ?? 0)} icon="checkmark-circle" color="#10B981" bg="#ECFDF5" />
+              <MetricBox title="Tugas Aktif" value={String(tasks.length)} icon="bicycle" color={LaundryColors.primary} bg={LaundryColors.rolePelangganBg} />
+              <MetricBox title="Tugas Selesai" value={String(earnings?.completed_tasks ?? 0)} icon="checkmark-circle" color={LaundryColors.success} bg={LaundryColors.roleMitraBg} />
             </View>
             <View style={styles.metricsGridRow}>
-              <MetricBox title="Available" value={formatMoney(availableBalance)} icon="wallet" color="#8B5CF6" bg="#F5F3FF" />
+              <MetricBox title="Available" value={formatMoney(availableBalance)} icon="wallet" color={LaundryColors.purple} bg={LaundryColors.surfacePurple} />
               <MetricBox title="Pending" value={formatMoney(pendingBalance)} icon="time" color="#F43F5E" bg="#FFE4E6" />
             </View>
           </View>
@@ -335,8 +335,8 @@ function TaskPreview({ task, onPress }: { task: CourierTask; onPress: () => void
       
       <View style={styles.taskFooter}>
         <Text style={styles.taskOrderId}>Order: {task.order_id}</Text>
-        <View style={[styles.typeBadge, { backgroundColor: task.type === "pickup" ? "#FEF3C7" : "#EBF5FF" }]}>
-          <Text style={[styles.typeBadgeText, { color: task.type === "pickup" ? "#D97706" : "#2563EB" }]}>{task.type === "pickup" ? "PICKUP" : "DELIVERY"}</Text>
+        <View style={[styles.typeBadge, { backgroundColor: task.type === "pickup" ? "#FEF3C7" : LaundryColors.rolePelangganBg }]}>
+          <Text style={[styles.typeBadgeText, { color: task.type === "pickup" ? "#D97706" : LaundryColors.primary }]}>{task.type === "pickup" ? "PICKUP" : "DELIVERY"}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   header: {
-    backgroundColor: "#FFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     paddingTop: Platform.OS === "ios" ? 56 : 40,
     paddingBottom: 16,
     paddingHorizontal: 20,
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
   headerSub: { fontSize: 12, color: LaundryColors.textSecondary, marginTop: 2 },
   
   headerContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     paddingTop: Platform.OS === "ios" ? 60 : StatusBar.currentHeight ? StatusBar.currentHeight + 10 : 40,
     paddingBottom: 20,
     paddingHorizontal: 24,
@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   metricCardBig: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 20,
     padding: 20,
     borderWidth: 1,
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
   },
   metricBox: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
@@ -526,7 +526,7 @@ const styles = StyleSheet.create({
   emptyContainer: {
     alignItems: "center",
     paddingVertical: 40,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
@@ -546,7 +546,7 @@ const styles = StyleSheet.create({
   },
 
   taskCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 20,
     padding: 16,
     marginBottom: 16,

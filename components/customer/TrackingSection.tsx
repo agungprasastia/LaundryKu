@@ -1,4 +1,5 @@
 import { Text, View } from 'react-native';
+import { LaundryColors } from '@/constants/colors';
 import TrackingMap, { normalizeCourierLocation } from '@/components/TrackingMap';
 import { getStatusLabel } from '@/constants/orderStatus';
 import { Order, OrderTracking } from '@/types/order';
@@ -33,10 +34,10 @@ export function TrackingSection({ order, tracking }: { order: Order; tracking: O
         height={220}
         showRouteLine
       />
-      <Text style={{ fontSize: 13, fontWeight: '600', color: '#1A1A2E' }}>
+      <Text style={{ fontSize: 13, fontWeight: '600', color: LaundryColors.textPrimary }}>
         Status: {getStatusLabel(order.status)}
       </Text>
-      <Text style={{ fontSize: 12, color: '#64748B' }}>
+      <Text style={{ fontSize: 12, color: LaundryColors.textSecondary }}>
         {courierLocation.lat != null && courierLocation.lng != null
           ? `Lokasi kurir terakhir diperbarui${updatedText ? `: ${updatedText}` : '.'}`
           : 'Kurir belum mengirim lokasi.'}

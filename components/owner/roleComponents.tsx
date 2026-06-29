@@ -231,12 +231,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 12,
-    backgroundColor: "#FEF2F2",
+    backgroundColor: LaundryColors.errorBg,
     borderRadius: 14,
     padding: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#FECACA",
+    borderColor: LaundryColors.errorBorder,
   },
   errorBannerText: {
     fontSize: 13,
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   },
 
   emptyCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 16,
     padding: 32,
     alignItems: "center",
@@ -332,13 +332,13 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   dangerButton: {
-    backgroundColor: "#FEF2F2",
+    backgroundColor: LaundryColors.errorBg,
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 16,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#FECACA",
+    borderColor: LaundryColors.errorBorder,
   },
   dangerButtonText: {
     color: LaundryColors.error,

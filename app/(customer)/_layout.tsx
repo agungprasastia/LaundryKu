@@ -13,7 +13,7 @@ export default function CustomerLayout() {
           tabBarActiveTintColor: LaundryColors.primary,
           tabBarInactiveTintColor: LaundryColors.textMuted,
           tabBarStyle: {
-            backgroundColor: '#FFFFFF',
+            backgroundColor: LaundryColors.backgroundWhite,
             borderTopWidth: 1,
             borderTopColor: LaundryColors.inputBorder,
             height: 65,

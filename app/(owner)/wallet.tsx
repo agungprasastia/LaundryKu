@@ -385,7 +385,7 @@ function WithdrawalCard({ item }: { item: Withdrawal }) {
 
   return (
     <View style={styles.listItemCard}>
-      <View style={[styles.listIconBox, { backgroundColor: "#F5F3FF" }]}>
+      <View style={[styles.listIconBox, { backgroundColor: LaundryColors.surfacePurple }]}>
         <Ionicons name="card" size={18} color="#8B5CF6" />
       </View>
       <View style={styles.listContentBox}>
@@ -453,11 +453,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  walletLabel: { fontSize: 14, color: "#D1FAE5", fontWeight: "600" },
+  walletLabel: { fontSize: 14, color: LaundryColors.walletOwnerLightText, fontWeight: "600" },
   walletValue: {
     fontSize: 34,
     fontWeight: "700",
-    color: "#FFF",
+    color: LaundryColors.textWhite,
     marginTop: 8,
     marginBottom: 20,
   },
@@ -468,11 +468,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   walletMetaLabel: { fontSize: 12, color: "rgba(255,255,255,0.7)", fontWeight: "500" },
-  walletMetaValue: { fontSize: 16, color: "#FFF", fontWeight: "700" },
+  walletMetaValue: { fontSize: 16, color: LaundryColors.textWhite, fontWeight: "700" },
   withdrawBtn: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 99,
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
   listItemCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -530,7 +530,7 @@ const styles = StyleSheet.create({
   },
   
   withdrawAvailableBox: {
-    backgroundColor: "#ECFDF5",
+    backgroundColor: LaundryColors.roleMitraBg,
     padding: 16,
     borderRadius: 14,
     borderWidth: 1,
@@ -538,8 +538,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     alignItems: "center",
   },
-  withdrawAvailableLabel: { fontSize: 13, color: "#065F46", fontWeight: "600" },
-  withdrawAvailableValue: { fontSize: 24, color: "#064E3B", fontWeight: "700", marginTop: 4 },
+  withdrawAvailableLabel: { fontSize: 13, color: LaundryColors.walletOwnerDarkLabel, fontWeight: "600" },
+  withdrawAvailableValue: { fontSize: 24, color: LaundryColors.walletOwnerDarkValue, fontWeight: "700", marginTop: 4 },
 
   methodTabsRow: { flexDirection: "row", gap: 12, marginBottom: 16 },
   methodTab: {
@@ -552,7 +552,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: LaundryColors.surfaceSlate,
   },
   methodTabActive: {
     borderColor: LaundryColors.roleMitraIcon,
@@ -562,7 +562,7 @@ const styles = StyleSheet.create({
   methodTabTextActive: { color: LaundryColors.roleMitraIcon },
   
   methodContentBox: {
-    backgroundColor: "#F8FAFC",
+    backgroundColor: LaundryColors.surfaceSlate,
     padding: 16,
     borderRadius: 16,
     borderWidth: 1,
@@ -578,7 +578,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: "#FFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
     borderRadius: 12,

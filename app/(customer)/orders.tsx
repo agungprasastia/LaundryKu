@@ -629,7 +629,7 @@ export default function CustomerOrdersScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.backgroundWhite,
     paddingTop: Platform.OS === 'ios' ? 56 : 40,
     paddingBottom: 16, paddingHorizontal: 20,
     borderBottomWidth: 1, borderBottomColor: LaundryColors.inputBorder,
@@ -643,7 +643,7 @@ const styles = StyleSheet.create({
 
   /* Tabs */
   tabContainer: {
-    flexDirection: 'row', backgroundColor: '#FFFFFF',
+    flexDirection: 'row', backgroundColor: LaundryColors.backgroundWhite,
     paddingHorizontal: 20, paddingBottom: 12, gap: 8,
   },
   tab: {
@@ -655,13 +655,13 @@ const styles = StyleSheet.create({
     backgroundColor: LaundryColors.primary, borderColor: LaundryColors.primary,
   },
   tabText: { fontSize: 13, fontWeight: '600', color: LaundryColors.textSecondary },
-  tabTextActive: { color: '#FFFFFF' },
+  tabTextActive: { color: LaundryColors.textWhite },
 
   /* Error */
   errorBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: '#FEF2F2', borderRadius: 12, padding: 12,
-    marginBottom: 16, borderWidth: 1, borderColor: '#FECACA',
+    backgroundColor: LaundryColors.errorBg, borderRadius: 12, padding: 12,
+    marginBottom: 16, borderWidth: 1, borderColor: LaundryColors.errorBorder,
   },
   errorText: { flex: 1, fontSize: 12, color: LaundryColors.error, fontWeight: '500' },
   retryText: { fontSize: 12, color: LaundryColors.primary, fontWeight: '700' },
@@ -670,14 +670,14 @@ const styles = StyleSheet.create({
   emptyContainer: { alignItems: 'center', paddingTop: 60, gap: 8 },
   emptyIcon: {
     width: 90, height: 90, borderRadius: 45,
-    backgroundColor: '#EBF5FF', alignItems: 'center', justifyContent: 'center', marginBottom: 8,
+    backgroundColor: LaundryColors.rolePelangganBg, alignItems: 'center', justifyContent: 'center', marginBottom: 8,
   },
   emptyTitle: { fontSize: 18, fontWeight: '700', color: LaundryColors.textPrimary },
   emptyDesc: { fontSize: 13, color: LaundryColors.textSecondary, textAlign: 'center' },
 
   /* Order card */
   orderCard: {
-    backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16,
+    backgroundColor: LaundryColors.backgroundWhite, borderRadius: 16, padding: 16,
     marginBottom: 12, borderWidth: 1, borderColor: LaundryColors.inputBorder,
   },
   orderCardTop: {
@@ -705,7 +705,7 @@ const styles = StyleSheet.create({
     flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    backgroundColor: LaundryColors.backgroundWhite, borderTopLeftRadius: 24, borderTopRightRadius: 24,
     padding: 20, maxHeight: '90%',
   },
   modalHeader: {
@@ -737,15 +737,15 @@ const styles = StyleSheet.create({
     height: 46, marginTop: 12, gap: 6,
   },
   actionButtonDisabled: { opacity: 0.6 },
-  actionButtonText: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
+  actionButtonText: { fontSize: 14, fontWeight: '700', color: LaundryColors.textWhite },
 
   dummyButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: '#FFF7ED', borderRadius: 12,
+    backgroundColor: LaundryColors.roleKurirBg, borderRadius: 12,
     height: 46, marginTop: 8, gap: 6,
     borderWidth: 1, borderColor: '#FDBA74',
   },
-  dummyButtonText: { fontSize: 13, fontWeight: '700', color: '#F97316' },
+  dummyButtonText: { fontSize: 13, fontWeight: '700', color: LaundryColors.warning },
 
   retryButton: {
     alignItems: 'center', paddingVertical: 10,
@@ -754,10 +754,10 @@ const styles = StyleSheet.create({
 
   completeButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: '#10B981', borderRadius: 14,
+    backgroundColor: LaundryColors.success, borderRadius: 14,
     height: 50, marginTop: 20, gap: 8,
   },
-  completeButtonText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
+  completeButtonText: { fontSize: 15, fontWeight: '700', color: LaundryColors.textWhite },
 });
 
 

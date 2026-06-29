@@ -495,7 +495,7 @@ function StatusBadge({ status }: { status?: string }) {
 const styles = StyleSheet.create({
   tabsContainer: {
     flexDirection: "row",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: LaundryColors.surfaceSlate,
     borderRadius: 16,
     padding: 6,
     marginBottom: 20,
@@ -512,7 +512,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   tabButtonActive: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -530,7 +530,7 @@ const styles = StyleSheet.create({
   },
 
   taskCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 20,
     marginBottom: 16,
     borderWidth: 1,
@@ -542,7 +542,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start",
     padding: 16,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: LaundryColors.surfaceSlate,
     borderBottomWidth: 1,
     borderBottomColor: LaundryColors.inputBorder,
   },
@@ -641,13 +641,13 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#F1F5F9",
+    backgroundColor: LaundryColors.surfaceGray,
     alignItems: "center",
     justifyContent: "center",
   },
 
   detailCard: {
-    backgroundColor: "#F8FAFC",
+    backgroundColor: LaundryColors.surfaceSlate,
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -667,7 +667,7 @@ const styles = StyleSheet.create({
   },
 
   detailBox: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
@@ -694,7 +694,7 @@ const styles = StyleSheet.create({
   },
 
   locationControlsBox: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
@@ -745,7 +745,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: LaundryColors.surfaceSlate,
     padding: 16,
     borderRadius: 16,
     borderWidth: 1,

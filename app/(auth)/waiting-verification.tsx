@@ -97,7 +97,7 @@ export default function WaitingVerificationScreen() {
           onPress={handleCheckStatus}
           activeOpacity={0.8}
         >
-          <Ionicons name="refresh-outline" size={20} color="#FFFFFF" />
+          <Ionicons name="refresh-outline" size={20} color={LaundryColors.textWhite} />
           <Text style={styles.checkText}>Cek Status Verifikasi</Text>
         </TouchableOpacity>
 
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.backgroundWhite,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
@@ -173,14 +173,14 @@ const styles = StyleSheet.create({
   },
   contentSection: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.backgroundWhite,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     marginTop: -10,
     paddingHorizontal: 24,
     paddingTop: 40,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: LaundryColors.shadowDark,
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.04,
     shadowRadius: 12,
@@ -252,13 +252,13 @@ const styles = StyleSheet.create({
   checkText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: LaundryColors.textWhite,
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 14,
     height: 52,
     borderWidth: 1.5,

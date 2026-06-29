@@ -77,6 +77,9 @@ export interface UpdateProfilePayload {
   address?: string;
   lat?: number;
   lng?: number;
+  // Courier-specific fields
+  vehicle_name?: string;
+  vehicle_plate_number?: string;
 }
 
 /**

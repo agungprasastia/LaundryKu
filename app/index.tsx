@@ -104,7 +104,7 @@ export default function WelcomeScreen() {
             {/* Left side - basket/folded clothes */}
             <View style={styles.illustLeft}>
               <View style={styles.illustPlant}>
-                <MaterialCommunityIcons name="leaf" size={22} color="#4CAF50" />
+                <MaterialCommunityIcons name="leaf" size={22} color={LaundryColors.leaf} />
               </View>
               <View style={styles.illustBasket}>
                 <MaterialCommunityIcons name="basket" size={36} color={LaundryColors.primary} />
@@ -198,7 +198,7 @@ export default function WelcomeScreen() {
                 onPressOut={() => animatePress(masukScale, false)}
                 activeOpacity={0.9}
               >
-                <Ionicons name="log-in-outline" size={20} color="#FFFFFF" />
+                <Ionicons name="log-in-outline" size={20} color={LaundryColors.textWhite} />
                 <Text style={styles.masukText}>Masuk</Text>
               </TouchableOpacity>
             </Animated.View>
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 18,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.backgroundWhite,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(76, 175, 80, 0.12)',
+    backgroundColor: LaundryColors.leafBg,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
 
   /* ========== CONTENT CARD ========== */
   contentCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.backgroundWhite,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     marginTop: -24,
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     paddingTop: 30,
     paddingBottom: 28,
     flex: 1,
-    shadowColor: '#000',
+    shadowColor: LaundryColors.shadowDark,
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.04,
     shadowRadius: 12,
@@ -421,7 +421,7 @@ const styles = StyleSheet.create({
   },
   featureCard: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
@@ -472,13 +472,13 @@ const styles = StyleSheet.create({
   masukText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: LaundryColors.textWhite,
   },
   daftarButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 14,
     height: 54,
     gap: 8,

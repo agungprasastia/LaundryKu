@@ -133,28 +133,28 @@ export default function OwnerBerandaScreen() {
     {
       icon: "shirt" as const,
       label: "Layanan",
-      color: "#2563EB",
+      color: LaundryColors.primary,
       bg: "#EBF5FF",
       onPress: () => router.push("/(owner)/services"),
     },
     {
       icon: "receipt" as const,
       label: "Pesanan",
-      color: "#10B981",
+      color: LaundryColors.success,
       bg: "#ECFDF5",
       onPress: () => router.push("/(owner)/orders"),
     },
     {
       icon: "wallet" as const,
       label: "Wallet",
-      color: "#F97316",
+      color: LaundryColors.warning,
       bg: "#FFF7ED",
       onPress: () => router.push("/(owner)/wallet"),
     },
     {
       icon: "person" as const,
       label: "Profil",
-      color: "#8B5CF6",
+      color: LaundryColors.purple,
       bg: "#F5F3FF",
       onPress: () => router.push("/(owner)/profile"),
     },
@@ -174,7 +174,7 @@ export default function OwnerBerandaScreen() {
           <View style={styles.headerRow}>
             <View style={styles.userInfo}>
               <View style={styles.avatar}>
-                <Ionicons name="business" size={24} color="#FFF" />
+                <Ionicons name="business" size={24} color={LaundryColors.textWhite} />
               </View>
               <View>
                 <Text style={styles.greeting}>Halo, {user?.full_name || "Mitra"} 👋</Text>
@@ -197,15 +197,15 @@ export default function OwnerBerandaScreen() {
           {/* METRICS */}
           <View style={styles.metricsWrapper}>
             <View style={styles.metricCardBig}>
-              <View style={[styles.metricIconBg, { backgroundColor: "#EBF5FF" }]}>
-                <Ionicons name="cash" size={24} color="#2563EB" />
+              <View style={[styles.metricIconBg, { backgroundColor: LaundryColors.rolePelangganBg }]}>
+                <Ionicons name="cash" size={24} color={LaundryColors.primary} />
               </View>
               <Text style={styles.metricLabelBig}>Total Pendapatan</Text>
               <Text style={styles.metricValueBig}>{money(revenue)}</Text>
             </View>
             <View style={styles.metricsGridRow}>
-              <MetricBox title="Order Aktif" value={String(active)} icon="flash" color="#F97316" bg="#FFF7ED" />
-              <MetricBox title="Total Order" value={String(totalOrders)} icon="receipt" color="#10B981" bg="#ECFDF5" />
+              <MetricBox title="Order Aktif" value={String(active)} icon="flash" color={LaundryColors.warning} bg="#FFF7ED" />
+              <MetricBox title="Total Order" value={String(totalOrders)} icon="receipt" color={LaundryColors.success} bg="#ECFDF5" />
             </View>
             <View style={styles.metricsGridRow}>
               <MetricBox title="Available" value={money(available)} icon="wallet" color="#8B5CF6" bg="#F5F3FF" />
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   header: {
-    backgroundColor: "#FFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     paddingTop: Platform.OS === "ios" ? 56 : 40,
     paddingBottom: 16,
     paddingHorizontal: 20,
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   headerSub: { fontSize: 12, color: LaundryColors.textSecondary, marginTop: 2 },
   
   headerContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     paddingTop: Platform.OS === "ios" ? 60 : StatusBar.currentHeight ? StatusBar.currentHeight + 10 : 40,
     paddingBottom: 20,
     paddingHorizontal: 24,
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   metricCardBig: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 20,
     padding: 20,
     borderWidth: 1,
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
   },
   metricBox: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
@@ -482,7 +482,7 @@ const styles = StyleSheet.create({
   emptyContainer: {
     alignItems: "center",
     paddingVertical: 40,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
   },
 
   orderCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 20,
     padding: 16,
     marginBottom: 16,

@@ -147,11 +147,11 @@ export default function CustomerProfileScreen() {
       >
         {/* ─── Profile Card ─── */}
         <View style={styles.profileCard}>
-          <TouchableOpacity onPress={handleEditProfile} style={{ position: 'absolute', top: 16, right: 16, padding: 8, backgroundColor: '#EFF6FF', borderRadius: 12 }}>
+          <TouchableOpacity onPress={handleEditProfile} style={styles.editButton}>
             <Ionicons name="pencil" size={16} color={LaundryColors.primary} />
           </TouchableOpacity>
           <View style={styles.avatar}>
-            <Ionicons name="person" size={36} color="#FFFFFF" />
+            <Ionicons name="person" size={36} color={LaundryColors.textWhite} />
           </View>
           <Text style={styles.name}>{user?.full_name || 'Pelanggan'}</Text>
           <Text style={styles.email}>{user?.email || '-'}</Text>
@@ -162,9 +162,9 @@ export default function CustomerProfileScreen() {
               <Text style={styles.roleBadgeText}>Pelanggan</Text>
             </View>
             {user?.is_verified ? (
-              <View style={[styles.roleBadge, { backgroundColor: '#ECFDF5' }]}>
-                <Ionicons name="checkmark-circle" size={12} color="#10B981" />
-                <Text style={[styles.roleBadgeText, { color: '#10B981' }]}>Terverifikasi</Text>
+              <View style={[styles.roleBadge, { backgroundColor: LaundryColors.roleMitraBg }]}>
+                <Ionicons name="checkmark-circle" size={12} color={LaundryColors.success} />
+                <Text style={[styles.roleBadgeText, { color: LaundryColors.success }]}>Terverifikasi</Text>
               </View>
             ) : null}
           </View>
@@ -272,7 +272,7 @@ export default function CustomerProfileScreen() {
           <Text style={styles.logoutText}>Keluar</Text>
         </TouchableOpacity>
 
-        <View style={{ height: 30 }} />
+        <View style={styles.bottomSpacer} />
       </ScrollView>
 
       {/* EDIT PROFILE MODAL */}
@@ -286,9 +286,9 @@ export default function CustomerProfileScreen() {
               </TouchableOpacity>
             </View>
 
-            <View style={{ gap: 16 }}>
+            <View style={styles.formGap}>
               <View>
-                <Text style={{ fontSize: 13, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Nama Lengkap</Text>
+                <Text style={styles.formLabel}>Nama Lengkap</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="Masukkan nama lengkap..."
@@ -297,7 +297,7 @@ export default function CustomerProfileScreen() {
                 />
               </View>
               <View>
-                <Text style={{ fontSize: 13, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Alamat Rumah / Pengiriman</Text>
+                <Text style={styles.formLabel}>Alamat Rumah / Pengiriman</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="Masukkan alamat lengkap..."
@@ -330,7 +330,7 @@ export default function CustomerProfileScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.backgroundWhite,
     paddingTop: Platform.OS === 'ios' ? 56 : 40,
     paddingBottom: 16, paddingHorizontal: 20,
     borderBottomWidth: 1, borderBottomColor: LaundryColors.inputBorder,
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
 
   /* Profile Card */
   profileCard: {
-    backgroundColor: '#FFFFFF', borderRadius: 20, padding: 24,
+    backgroundColor: LaundryColors.backgroundWhite, borderRadius: 20, padding: 24,
     alignItems: 'center', borderWidth: 1, borderColor: LaundryColors.inputBorder,
   },
   avatar: {
@@ -380,26 +380,26 @@ const styles = StyleSheet.create({
 
   errorBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: '#FEF2F2', borderRadius: 12, padding: 12,
-    borderWidth: 1, borderColor: '#FECACA',
+    backgroundColor: LaundryColors.errorBg, borderRadius: 12, padding: 12,
+    borderWidth: 1, borderColor: LaundryColors.errorBorder,
   },
   errorText: { flex: 1, fontSize: 12, color: LaundryColors.error, fontWeight: '500' },
   retryText: { fontSize: 12, color: LaundryColors.primary, fontWeight: '700' },
 
   emptyNotif: {
-    backgroundColor: '#FFFFFF', borderRadius: 16, padding: 24,
+    backgroundColor: LaundryColors.backgroundWhite, borderRadius: 16, padding: 24,
     alignItems: 'center', gap: 8,
     borderWidth: 1, borderColor: LaundryColors.inputBorder,
   },
   emptyNotifText: { fontSize: 13, color: LaundryColors.textSecondary },
 
   notifCard: {
-    backgroundColor: '#FFFFFF', borderRadius: 14, padding: 14,
+    backgroundColor: LaundryColors.backgroundWhite, borderRadius: 14, padding: 14,
     marginBottom: 8, borderWidth: 1, borderColor: LaundryColors.inputBorder,
   },
   notifCardUnread: {
     borderLeftWidth: 3, borderLeftColor: LaundryColors.primary,
-    backgroundColor: '#FAFCFF',
+    backgroundColor: LaundryColors.notifUnreadBg,
   },
   notifCardHeader: { flexDirection: 'row', gap: 10 },
   notifDot: {
@@ -422,8 +422,8 @@ const styles = StyleSheet.create({
   /* Logout */
   logoutButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: '#FEF2F2', borderRadius: 14, height: 50, gap: 8,
-    borderWidth: 1, borderColor: '#FECACA', marginTop: 24,
+    backgroundColor: LaundryColors.errorBg, borderRadius: 14, height: 50, gap: 8,
+    borderWidth: 1, borderColor: LaundryColors.errorBorder, marginTop: 24,
   },
   logoutText: { fontSize: 15, fontWeight: '700', color: LaundryColors.error },
 
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContainer: {
-    backgroundColor: "#F8FAFC",
+    backgroundColor: LaundryColors.surfaceSlate,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 20,
@@ -462,12 +462,12 @@ const styles = StyleSheet.create({
     backgroundColor: LaundryColors.primary,
   },
   modalButtonText: {
-    color: "#FFF",
+    color: LaundryColors.textWhite,
     fontWeight: "700",
     fontSize: 15,
   },
   input: {
-    backgroundColor: "#FFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
     borderRadius: 14,
@@ -475,6 +475,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: LaundryColors.textPrimary,
+  },
+
+  /* Extracted inline styles */
+  editButton: {
+    position: 'absolute', top: 16, right: 16, padding: 8,
+    backgroundColor: LaundryColors.surfaceBlueTint, borderRadius: 12,
+  },
+  bottomSpacer: { height: 30 },
+  formGap: { gap: 16 },
+  formLabel: {
+    fontSize: 13, fontWeight: '500',
+    color: LaundryColors.textSecondary, marginBottom: 6,
   },
 });
 

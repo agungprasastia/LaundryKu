@@ -102,16 +102,16 @@ export default function CourierEarningsScreen() {
       {/* STATS GRID */}
       <View style={styles.statsGrid}>
         <View style={styles.statBox}>
-          <View style={[styles.statIconBox, { backgroundColor: "#ECFDF5" }]}>
-            <Ionicons name="today" size={18} color="#10B981" />
+          <View style={[styles.statIconBox, { backgroundColor: LaundryColors.roleMitraBg }]}>
+            <Ionicons name="today" size={18} color={LaundryColors.success} />
           </View>
           <Text style={styles.statValue}>{formatMoney(earnings?.today ?? 0)}</Text>
           <Text style={styles.statLabel}>Hari Ini</Text>
         </View>
         
         <View style={styles.statBox}>
-          <View style={[styles.statIconBox, { backgroundColor: "#EBF5FF" }]}>
-            <Ionicons name="calendar" size={18} color="#2563EB" />
+          <View style={[styles.statIconBox, { backgroundColor: LaundryColors.rolePelangganBg }]}>
+            <Ionicons name="calendar" size={18} color={LaundryColors.primary} />
           </View>
           <Text style={styles.statValue}>{formatMoney(earnings?.this_month ?? 0)}</Text>
           <Text style={styles.statLabel}>Bulan Ini</Text>
@@ -181,13 +181,13 @@ const styles = StyleSheet.create({
   },
   totalCardLabel: {
     fontSize: 14,
-    color: "#D1FAE5",
+    color: LaundryColors.walletOwnerLightText,
     fontWeight: "600",
   },
   totalCardValue: {
     fontSize: 34,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: LaundryColors.textWhite,
     marginTop: 8,
     marginBottom: 20,
   },
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   },
   statBox: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   },
   
   historyContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: LaundryColors.backgroundWhite,
     borderRadius: 20,
     padding: 8,
     borderWidth: 1,
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: LaundryColors.surfaceSlate,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   historyAmountBox: {
-    backgroundColor: "#ECFDF5",
+    backgroundColor: LaundryColors.roleMitraBg,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
@@ -287,6 +287,6 @@ const styles = StyleSheet.create({
   historyAmount: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#10B981",
+    color: LaundryColors.success,
   },
 });

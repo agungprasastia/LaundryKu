@@ -570,7 +570,7 @@ export default function CustomerServicesScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.backgroundWhite,
     paddingTop: Platform.OS === 'ios' ? 56 : 40,
     paddingBottom: 16, paddingHorizontal: 20,
     borderBottomWidth: 1, borderBottomColor: LaundryColors.inputBorder,
@@ -586,8 +586,8 @@ const styles = StyleSheet.create({
   /* Error */
   errorBanner: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: '#FEF2F2', borderRadius: 12, padding: 12,
-    marginBottom: 16, borderWidth: 1, borderColor: '#FECACA',
+    backgroundColor: LaundryColors.errorBg, borderRadius: 12, padding: 12,
+    marginBottom: 16, borderWidth: 1, borderColor: LaundryColors.errorBorder,
   },
   errorText: { flex: 1, fontSize: 12, color: LaundryColors.error, fontWeight: '500' },
   retryText: { fontSize: 12, color: LaundryColors.primary, fontWeight: '700' },
@@ -596,20 +596,20 @@ const styles = StyleSheet.create({
   emptyContainer: { alignItems: 'center', paddingTop: 60, gap: 8 },
   emptyIcon: {
     width: 90, height: 90, borderRadius: 45,
-    backgroundColor: '#EBF5FF', alignItems: 'center', justifyContent: 'center', marginBottom: 8,
+    backgroundColor: LaundryColors.rolePelangganBg, alignItems: 'center', justifyContent: 'center', marginBottom: 8,
   },
   emptyTitle: { fontSize: 18, fontWeight: '700', color: LaundryColors.textPrimary },
   emptyDesc: { fontSize: 13, color: LaundryColors.textSecondary, textAlign: 'center' },
 
   /* Service card */
   serviceCard: {
-    backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16,
+    backgroundColor: LaundryColors.backgroundWhite, borderRadius: 16, padding: 16,
     marginBottom: 12, borderWidth: 1, borderColor: LaundryColors.inputBorder,
   },
   serviceCardHeader: { flexDirection: 'row', alignItems: 'center' },
   serviceIconWrap: {
     width: 44, height: 44, borderRadius: 14,
-    backgroundColor: '#EBF5FF', alignItems: 'center', justifyContent: 'center', marginRight: 12,
+    backgroundColor: LaundryColors.rolePelangganBg, alignItems: 'center', justifyContent: 'center', marginRight: 12,
   },
   serviceMainInfo: { flex: 1 },
   serviceName: { fontSize: 15, fontWeight: '700', color: LaundryColors.textPrimary },
@@ -638,7 +638,7 @@ const styles = StyleSheet.create({
     backgroundColor: LaundryColors.primary,
     borderRadius: 10, paddingHorizontal: 14, paddingVertical: 8,
   },
-  orderButtonText: { fontSize: 12, fontWeight: '700', color: '#FFFFFF' },
+  orderButtonText: { fontSize: 12, fontWeight: '700', color: LaundryColors.textWhite },
 
   /* Modal */
   modalOverlay: {
@@ -646,7 +646,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: LaundryColors.backgroundWhite,
     borderTopLeftRadius: 24, borderTopRightRadius: 24,
     padding: 20, maxHeight: '85%',
   },
@@ -659,7 +659,7 @@ const styles = StyleSheet.create({
   /* Detail modal */
   detailIconLarge: {
     width: 72, height: 72, borderRadius: 20,
-    backgroundColor: '#EBF5FF', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: LaundryColors.rolePelangganBg, alignItems: 'center', justifyContent: 'center',
     alignSelf: 'center', marginBottom: 12,
   },
   detailName: { fontSize: 20, fontWeight: '700', color: LaundryColors.textPrimary, textAlign: 'center' },
@@ -676,12 +676,12 @@ const styles = StyleSheet.create({
     backgroundColor: LaundryColors.primary, borderRadius: 14,
     height: 50, marginTop: 24, gap: 8,
   },
-  modalOrderButtonText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
+  modalOrderButtonText: { fontSize: 15, fontWeight: '700', color: LaundryColors.textWhite },
 
   /* Order form */
   orderFormServiceInfo: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: '#EBF5FF', borderRadius: 12, padding: 12, marginBottom: 16,
+    backgroundColor: LaundryColors.rolePelangganBg, borderRadius: 12, padding: 12, marginBottom: 16,
   },
   orderFormServiceName: { fontSize: 14, fontWeight: '700', color: LaundryColors.primary },
 
@@ -709,7 +709,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F7FF',
   },
   locationButtonSuccess: {
-    borderColor: '#10B981', borderStyle: 'solid', backgroundColor: '#ECFDF5',
+    borderColor: LaundryColors.success, borderStyle: 'solid', backgroundColor: LaundryColors.roleMitraBg,
   },
   locationButtonLoading: {
     borderColor: LaundryColors.primaryLight, backgroundColor: '#F8FAFF',
@@ -718,7 +718,7 @@ const styles = StyleSheet.create({
     fontSize: 14, fontWeight: '600', color: LaundryColors.primary,
   },
   locationButtonTextSuccess: {
-    color: '#10B981',
+    color: LaundryColors.success,
   },
   locationCoords: {
     fontSize: 11, color: LaundryColors.textMuted, textAlign: 'center',
@@ -737,10 +737,10 @@ const styles = StyleSheet.create({
     gap: 6, paddingVertical: 8,
   },
   devToggleText: {
-    fontSize: 11, color: '#9CA3AF', fontStyle: 'italic',
+    fontSize: 11, color: LaundryColors.textMuted, fontStyle: 'italic',
   },
   devManualBox: {
-    backgroundColor: '#FFF7ED', borderRadius: 10, padding: 12,
+    backgroundColor: LaundryColors.roleKurirBg, borderRadius: 10, padding: 12,
     borderWidth: 1, borderColor: '#FDE68A',
   },
   devManualHeader: {
@@ -748,22 +748,22 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   devManualTitle: {
-    fontSize: 12, fontWeight: '600', color: '#92400E',
+    fontSize: 12, fontWeight: '600', color: LaundryColors.amberDark,
   },
   devLabel: {
-    fontSize: 11, fontWeight: '600', color: '#92400E', marginBottom: 4,
+    fontSize: 11, fontWeight: '600', color: LaundryColors.amberDark, marginBottom: 4,
   },
   devInput: {
-    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#FDE68A',
+    backgroundColor: LaundryColors.backgroundWhite, borderWidth: 1, borderColor: '#FDE68A',
     borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8,
-    fontSize: 13, color: '#92400E',
+    fontSize: 13, color: LaundryColors.amberDark,
   },
   devApplyButton: {
-    backgroundColor: '#F59E0B', borderRadius: 8,
+    backgroundColor: LaundryColors.amber, borderRadius: 8,
     paddingVertical: 8, alignItems: 'center', marginTop: 8,
   },
   devApplyButtonText: {
-    fontSize: 12, fontWeight: '700', color: '#FFFFFF',
+    fontSize: 12, fontWeight: '700', color: LaundryColors.textWhite,
   },
 
   submitButton: {
@@ -772,5 +772,5 @@ const styles = StyleSheet.create({
     height: 50, marginTop: 20, marginBottom: 20, gap: 8,
   },
   submitButtonDisabled: { backgroundColor: LaundryColors.primaryLight },
-  submitButtonText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
+  submitButtonText: { fontSize: 15, fontWeight: '700', color: LaundryColors.textWhite },
 });

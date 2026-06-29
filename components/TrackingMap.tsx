@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { LaundryColors } from '@/constants/colors';
 import { OrderTracking } from '@/types/order';
@@ -137,6 +137,17 @@ export default function TrackingMap({
       <View style={[styles.empty, { height }]}>
         <Text style={styles.emptyTitle}>Lokasi kurir belum tersedia.</Text>
         <Text style={styles.emptyText}>Peta akan muncul setelah kurir mengirim posisi GPS.</Text>
+      </View>
+    );
+  }
+
+  if (Platform.OS === 'web') {
+    return (
+      <View style={[styles.container, { height }]}>
+        <iframe 
+          srcDoc={html} 
+          style={{ width: '100%', height: '100%', border: 'none', backgroundColor: LaundryColors.cardBg }} 
+        />
       </View>
     );
   }
