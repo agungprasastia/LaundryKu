@@ -191,8 +191,18 @@ export default function CustomerServicesScreen() {
     setShowManualCoords(false);
   };
 
-  const onDateChange = (_: unknown, selectedDate?: Date) => {
-    setShowDatePicker(false);
+  const onDateChange = (event: any, selectedDate?: Date) => {
+    // Hindari crash "Cannot read property 'dismiss' of undefined" di Android saat unmount
+    if (Platform.OS === 'android') {
+      setTimeout(() => setShowDatePicker(false), 100);
+    } else {
+      setShowDatePicker(false);
+    }
+
+    if (event?.type === 'dismissed') {
+      return;
+    }
+
     if (selectedDate) {
       setPickupDate(selectedDate);
       const yy = selectedDate.getFullYear();
