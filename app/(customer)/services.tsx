@@ -191,7 +191,7 @@ export default function CustomerServicesScreen() {
     setShowManualCoords(false);
   };
 
-  const onDateChange = (_event: unknown, selectedDate?: Date) => {
+  const onDateChange = (_: unknown, selectedDate?: Date) => {
     setShowDatePicker(false);
     if (selectedDate) {
       setPickupDate(selectedDate);
@@ -205,8 +205,7 @@ export default function CustomerServicesScreen() {
     }
   };
 
-  const onWebDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
+  const onWebDateChange = (val: string) => {
     if (val) {
       const parsed = new Date(val);
       setPickupDate(parsed);
@@ -577,7 +576,7 @@ export default function CustomerServicesScreen() {
                   {React.createElement('input', {
                     type: 'datetime-local',
                     value: pickupDate ? new Date(pickupDate.getTime() - pickupDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '',
-                    onChange: onWebDateChange,
+                    onChange: (e) => onWebDateChange(e.target.value),
                     disabled: submitting,
                     style: {
                       border: 'none',
