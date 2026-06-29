@@ -11,6 +11,7 @@ import {
   Modal,
   TextInput,
   KeyboardAvoidingView,
+  Linking,
 } from 'react-native';
 import { crossAlert } from '@/utils/crossAlert';
 import { useRouter } from 'expo-router';
@@ -148,7 +149,10 @@ export default function CustomerServicesScreen() {
         crossAlert(
           'Izin Lokasi Diperlukan',
           'Izin lokasi diperlukan untuk menentukan lokasi pickup. Silakan aktifkan izin lokasi di pengaturan.',
-          [{ text: 'OK' }]
+          [
+            { text: 'Buka Pengaturan', onPress: () => { if (Platform.OS !== 'web') Linking.openSettings(); } },
+            { text: 'Batal' }
+          ]
         );
         return;
       }
