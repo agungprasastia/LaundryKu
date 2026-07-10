@@ -30,6 +30,9 @@ export interface PaginatedResponse<T = unknown> {
 
 export interface AdminDashboardMetrics {
   total_users?: number;
+  total_customers?: number;
+  total_couriers?: number;
+  total_owners?: number;
   users_change?: string;
   total_orders?: number;
   orders_change?: string;
