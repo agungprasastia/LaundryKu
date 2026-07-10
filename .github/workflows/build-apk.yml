@@ -42,9 +42,16 @@ jobs:
           NODE_OPTIONS: "--max-old-space-size=4096"
         run: ./gradlew assembleRelease
 
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d-%H%M')" >> $GITHUB_ENV
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: LaundryKu-APK
-          path: ./android/app/build/outputs/apk/release/app-release.apk
+          tag_name: release-${{ env.date }}
+          name: Release ${{ env.date }}
+          files: ./android/app/build/outputs/apk/release/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
