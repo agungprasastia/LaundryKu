@@ -31,8 +31,23 @@ jobs:
         run: npm ci
 
       - name: Build APK via EAS
-        run: eas build --platform android --profile preview --non-interactive --no-wait
+        run: eas build --platform android --profile preview --non-interactive --wait
 
-      - name: Build Link
-        run: echo "Build dikirim ke EAS! Pantau progress di https://expo.dev/accounts/me/projects/LaundryKu/builds"
+      - name: Get APK link & Download
+        run: |
+          APK_URL=$(eas build:list --platform android --status finished --limit 1 --json | jq -r '.[0].artifacts.buildUrl')
+          curl -L -o app-release.apk "$APK_URL"
+
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d-%H%M')" >> $GITHUB_ENV
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: release-${{ env.date }}
+          name: Release ${{ env.date }}
+          files: app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
