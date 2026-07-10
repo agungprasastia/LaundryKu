@@ -1,4 +1,4 @@
-name: Build APK (Expo EAS Cloud)
+name: Build APK
 
 on:
   workflow_dispatch:
@@ -20,23 +20,29 @@ jobs:
           cache: 'npm'
           cache-dependency-path: './package-lock.json'
 
-      - name: Setup Expo
-        uses: expo/expo-github-action@v8
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          expo-version: latest
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Expo CLI
+        run: npm install -g expo-cli
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build APK via EAS
-        run: eas build --platform android --profile preview --non-interactive --wait
+      - name: Generate Native Android Folder (Prebuild)
+        run: npx expo prebuild --platform android --clean
 
-      - name: Get APK link & Download
-        run: |
-          APK_URL=$(eas build:list --platform android --status finished --limit 1 --json | jq -r '.[0].artifacts.buildUrl')
-          curl -L -o app-release.apk "$APK_URL"
+      - name: Build APK (AssembleRelease)
+        working-directory: ./android
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        run: ./gradlew assembleRelease
 
       - name: Get current date
         id: date
@@ -47,7 +53,7 @@ jobs:
         with:
           tag_name: release-${{ env.date }}
           name: Release ${{ env.date }}
-          files: app-release.apk
+          files: ./android/app/build/outputs/apk/release/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
