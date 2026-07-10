@@ -1,7 +1,7 @@
-name: Build APK (Local di GitHub Runner)
+name: Build APK (Expo EAS Cloud)
 
 on:
-  workflow_dispatch: # Bisa di-trigger manual di tab Actions
+  workflow_dispatch:
 
 jobs:
   build:
@@ -20,41 +20,19 @@ jobs:
           cache: 'npm'
           cache-dependency-path: './package-lock.json'
 
-      - name: Setup Java
-        uses: actions/setup-java@v3
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
         with:
-          distribution: 'zulu'
-          java-version: '17'
-          cache: 'gradle'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Expo CLI
-        run: npm install -g expo-cli
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate Native Android Folder (Prebuild)
-        run: npx expo prebuild --platform android --clean
+      - name: Build APK via EAS
+        run: eas build --platform android --profile preview --non-interactive --no-wait
 
-      - name: Build APK (AssembleRelease)
-        working-directory: ./android
-        env:
-          NODE_OPTIONS: "--max-old-space-size=4096"
-        run: ./gradlew assembleRelease
-
-      - name: Get current date
-        id: date
-        run: echo "date=$(date +'%Y-%m-%d-%H%M')" >> $GITHUB_ENV
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: release-${{ env.date }}
-          name: Release ${{ env.date }}
-          files: ./android/app/build/outputs/apk/release/app-release.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Link
+        run: echo "Build dikirim ke EAS! Pantau progress di https://expo.dev/accounts/me/projects/LaundryKu/builds"
 
