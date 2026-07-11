@@ -254,47 +254,44 @@ export default function CustomerProfileScreen() {
                   <Text style={styles.emptyNotifText}>Belum ada notifikasi</Text>
                 </View>
               ) : (
-                notifications.map((notif) => {
-                  const isRead = !!notif.is_read && notif.is_read !== 0;
-                  return (
-                    <View
-                      key={notif.notification_id}
-                      style={[styles.notifCard, !isRead && styles.notifCardUnread]}
-                    >
-                      <View style={styles.notifCardHeader}>
-                        <View style={[
-                          styles.notifDot,
-                          isRead && { backgroundColor: 'transparent', borderColor: LaundryColors.textMuted },
-                        ]} />
-                        <View style={styles.notifContent}>
-                          {notif.title ? (
-                            <Text style={styles.notifTitle}>{notif.title}</Text>
-                          ) : null}
-                          <Text style={styles.notifMessage}>{notif.body || notif.message}</Text>
-                          <Text style={styles.notifDate}>{formatDate(notif.created_at)}</Text>
-                        </View>
-                      </View>
-
-                      {!isRead ? (
-                        <TouchableOpacity
-                          style={styles.markReadButton}
-                          onPress={() => handleMarkAsRead(notif.notification_id)}
-                          disabled={markingRead === notif.notification_id}
-                          activeOpacity={0.7}
-                        >
+                <View style={{ flex: 1 }}>
+                  {notifications.map((notif) => {
+                    const isRead = !!notif.is_read && notif.is_read !== 0;
+                    return (
+                      <TouchableOpacity
+                        key={notif.notification_id}
+                        style={[styles.notificationCard, !isRead && styles.notificationCardUnread]}
+                        onPress={() => !isRead && handleMarkAsRead(notif.notification_id)}
+                        disabled={markingRead === notif.notification_id}
+                        activeOpacity={isRead ? 1.0 : 0.8}
+                      >
+                        <View style={[styles.notifIconBox, !isRead && styles.notifIconBoxUnread]}>
                           {markingRead === notif.notification_id ? (
                             <ActivityIndicator size="small" color={LaundryColors.primary} />
                           ) : (
-                            <>
-                              <Ionicons name="checkmark" size={14} color={LaundryColors.primary} />
-                              <Text style={styles.markReadText}>Tandai Dibaca</Text>
-                            </>
+                            <Ionicons 
+                              name={isRead ? "notifications-outline" : "notifications"} 
+                              size={22} 
+                              color={!isRead ? LaundryColors.primary : LaundryColors.textMuted} 
+                            />
                           )}
-                        </TouchableOpacity>
-                      ) : null}
-                    </View>
-                  );
-                })
+                        </View>
+                        <View style={styles.notifContentBox}>
+                          <View style={styles.notifHeaderRow}>
+                            <Text style={[styles.notifTitle, !isRead && styles.notifTitleUnread]} numberOfLines={1}>
+                              {notif.title || "Notifikasi"}
+                            </Text>
+                            <Text style={styles.notifTime}>{formatDate(notif.created_at)}</Text>
+                          </View>
+                          <Text style={styles.notifMessage} numberOfLines={2}>
+                            {notif.body || notif.message || "-"}
+                          </Text>
+                        </View>
+                        {!isRead && <View style={styles.unreadDot} />}
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
               )}
             </ScrollView>
           </View>
@@ -432,31 +429,70 @@ const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   },
   emptyNotifText: { fontSize: 14, color: LaundryColors.textSecondary },
 
-  notifCard: {
-    backgroundColor: LaundryColors.backgroundWhite, borderRadius: 16, padding: 16,
-    marginBottom: 8, borderWidth: 1, borderColor: LaundryColors.inputBorder,
+  notificationCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: LaundryColors.backgroundWhite,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: LaundryColors.inputBorder,
   },
-  notifCardUnread: {
-    borderLeftWidth: 3, borderLeftColor: LaundryColors.primary,
-    backgroundColor: LaundryColors.notifUnreadBg,
+  notificationCardUnread: {
+    backgroundColor: LaundryColors.surfaceSlate,
+    borderColor: "#DBEAFE",
   },
-  notifCardHeader: { flexDirection: 'row', gap: 10 },
-  notifDot: {
-    width: 8, height: 8, borderRadius: 4,
+  notifIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 24,
+    backgroundColor: LaundryColors.surfaceGray,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  notifIconBoxUnread: {
+    backgroundColor: LaundryColors.rolePelangganBg,
+  },
+  notifContentBox: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  notifHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  notifTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: LaundryColors.textSecondary,
+    flex: 1,
+    marginRight: 8,
+  },
+  notifTitleUnread: {
+    color: LaundryColors.textPrimary,
+    fontWeight: "700",
+  },
+  notifTime: {
+    fontSize: 12,
+    color: LaundryColors.textMuted,
+    fontWeight: "500",
+  },
+  notifMessage: {
+    fontSize: 14,
+    color: LaundryColors.textSecondary,
+    lineHeight: 20,
+  },
+  unreadDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: LaundryColors.primary,
-    marginTop: 4,
-    borderWidth: 1, borderColor: LaundryColors.primary,
+    alignSelf: "center",
   },
-  notifContent: { flex: 1 },
-  notifTitle: { fontSize: 14, fontWeight: '700', color: LaundryColors.textPrimary },
-  notifMessage: { fontSize: 12, color: LaundryColors.textSecondary, marginTop: 2, lineHeight: 18 },
-  notifDate: { fontSize: 10, color: LaundryColors.textMuted, marginTop: 4 },
-
-  markReadButton: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end',
-    gap: 4, marginTop: 8,
-  },
-  markReadText: { fontSize: 12, fontWeight: '600', color: LaundryColors.primary },
 
   /* Logout */
   logoutButton: {

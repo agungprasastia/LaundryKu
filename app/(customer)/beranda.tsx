@@ -37,46 +37,55 @@ export default function CustomerBerandaScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const {
-    data: servicesRes,
+    data: rawServices = [],
     isLoading: isLoadingServices,
     error: servicesError,
     refetch: refetchServices,
   } = useQuery({
     queryKey: ['customer', 'services'],
-    queryFn: () => serviceService.getServices(),
+    queryFn: async () => {
+      const response = await serviceService.getServices();
+      if (!response.success) throw new Error(response.message || 'Gagal memuat layanan');
+      return Array.isArray(response.data) ? response.data : [];
+    },
   });
 
   const {
-    data: ordersRes,
+    data: allOrders = [],
     isLoading: isLoadingOrders,
     error: ordersError,
     refetch: refetchOrders,
   } = useQuery({
     queryKey: ['customer', 'orders'],
-    queryFn: () => orderService.getMyOrders(),
+    queryFn: async () => {
+      const response = await orderService.getMyOrders();
+      if (!response.success) throw new Error(response.message || 'Gagal memuat pesanan');
+      return Array.isArray(response.data) ? response.data : [];
+    },
   });
 
   const {
-    data: notifsRes,
+    data: notifications = [],
     isLoading: isLoadingNotifs,
     error: notifsError,
     refetch: refetchNotifs,
   } = useQuery({
     queryKey: ['customer', 'notifications'],
-    queryFn: () => notificationService.getNotifications(),
+    queryFn: async () => {
+      const response = await notificationService.getNotifications();
+      if (!response.success) throw new Error(response.message || 'Gagal memuat notifikasi');
+      return Array.isArray(response.data) ? response.data : [];
+    },
   });
 
   const loading = isLoadingServices || isLoadingOrders || isLoadingNotifs;
   const error = (servicesError || ordersError || notifsError) ? 'Gagal memuat data' : '';
 
-  const services = (servicesRes?.success && Array.isArray(servicesRes.data) ? servicesRes.data : [])
+  const services = rawServices
     .filter((s: LaundryService) => s.is_active === true || s.is_active === 1)
     .slice(0, 3);
-  
-  const orders = (ordersRes?.success && Array.isArray(ordersRes.data) ? ordersRes.data : [])
-    .slice(0, 3);
-  
-  const notifications = (notifsRes?.success && Array.isArray(notifsRes.data) ? notifsRes.data : []);
+
+  const orders = allOrders.slice(0, 3);
 
   const unreadCount = notifications.filter(
     (n) => !n.is_read || n.is_read === 0

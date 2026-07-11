@@ -608,21 +608,31 @@ export default function CustomerOrdersScreen() {
 
                 {/* ─── Complete Order Button ─── */}
                 {detailOrder.status === 'DELIVERED' ? (
-                  <TouchableOpacity
-                    style={[styles.completeButton, completeLoading && styles.actionButtonDisabled]}
-                    onPress={handleCompleteOrder}
-                    disabled={completeLoading}
-                    activeOpacity={0.8}
-                  >
-                    {completeLoading ? (
-                      <ActivityIndicator size="small" color={LaundryColors.textWhite} />
-                    ) : (
-                      <>
-                        <Ionicons name="checkmark-done-circle" size={20} color={LaundryColors.textWhite} />
-                        <Text style={styles.completeButtonText}>Konfirmasi Selesai</Text>
-                      </>
-                    )}
-                  </TouchableOpacity>
+                  <View style={{ marginTop: 12 }}>
+                    {(!invoice || invoice.status !== 'paid') ? (
+                      <Text style={{ color: '#EF4444', fontSize: 13, textAlign: 'center', marginBottom: 8, fontWeight: '500' }}>
+                        * Selesaikan pembayaran invoice terlebih dahulu untuk konfirmasi.
+                      </Text>
+                    ) : null}
+                    <TouchableOpacity
+                      style={[
+                        styles.completeButton,
+                        (completeLoading || !invoice || invoice.status !== 'paid') && styles.actionButtonDisabled
+                      ]}
+                      onPress={handleCompleteOrder}
+                      disabled={completeLoading || !invoice || invoice.status !== 'paid'}
+                      activeOpacity={0.8}
+                    >
+                      {completeLoading ? (
+                        <ActivityIndicator size="small" color={LaundryColors.textWhite} />
+                      ) : (
+                        <>
+                          <Ionicons name="checkmark-done-circle" size={20} color={LaundryColors.textWhite} />
+                          <Text style={styles.completeButtonText}>Konfirmasi Selesai</Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  </View>
                 ) : null}
 
                 <View style={{ height: 30 }} />

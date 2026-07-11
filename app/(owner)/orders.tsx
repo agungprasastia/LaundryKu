@@ -241,7 +241,14 @@ export default function OwnerOrdersScreen() {
             
             <View style={styles.footerRow}>
               <Text style={styles.price}>{money(o.total_amount ?? o.total_price)}</Text>
-              <Text style={styles.muted}>{date(o.pickup_scheduled_at || o.created_at)}</Text>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={styles.muted}>Dibuat: {date(o.created_at)}</Text>
+                {o.pickup_scheduled_at ? (
+                  <Text style={[styles.muted, { color: LaundryColors.roleMitraIcon, fontWeight: '600', marginTop: 2 }]}>
+                    Pickup: {date(o.pickup_scheduled_at)}
+                  </Text>
+                ) : null}
+              </View>
             </View>
           </TouchableOpacity>
         ))
@@ -310,6 +317,7 @@ export default function OwnerOrdersScreen() {
 
                   <Action
                     order={detail}
+                    tracking={tracking}
                     busy={busy}
                     status={status}
                     showCouriers={showCouriers}
@@ -425,6 +433,7 @@ function OwnerTrackingPanel({ order, tracking }: { order: Order; tracking: Order
 
 interface ActionProps {
   order: Order;
+  tracking: OrderTracking | null;
   busy: boolean;
   status: (newStatus: OrderStatus) => void;
   showCouriers: () => void;
@@ -432,7 +441,7 @@ interface ActionProps {
   activate: () => void;
 }
 
-function Action({ order, busy, status, showCouriers, weight, activate }: ActionProps) {
+function Action({ order, tracking, busy, status, showCouriers, weight, activate }: ActionProps) {
   const styles = useAppStyles(createStyles);
   switch (order.status) {
     case "WAITING_OWNER_CONFIRMATION":
@@ -444,7 +453,14 @@ function Action({ order, busy, status, showCouriers, weight, activate }: ActionP
     case "PROCESSING":
       return <PrimaryButton text="Selesai Diproses / Siap Diantar" onPress={() => status("READY_FOR_DELIVERY")} disabled={busy} />;
     case "READY_FOR_DELIVERY":
-      return <PrimaryButton text="Aktifkan Delivery" onPress={activate} disabled={busy} />;
+      const isAlreadyActivated = tracking?.current_phase === 'delivery';
+      return (
+        <PrimaryButton
+          text={isAlreadyActivated ? "Delivery Sudah Aktif" : "Aktifkan Delivery"}
+          onPress={activate}
+          disabled={busy || isAlreadyActivated}
+        />
+      );
     default:
       return (
         <View style={{ marginTop: 16, alignItems: "center" }}>

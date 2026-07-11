@@ -46,44 +46,52 @@ export default function CourierBerandaScreen() {
   const [updatingLocation, setUpdatingLocation] = useState(false);
 
   const {
-    data: tasksRes,
+    data: tasks = [],
     isLoading: isLoadingTasks,
     error: tasksError,
     refetch: refetchTasks,
   } = useQuery({
     queryKey: ['courier', 'tasks'],
-    queryFn: () => courierService.getMyTasks(),
+    queryFn: async () => {
+      const response = await courierService.getMyTasks();
+      if (!response.success) throw new Error(response.message || 'Gagal memuat tugas');
+      return Array.isArray(response.data) ? response.data : [];
+    },
     enabled: verified,
   });
 
   const {
-    data: earningsRes,
+    data: earnings = null,
     isLoading: isLoadingEarnings,
     error: earningsError,
     refetch: refetchEarnings,
   } = useQuery({
     queryKey: ['courier', 'earnings'],
-    queryFn: () => courierService.getMyEarnings(),
+    queryFn: async () => {
+      const response = await courierService.getMyEarnings();
+      if (!response.success) throw new Error(response.message || 'Gagal memuat pendapatan');
+      return response.data;
+    },
     enabled: verified,
   });
 
   const {
-    data: walletRes,
+    data: wallet = null,
     isLoading: isLoadingWallet,
     error: walletError,
     refetch: refetchWallet,
   } = useQuery({
     queryKey: ['courier', 'wallet'],
-    queryFn: () => walletService.getMyWallet(),
+    queryFn: async () => {
+      const response = await walletService.getMyWallet();
+      if (!response.success) throw new Error(response.message || 'Gagal memuat dompet');
+      return response.data;
+    },
     enabled: verified,
   });
 
   const loading = verified && (isLoadingTasks || isLoadingEarnings || isLoadingWallet);
   const error = (tasksError || earningsError || walletError) ? "Gagal memuat beranda kurir" : "";
-
-  const tasks = tasksRes?.success && Array.isArray(tasksRes.data) ? tasksRes.data : [];
-  const earnings = earningsRes?.success ? earningsRes.data : null;
-  const wallet = walletRes?.success ? walletRes.data : null;
 
   useEffect(() => {
     Animated.parallel([

@@ -33,30 +33,35 @@ export default function AdminBerandaScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const {
-    data: metricsRes,
+    data: metrics = null,
     isLoading: isLoadingMetrics,
     error: metricsError,
     refetch: refetchMetrics,
   } = useQuery({
     queryKey: ['admin', 'metrics'],
-    queryFn: () => adminService.getDashboardMetrics(),
+    queryFn: async () => {
+      const response = await adminService.getDashboardMetrics();
+      if (!response.success) throw new Error(response.message || 'Gagal memuat data');
+      return response.data;
+    },
   });
 
   const {
-    data: pendingRes,
+    data: pendingUsers = [],
     isLoading: isLoadingPending,
     error: pendingError,
     refetch: refetchPending,
   } = useQuery({
     queryKey: ['admin', 'pendingUsers'],
-    queryFn: () => adminService.getPendingUsers(),
+    queryFn: async () => {
+      const response = await adminService.getPendingUsers();
+      if (!response.success) throw new Error(response.message || 'Gagal memuat data');
+      return Array.isArray(response.data) ? response.data : [];
+    },
   });
 
   const loading = isLoadingMetrics || isLoadingPending;
   const error = (metricsError || pendingError) ? 'Gagal memuat data dashboard' : '';
-
-  const metrics = metricsRes?.success ? metricsRes.data : null;
-  const pendingUsers = pendingRes?.success && Array.isArray(pendingRes.data) ? pendingRes.data : [];
 
   useEffect(() => {
     Animated.parallel([

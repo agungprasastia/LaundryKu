@@ -57,9 +57,17 @@ export const OrderCard = React.memo(function OrderCard({ order, onPress }: { ord
         <Text style={styles.orderCustomer}>{order.customer_name || "Customer"}</Text>
         <Text style={styles.orderService}>{order.service_name || order.service?.name || "Layanan Reguler"}</Text>
         <View style={styles.orderMeta}>
-          <Ionicons name="calendar-outline" size={14} color={LaundryColors.textSecondary} />
-          <Text style={styles.orderDate}>{date(order.pickup_scheduled_at || order.created_at)}</Text>
+          <Ionicons name="time-outline" size={14} color={LaundryColors.textSecondary} />
+          <Text style={styles.orderDate}>Dibuat: {date(order.created_at)}</Text>
         </View>
+        {order.pickup_scheduled_at ? (
+          <View style={[styles.orderMeta, { marginTop: 4 }]}>
+            <Ionicons name="calendar-outline" size={14} color={LaundryColors.roleMitraIcon} />
+            <Text style={[styles.orderDate, { color: LaundryColors.roleMitraIcon, fontWeight: "600" }]}>
+              Pickup: {date(order.pickup_scheduled_at)}
+            </Text>
+          </View>
+        ) : null}
       </View>
       <View style={styles.orderFooter}>
         <Text style={styles.orderPriceLabel}>Total Pembayaran</Text>
