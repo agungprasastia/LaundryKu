@@ -50,13 +50,15 @@ jobs:
 
       - name: Get current date
         id: date
-        run: echo "date=$(date +'%Y-%m-%d-%H%M')" >> $GITHUB_ENV
+        run: |
+          echo "date_tag=$(date +'%v%Y%m%d%H%M')" >> $GITHUB_ENV
+          echo "date_name=$(date +'%d %B %Y - %H:%M')" >> $GITHUB_ENV
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: release-${{ env.date }}
-          name: Release ${{ env.date }}
+          tag_name: ${{ env.date_tag }}
+          name: "LaundryKu APK - ${{ env.date_name }}"
           files: ./android/app/build/outputs/apk/release/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
