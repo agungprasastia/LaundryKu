@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as adminService from '@/services/adminService';
-import { Wallet, WalletTransaction, Withdrawal } from '@/types/wallet';
+import { Wallet, WalletTransaction, Withdrawal, WithdrawPayload } from '@/types/wallet';
 import { getErrorMessage } from '@/utils/helpers';
 import { crossAlert } from '@/utils/crossAlert';
 
@@ -67,7 +67,7 @@ export function useAdminWallet() {
       if (!res.success) throw new Error(res.message || 'Gagal memproses penarikan');
       return res;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_, variables) => {
       crossAlert('Berhasil', variables.status === 'success' ? 'Penarikan disetujui' : 'Penarikan ditolak');
       closeProcessModal();
       // Invalidate relevant queries
@@ -115,7 +115,7 @@ export function useAdminWallet() {
   });
 
   const withdrawMutation = useMutation({
-    mutationFn: async (payload: import('@/types/wallet').WithdrawPayload) => {
+    mutationFn: async (payload: WithdrawPayload) => {
       const res = await adminService.requestAdminWithdraw(payload);
       if (!res.success) throw new Error(res.message || 'Gagal mengajukan penarikan');
       return res;
@@ -161,7 +161,7 @@ export function useAdminWallet() {
       if (!eWalletProvider || !eWalletNumber) return crossAlert('Gagal', 'Lengkapi data e-wallet');
     }
 
-    const payload: import('@/types/wallet').WithdrawPayload = withdrawMethod === 'bank'
+    const payload: WithdrawPayload = withdrawMethod === 'bank'
       ? { amount: amountNum, bank_name: bankName, bank_account_number: bankAccountNumber }
       : { amount: amountNum, e_wallet_provider: eWalletProvider, e_wallet_number: eWalletNumber };
 

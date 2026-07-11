@@ -18,6 +18,8 @@ import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
 import { useAuth } from '@/contexts/AuthContext';
+import { ThemeColors } from '@/constants/colors';
+import { getErrorMessage } from '@/utils/helpers';
 
 type RoleType = 'pelanggan' | 'mitra' | 'kurir';
 
@@ -115,12 +117,8 @@ export default function LoginScreen() {
         default:
           router.replace('/(auth)/login');
       }
-    } catch (error: any) {
-      // Extract error message from backend or axios error
-      const msg =
-        (error as import("axios").AxiosError<{message: string}>)?.response?.data?.message ||
-        error?.message ||
-        'Login gagal. Periksa email dan password Anda.';
+    } catch (error: unknown) {
+      const msg = getErrorMessage(error, 'Login gagal. Periksa email dan password Anda.');
       setErrorMessage(msg);
     } finally {
       setLoading(false);
@@ -145,7 +143,7 @@ export default function LoginScreen() {
     ]);
   };
 
-  const roleCards: { key: RoleType; label: string; icon: string; color: string; bg: string }[] = [
+  const roleCards: { key: RoleType; label: string; icon: keyof typeof MaterialIcons.glyphMap; color: string; bg: string }[] = [
     { key: 'pelanggan', label: 'Pelanggan', icon: 'person', color: LaundryColors.rolePelangganIcon, bg: LaundryColors.rolePelangganBg },
     { key: 'mitra', label: 'Mitra Laundry', icon: 'storefront', color: LaundryColors.roleMitraIcon, bg: LaundryColors.roleMitraBg },
     { key: 'kurir', label: 'Kurir', icon: 'delivery-dining', color: LaundryColors.roleKurirIcon, bg: LaundryColors.roleKurirBg },
@@ -327,7 +325,7 @@ export default function LoginScreen() {
                   activeOpacity={0.7}
                 >
                   <View style={[styles.roleIconCircle, { backgroundColor: role.bg }]}>
-                    <MaterialIcons name={role.icon as any} size={28} color={role.color} />
+                    <MaterialIcons name={role.icon} size={28} color={role.color} />
                   </View>
                   <Text style={styles.roleCardLabel}>Daftar sebagai</Text>
                   <View style={styles.roleCardNameRow}>
@@ -353,7 +351,7 @@ export default function LoginScreen() {
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: LaundryColors.background,

@@ -301,6 +301,18 @@ function WithdrawalCard({ item }: { item: Withdrawal }) {
   );
 }
 
+interface WithdrawModalProps {
+  visible: boolean;
+  method: Method;
+  form: typeof emptyForm;
+  submitting: boolean;
+  onMethodChange: (method: Method) => void;
+  onFormChange: (form: typeof emptyForm) => void;
+  onClose: () => void;
+  onSubmit: () => void;
+  availableBalance: number;
+}
+
 function WithdrawModal({
   visible,
   method,
@@ -311,7 +323,7 @@ function WithdrawModal({
   onClose,
   onSubmit,
   availableBalance,
-}: any) {
+}: WithdrawModalProps) {
   const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   return (

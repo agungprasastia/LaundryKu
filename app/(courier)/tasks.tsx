@@ -264,7 +264,7 @@ function TabButton({
 }: {
   active: boolean;
   text: string;
-  icon: keyof typeof import("@expo/vector-icons").Ionicons.glyphMap;
+  icon: keyof typeof Ionicons.glyphMap;
   onPress: () => void;
 }) {
   const { colors: LaundryColors } = useTheme();

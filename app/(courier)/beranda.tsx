@@ -303,7 +303,7 @@ export default function CourierBerandaScreen() {
   );
 }
 
-function MetricBox({ title, value, icon, color, bg }: { title: string; value: string; icon: keyof typeof import("@expo/vector-icons").Ionicons.glyphMap; color: string; bg: string }) {
+function MetricBox({ title, value, icon, color, bg }: { title: string; value: string; icon: keyof typeof Ionicons.glyphMap; color: string; bg: string }) {
   const styles = useAppStyles(createStyles);
   return (
     <View style={styles.metricBox}>

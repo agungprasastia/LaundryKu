@@ -14,11 +14,13 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as adminService from '@/services/adminService';
+import { AdminAnalytics } from '@/types/api';
+import { getErrorMessage } from '@/utils/helpers';
 
 export default function LaporanScreen() {
   const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
-  const [analytics, setAnalytics] = useState<any>(null);
+  const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
@@ -31,7 +33,7 @@ export default function LaporanScreen() {
         setAnalytics(response.data);
       }
     } catch (err: unknown) {
-      const msg = (err as any)?.response?.data?.message || (err as any)?.message || 'Gagal memuat data';
+      const msg = getErrorMessage(err, 'Gagal memuat data');
       setError(msg);
     } finally {
       setLoading(false);
@@ -48,7 +50,7 @@ export default function LaporanScreen() {
     fetchAnalytics();
   };
 
-  const formatCurrency = (value: any): string => {
+  const formatCurrency = (value: number | undefined | null): string => {
     if (value == null) return 'Rp 0';
     return `Rp ${Number(value).toLocaleString('id-ID')}`;
   };

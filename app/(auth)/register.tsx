@@ -17,6 +17,8 @@ import { crossAlert } from '@/utils/crossAlert';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
+import { RegisterPayload } from '@/types/user';
+import { AxiosError } from 'axios';
 import { useAppStyles } from '@/hooks/useAppStyles';
 import { useAuth } from '@/contexts/AuthContext';
 import { ROLE_MAP, FrontendRole, UserRole } from '@/types/user';
@@ -129,7 +131,7 @@ export default function RegisterScreen() {
     const backendRole: UserRole = ROLE_MAP[selectedRole as FrontendRole];
 
     // Build payload
-    const payload: import("@/types/user").RegisterPayload = {
+    const payload: RegisterPayload = {
       full_name: namaLengkap.trim(),
       email: email.trim(),
       password: password,
@@ -180,7 +182,7 @@ export default function RegisterScreen() {
       }
     } catch (error: unknown) {
       const msg =
-        (error as import("axios").AxiosError<{message: string}>)?.response?.data?.message ||
+        (error as AxiosError<{message: string}>)?.response?.data?.message ||
         (error as Error)?.message ||
         'Registrasi gagal. Silakan coba lagi.';
       setErrorMessage(msg);
@@ -201,7 +203,7 @@ export default function RegisterScreen() {
     );
   };
 
-  const roles: { key: RoleType; label: string; icon: string; color: string; bg: string }[] = [
+  const roles: { key: RoleType; label: string; icon: keyof typeof MaterialIcons.glyphMap; color: string; bg: string }[] = [
     { key: 'pelanggan', label: 'Pelanggan', icon: 'person', color: LaundryColors.rolePelangganIcon, bg: LaundryColors.rolePelangganBg },
     { key: 'mitra', label: 'Mitra Laundry', icon: 'storefront', color: LaundryColors.roleMitraIcon, bg: LaundryColors.roleMitraBg },
     { key: 'kurir', label: 'Kurir', icon: 'delivery-dining', color: LaundryColors.roleKurirIcon, bg: LaundryColors.roleKurirBg },
@@ -419,7 +421,7 @@ export default function RegisterScreen() {
                           <Ionicons name="checkmark-circle" size={20} color={LaundryColors.checkmark} />
                         </View>
                       )}
-                      <MaterialIcons name={role.icon as any} size={32} color={role.color} />
+                      <MaterialIcons name={role.icon} size={32} color={role.color} />
                       <Text style={[styles.roleCardName, { color: role.color }]}>{role.label}</Text>
                     </TouchableOpacity>
                   );

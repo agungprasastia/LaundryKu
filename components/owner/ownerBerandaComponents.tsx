@@ -16,7 +16,7 @@ const money = (n?: number) => "Rp " + Number(n || 0).toLocaleString("id-ID");
 const date = (v?: string) =>
   v ? new Date(v).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-";
 
-export const MetricBox = React.memo(function MetricBox({ title, value, icon, color, bg }: { title: string; value: string; icon: keyof typeof import("@expo/vector-icons").Ionicons.glyphMap; color: string; bg: string }) {
+export const MetricBox = React.memo(function MetricBox({ title, value, icon, color, bg }: { title: string; value: string; icon: keyof typeof Ionicons.glyphMap; color: string; bg: string }) {
   const styles = useAppStyles(createStyles);
   return (
     <View style={styles.metricBox}>

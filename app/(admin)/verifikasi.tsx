@@ -14,6 +14,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
 import { Ionicons } from '@expo/vector-icons';
 import * as adminService from '@/services/adminService';
+import { getErrorMessage } from '@/utils/helpers';
 import { PendingUser } from '@/types/user';
 
 export default function VerifikasiScreen() {
@@ -37,7 +38,7 @@ export default function VerifikasiScreen() {
         setPendingUsers([]);
       }
     } catch (err: unknown) {
-      const msg = (err as any)?.response?.data?.message || (err as any)?.message || 'Gagal memuat data';
+      const msg = getErrorMessage(err, 'Gagal memuat data');
       setError(msg);
     } finally {
       setLoading(false);
@@ -83,7 +84,7 @@ export default function VerifikasiScreen() {
         setTimeout(() => setError(''), 4000);
       }
     } catch (err: unknown) {
-      const msg = (err as any)?.response?.data?.message || (err as any)?.message || 'Gagal memverifikasi';
+      const msg = getErrorMessage(err, 'Gagal memverifikasi');
       setError(msg);
       setTimeout(() => setError(''), 4000);
     } finally {

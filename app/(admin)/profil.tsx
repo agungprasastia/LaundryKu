@@ -51,7 +51,7 @@ export default function ProfilScreen() {
     );
   };
 
-  const handleUnavailableFeature = () => {
+  const _handleUnavailableFeature = () => {
     crossAlert('Fitur Belum Tersedia', 'Fitur ini belum tersedia.', [{ text: 'OK' }]);
   };
 

@@ -31,7 +31,7 @@ export default function AdminLayout() {
           name="beranda"
           options={{
             title: 'Beranda',
-            tabBarIcon: ({ color, size }) => (
+            tabBarIcon: ({ color }) => (
               <Ionicons name="home" size={22} color={color} />
             ),
           }}
@@ -40,7 +40,7 @@ export default function AdminLayout() {
           name="verifikasi"
           options={{
             title: 'Verifikasi',
-            tabBarIcon: ({ color, size }) => (
+            tabBarIcon: ({ color }) => (
               <Ionicons name="shield-checkmark-outline" size={22} color={color} />
             ),
           }}
@@ -49,7 +49,7 @@ export default function AdminLayout() {
           name="pengguna"
           options={{
             title: 'Pengguna',
-            tabBarIcon: ({ color, size }) => (
+            tabBarIcon: ({ color }) => (
               <Ionicons name="people-outline" size={22} color={color} />
             ),
           }}
@@ -58,7 +58,7 @@ export default function AdminLayout() {
           name="laporan"
           options={{
             title: 'Laporan',
-            tabBarIcon: ({ color, size }) => (
+            tabBarIcon: ({ color }) => (
               <MaterialCommunityIcons name="chart-box-outline" size={22} color={color} />
             ),
           }}
@@ -67,7 +67,7 @@ export default function AdminLayout() {
           name="wallet"
           options={{
             title: 'Wallet',
-            tabBarIcon: ({ color, size }) => (
+            tabBarIcon: ({ color }) => (
               <Ionicons name="wallet-outline" size={22} color={color} />
             ),
           }}
@@ -76,7 +76,7 @@ export default function AdminLayout() {
           name="profil"
           options={{
             title: 'Profil',
-            tabBarIcon: ({ color, size }) => (
+            tabBarIcon: ({ color }) => (
               <Ionicons name="person-outline" size={22} color={color} />
             ),
           }}

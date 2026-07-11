@@ -18,7 +18,8 @@ import Animated, {
   withSpring, 
   withRepeat, 
   withSequence,
-  withDelay
+  withDelay,
+  SharedValue
 } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -100,7 +101,7 @@ export default function WelcomeScreen() {
     buttonSlide.value = withDelay(600, withSpring(0, { damping: 12, stiffness: 90 }));
 
     // Floating bubbles loop
-    const float = (anim: import("react-native-reanimated").SharedValue<number>, dur: number) => {
+    const float = (anim: SharedValue<number>, dur: number) => {
       anim.value = withRepeat(
         withSequence(
           withTiming(-10, { duration: dur }),

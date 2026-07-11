@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, PressableProps, StyleProp, ViewStyle, Platform } from 'react-native';
+import { Pressable, PressableProps, StyleProp, ViewStyle, Platform, GestureResponderEvent } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -34,7 +34,7 @@ export default function InteractiveButton({
     };
   });
 
-  const handlePressIn = (e: import("react-native").GestureResponderEvent) => {
+  const handlePressIn = (e: GestureResponderEvent) => {
     scale.value = withSpring(scaleTo, {
       mass: 0.5,
       damping: 12,
@@ -46,7 +46,7 @@ export default function InteractiveButton({
     if (onPressIn) onPressIn(e);
   };
 
-  const handlePressOut = (e: import("react-native").GestureResponderEvent) => {
+  const handlePressOut = (e: GestureResponderEvent) => {
     scale.value = withSpring(1, {
       mass: 0.5,
       damping: 12,

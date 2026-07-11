@@ -13,6 +13,7 @@ import {
   Linking,
 } from 'react-native';
 import { crossAlert } from '@/utils/crossAlert';
+import { getErrorMessage } from '@/utils/helpers';
 import { useRouter } from 'expo-router';
 import InteractiveButton from '@/components/ui/InteractiveButton';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,7 +26,7 @@ import { ThemeColors } from '@/constants/colors';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
 import * as Location from 'expo-location';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
 
 export default function CustomerServicesScreen() {
@@ -72,7 +73,7 @@ export default function CustomerServicesScreen() {
         setServices([]);
       }
     } catch (err: unknown) {
-      const msg = (err as any)?.response?.data?.message || (err as any)?.message || 'Gagal memuat layanan';
+      const msg = getErrorMessage(err, 'Gagal memuat layanan');
       setError(msg);
     } finally {
       setLoading(false);
@@ -159,14 +160,14 @@ export default function CustomerServicesScreen() {
       setLocationStatus('success');
     } catch (err: unknown) {
       setLocationStatus('error');
-      const msg = (err as any)?.message || 'Gagal mengambil lokasi';
+      const msg = getErrorMessage(err, 'Gagal mengambil lokasi');
       setLocationError(msg);
       crossAlert('Gagal Mengambil Lokasi', msg, [{ text: 'OK' }]);
     }
   };
 
 
-  const onDateChange = (event: any, selectedDate?: Date) => {
+  const onDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     if (event?.type === 'dismissed') {
       setShowDatePicker(false);
       return;
@@ -290,7 +291,7 @@ export default function CustomerServicesScreen() {
         crossAlert('Gagal', response.message || 'Gagal membuat pesanan');
       }
     } catch (err: unknown) {
-      const msg = (err as any)?.response?.data?.message || (err as any)?.message || 'Gagal membuat pesanan';
+      const msg = getErrorMessage(err, 'Gagal membuat pesanan');
       crossAlert('Error', msg);
     } finally {
       setSubmitting(false);

@@ -1,4 +1,6 @@
 import React, { useState, useCallback } from "react";
+import { Withdrawal } from '@/types/wallet';
+import { TextStyle } from 'react-native';
 import { formatMoney } from '@/utils/formatters';
 import { useAdminWallet } from '@/hooks/useAdminWallet';
 import {
@@ -74,8 +76,8 @@ export default function AdminWalletScreen() {
   const handleTabTransactions = useCallback(() => setActiveTab("transactions"), []);
   const handleTabWithdrawals = useCallback(() => setActiveTab("withdrawals"), []);
 
-  const handleApproveWithdrawal = useCallback((item: any) => openProcessModal(item, "success"), [openProcessModal]);
-  const handleRejectWithdrawal = useCallback((item: any) => openProcessModal(item, "failed"), [openProcessModal]);
+  const handleApproveWithdrawal = useCallback((item: Withdrawal) => openProcessModal(item, "success"), [openProcessModal]);
+  const handleRejectWithdrawal = useCallback((item: Withdrawal) => openProcessModal(item, "failed"), [openProcessModal]);
 
   // ─── Render ──────────────────────────────────────
   if (loading) {
@@ -301,7 +303,7 @@ const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   loadingText: {
     fontSize: LaundryTypography.size.base,
     color: LaundryColors.textSecondary,
-    fontWeight: LaundryTypography.weight.medium as any,
+    fontWeight: LaundryTypography.weight.medium as TextStyle['fontWeight'],
   },
   header: {
     backgroundColor: LaundryColors.cardBg,
@@ -313,7 +315,7 @@ const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   },
   headerTitle: {
     fontSize: LaundryTypography.size.lg,
-    fontWeight: LaundryTypography.weight.bold as any,
+    fontWeight: LaundryTypography.weight.bold as TextStyle['fontWeight'],
     color: LaundryColors.textPrimary,
   },
   headerSubtitle: {
@@ -337,12 +339,12 @@ const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
     flex: 1,
     fontSize: LaundryTypography.size.sm,
     color: LaundryColors.error,
-    fontWeight: LaundryTypography.weight.medium as any,
+    fontWeight: LaundryTypography.weight.medium as TextStyle['fontWeight'],
   },
   retryText: {
     fontSize: LaundryTypography.size.sm,
     color: LaundryColors.primary,
-    fontWeight: LaundryTypography.weight.bold as any,
+    fontWeight: LaundryTypography.weight.bold as TextStyle['fontWeight'],
   },
   walletCardWrapper: {
     marginHorizontal: LaundrySpacing.spacing.lg,
@@ -385,7 +387,7 @@ const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   walletLabel: {
     fontSize: LaundryTypography.size.base,
     color: "rgba(255,255,255,0.8)",
-    fontWeight: LaundryTypography.weight.semibold as any,
+    fontWeight: LaundryTypography.weight.semibold as TextStyle['fontWeight'],
   },
   walletIconBox: {
     width: 40,
@@ -397,7 +399,7 @@ const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   },
   walletValue: {
     fontSize: LaundryTypography.size.display,
-    fontWeight: LaundryTypography.weight.bold as any,
+    fontWeight: LaundryTypography.weight.bold as TextStyle['fontWeight'],
     color: LaundryColors.textWhite,
     marginTop: 8,
     marginBottom: 20,
@@ -415,12 +417,12 @@ const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   walletMetaLabel: {
     fontSize: LaundryTypography.size.sm,
     color: "rgba(255,255,255,0.6)",
-    fontWeight: LaundryTypography.weight.medium as any,
+    fontWeight: LaundryTypography.weight.medium as TextStyle['fontWeight'],
   },
   walletMetaValue: {
     fontSize: LaundryTypography.size.md,
     color: LaundryColors.textWhite,
-    fontWeight: LaundryTypography.weight.bold as any,
+    fontWeight: LaundryTypography.weight.bold as TextStyle['fontWeight'],
     marginTop: 2,
   },
   tabsContainer: {
@@ -444,7 +446,7 @@ const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   },
   emptyTitle: {
     fontSize: LaundryTypography.size.md,
-    fontWeight: LaundryTypography.weight.bold as any,
+    fontWeight: LaundryTypography.weight.bold as TextStyle['fontWeight'],
     color: LaundryColors.textPrimary,
     marginTop: 4,
   },
@@ -470,7 +472,7 @@ const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   },
   withdrawBtnText: {
     color: LaundryColors.primary,
-    fontWeight: LaundryTypography.weight.bold as any,
+    fontWeight: LaundryTypography.weight.bold as TextStyle['fontWeight'],
     fontSize: LaundryTypography.size.base,
   },
 });

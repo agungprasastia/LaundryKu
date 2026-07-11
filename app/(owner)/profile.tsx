@@ -44,9 +44,7 @@ export default function OwnerProfileScreen() {
   const [helpModal, setHelpModal] = useState(false);
   const [aboutModal, setAboutModal] = useState(false);
 
-  const handleUnavailableFeature = useCallback(() => {
-    crossAlert('Fitur Belum Tersedia', 'Fitur ini belum tersedia.', [{ text: 'OK' }]);
-  }, []);
+
   
   const [editModal, setEditModal] = useState(false);
   const [form, setForm] = useState({
@@ -148,10 +146,7 @@ export default function OwnerProfileScreen() {
     }
   }, []);
 
-  const latLng =
-    user?.lat != null && user?.lng != null
-      ? `${user.lat}, ${user.lng}`
-      : "Belum diatur";
+
 
   const isUserVerified = isVerified(user?.is_verified);
 

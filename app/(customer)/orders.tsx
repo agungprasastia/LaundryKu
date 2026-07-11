@@ -23,6 +23,7 @@ import {
 import * as orderService from '@/services/orderService';
 import * as paymentService from '@/services/paymentService';
 import { Order, OrderTracking } from '@/types/order';
+import { AxiosError } from 'axios';
 import { Invoice } from '@/types/payment';
 import { StatusTimeline } from '@/components/customer/StatusTimeline';
 import { TrackingSection } from '@/components/customer/TrackingSection';
@@ -75,7 +76,7 @@ export default function CustomerOrdersScreen() {
         setHistoryOrders([]);
       }
     } catch (err: unknown) {
-      const msg = (err as import("axios").AxiosError<{message: string}>)?.response?.data?.message || (err as Error)?.message || 'Gagal memuat pesanan';
+      const msg = (err as AxiosError<{message: string}>)?.response?.data?.message || (err as Error)?.message || 'Gagal memuat pesanan';
       setError(msg);
     } finally {
       setLoading(false);
@@ -189,10 +190,10 @@ export default function CustomerOrdersScreen() {
         if (res.data?.payment_id) {
           setLastPaymentId(res.data.payment_id);
         }
-        crossAlert('Gagal', (res as any).message || 'Gagal membuat payment');
+        crossAlert('Gagal', res.message || 'Gagal membuat payment');
       }
     } catch (err: unknown) {
-      const axiosErr = err as import("axios").AxiosError<{data?: {payment_id: string}, message?: string}>;
+      const axiosErr = err as AxiosError<{data?: {payment_id: string}, message?: string}>;
       if (axiosErr?.response?.status === 409 && axiosErr?.response?.data?.data?.payment_id) {
         setLastPaymentId(axiosErr.response.data.data.payment_id);
       }
@@ -223,10 +224,10 @@ export default function CustomerOrdersScreen() {
         }
         fetchOrders();
       } else {
-        crossAlert('Gagal', (res as any).message || 'Simulasi payment gagal');
+        crossAlert('Gagal', res.message || 'Simulasi payment gagal');
       }
     } catch (err: unknown) {
-      const msg = (err as import("axios").AxiosError<{message: string}>)?.response?.data?.message || (err as Error)?.message || 'Simulasi payment gagal';
+      const msg = (err as AxiosError<{message: string}>)?.response?.data?.message || (err as Error)?.message || 'Simulasi payment gagal';
       crossAlert('Error', msg);
     } finally {
       setCallbackLoading(false);
@@ -252,10 +253,10 @@ export default function CustomerOrdersScreen() {
                 setShowDetail(false);
                 fetchOrders();
               } else {
-                crossAlert('Gagal', (res as any).message || 'Gagal menyelesaikan pesanan');
+                crossAlert('Gagal', res.message || 'Gagal menyelesaikan pesanan');
               }
             } catch (err: unknown) {
-              const msg = (err as import("axios").AxiosError<{message: string}>)?.response?.data?.message || (err as Error)?.message || 'Gagal menyelesaikan pesanan';
+              const msg = (err as AxiosError<{message: string}>)?.response?.data?.message || (err as Error)?.message || 'Gagal menyelesaikan pesanan';
               crossAlert('Error', msg);
             } finally {
               setCompleteLoading(false);

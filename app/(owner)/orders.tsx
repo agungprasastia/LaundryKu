@@ -24,7 +24,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import * as ownerService from "@/services/ownerService";
 import * as orderService from "@/services/orderService";
 import * as courierService from "@/services/courierService";
-import { AvailableCourier, Order, OrderTracking } from "@/types/order";
+import { AvailableCourier, Order, OrderTracking, OrderStatus } from "@/types/order";
 import TrackingMap, { normalizeCourierLocation } from "@/components/TrackingMap";
 import {
   OwnerScreen,
@@ -41,8 +41,9 @@ const money = (n?: number) =>
 const num = (n?: number) =>
   n == null ? "-" : Number(n).toLocaleString("id-ID");
 const date = (v?: string) => (v ? new Date(v).toLocaleString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "-");
-const ver = (v: any) => v === true || v === 1;
-const em = (e: any, f: string) => e?.response?.data?.message || e?.message || f;
+import { getErrorMessage } from '@/utils/helpers';
+const ver = (v: unknown) => v === true || v === 1;
+const em = (e: unknown, f: string) => getErrorMessage(e, f);
 
 export default function OwnerOrdersScreen() {
   const { colors: LaundryColors } = useTheme();
@@ -422,7 +423,16 @@ function OwnerTrackingPanel({ order, tracking }: { order: Order; tracking: Order
   );
 }
 
-function Action({ order, busy, status, showCouriers, weight, activate }: any) {
+interface ActionProps {
+  order: Order;
+  busy: boolean;
+  status: (newStatus: OrderStatus) => void;
+  showCouriers: () => void;
+  weight: () => void;
+  activate: () => void;
+}
+
+function Action({ order, busy, status, showCouriers, weight, activate }: ActionProps) {
   const styles = useAppStyles(createStyles);
   switch (order.status) {
     case "WAITING_OWNER_CONFIRMATION":
@@ -455,7 +465,7 @@ function Badge({ st }: { st: string }) {
   );
 }
 
-function Info({ k, v, bold, highlight }: { k: string; v: any; bold?: boolean; highlight?: boolean }) {
+function Info({ k, v, bold, highlight }: { k: string; v: React.ReactNode; bold?: boolean; highlight?: boolean }) {
   const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   return (

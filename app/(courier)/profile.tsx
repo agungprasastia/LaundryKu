@@ -35,7 +35,7 @@ export default function CourierProfileScreen() {
   const [helpModal, setHelpModal] = useState(false);
   const [aboutModal, setAboutModal] = useState(false);
 
-  const handleUnavailableFeature = () => {
+  const _handleUnavailableFeature = () => {
     crossAlert('Fitur Belum Tersedia', 'Fitur ini belum tersedia.', [{ text: 'OK' }]);
   };
 

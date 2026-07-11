@@ -95,7 +95,7 @@ export function EmptyState({
 }: {
   title: string;
   message?: string;
-  icon?: keyof typeof import("@expo/vector-icons").Ionicons.glyphMap;
+  icon?: keyof typeof Ionicons.glyphMap;
 }) {
   const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
