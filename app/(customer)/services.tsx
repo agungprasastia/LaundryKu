@@ -25,10 +25,6 @@ import * as Location from 'expo-location';
 import Constants from 'expo-constants';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-// Dev mode: allow manual coordinate input (only when explicitly enabled)
-const ALLOW_MANUAL_COORDS =
-  Constants.expoConfig?.extra?.EXPO_PUBLIC_ALLOW_MANUAL_COORDS === 'true' ||
-  process.env.EXPO_PUBLIC_ALLOW_MANUAL_COORDS === 'true';
 
 export default function CustomerServicesScreen() {
   const router = useRouter();
@@ -58,9 +54,6 @@ export default function CustomerServicesScreen() {
   // GPS location state
   const [locationStatus, setLocationStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [locationError, setLocationError] = useState('');
-  const [showManualCoords, setShowManualCoords] = useState(false);
-  const [manualLat, setManualLat] = useState('');
-  const [manualLng, setManualLng] = useState('');
 
   const fetchServices = useCallback(async () => {
     try {
@@ -112,9 +105,6 @@ export default function CustomerServicesScreen() {
     setPickupDate(null);
     setLocationStatus('idle');
     setLocationError('');
-    setShowManualCoords(false);
-    setManualLat('');
-    setManualLng('');
     setShowDetail(false);
     setShowOrderModal(true);
   };
@@ -131,9 +121,6 @@ export default function CustomerServicesScreen() {
     setPickupDate(null);
     setLocationStatus('idle');
     setLocationError('');
-    setShowManualCoords(false);
-    setManualLat('');
-    setManualLng('');
   };
 
   // ─── GPS Location Handler ───
@@ -174,23 +161,6 @@ export default function CustomerServicesScreen() {
     }
   };
 
-  // ─── Apply Manual Coordinates (dev only) ───
-  const handleApplyManualCoords = () => {
-    const lat = parseFloat(manualLat);
-    const lng = parseFloat(manualLng);
-    if (isNaN(lat) || lat < -90 || lat > 90) {
-      crossAlert('Error', 'Latitude harus antara -90 dan 90');
-      return;
-    }
-    if (isNaN(lng) || lng < -180 || lng > 180) {
-      crossAlert('Error', 'Longitude harus antara -180 dan 180');
-      return;
-    }
-    setPickupLat(lat);
-    setPickupLng(lng);
-    setLocationStatus('success');
-    setShowManualCoords(false);
-  };
 
   const onDateChange = (event: any, selectedDate?: Date) => {
     if (event?.type === 'dismissed') {
@@ -550,62 +520,6 @@ export default function CustomerServicesScreen() {
                 <Text style={styles.locationErrorText}>⚠️ {locationError}</Text>
               ) : null}
 
-              {/* ─── Dev Mode: Manual Coordinates Fallback ─── */}
-              {ALLOW_MANUAL_COORDS && (
-                <View style={styles.devSection}>
-                  {!showManualCoords ? (
-                    <TouchableOpacity
-                      style={styles.devToggleButton}
-                      onPress={() => setShowManualCoords(true)}
-                      activeOpacity={0.7}
-                    >
-                      <Ionicons name="code-slash" size={14} color={LaundryColors.textMuted} />
-                      <Text style={styles.devToggleText}>Input Koordinat Manual (Development)</Text>
-                    </TouchableOpacity>
-                  ) : (
-                    <View style={styles.devManualBox}>
-                      <View style={styles.devManualHeader}>
-                        <Text style={styles.devManualTitle}>🛠 Manual Coordinates</Text>
-                        <TouchableOpacity onPress={() => setShowManualCoords(false)}>
-                          <Ionicons name="close" size={18} color={LaundryColors.textMuted} />
-                        </TouchableOpacity>
-                      </View>
-                      <View style={styles.inputRow}>
-                        <View style={styles.inputHalf}>
-                          <Text style={styles.devLabel}>Latitude</Text>
-                          <TextInput
-                            style={styles.devInput}
-                            value={manualLat}
-                            onChangeText={setManualLat}
-                            placeholder="-6.2"
-                            placeholderTextColor="#9CA3AF"
-                            keyboardType="numeric"
-                          />
-                        </View>
-                        <View style={styles.inputHalf}>
-                          <Text style={styles.devLabel}>Longitude</Text>
-                          <TextInput
-                            style={styles.devInput}
-                            value={manualLng}
-                            onChangeText={setManualLng}
-                            placeholder="106.8"
-                            placeholderTextColor="#9CA3AF"
-                            keyboardType="numeric"
-                          />
-                        </View>
-                      </View>
-                      <TouchableOpacity
-                        style={styles.devApplyButton}
-                        onPress={handleApplyManualCoords}
-                        activeOpacity={0.7}
-                      >
-                        <Text style={styles.devApplyButtonText}>Terapkan Koordinat</Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </View>
-              )}
-
               <Text style={styles.inputLabel}>Jadwal Pickup *</Text>
               
               {Platform.OS === 'web' ? (
@@ -809,8 +723,8 @@ const styles = StyleSheet.create({
     borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12,
     fontSize: 14, color: LaundryColors.textPrimary,
   },
-  inputRow: { flexDirection: 'row', gap: 12 },
-  inputHalf: { flex: 1 },
+  
+  
   inputHint: {
     fontSize: 10, color: LaundryColors.textMuted, marginTop: 4, marginBottom: 4,
   },
@@ -843,42 +757,16 @@ const styles = StyleSheet.create({
   },
 
   /* Dev Mode Manual Coords */
-  devSection: {
-    marginTop: 8,
-  },
-  devToggleButton: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 6, paddingVertical: 8,
-  },
-  devToggleText: {
-    fontSize: 12, color: LaundryColors.textMuted, fontStyle: 'italic',
-  },
-  devManualBox: {
-    backgroundColor: LaundryColors.roleKurirBg, borderRadius: 12, padding: 12,
-    borderWidth: 1, borderColor: '#FDE68A',
-  },
-  devManualHeader: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    marginBottom: 8,
-  },
-  devManualTitle: {
-    fontSize: 12, fontWeight: '600', color: LaundryColors.amberDark,
-  },
-  devLabel: {
-    fontSize: 12, fontWeight: '600', color: LaundryColors.amberDark, marginBottom: 4,
-  },
-  devInput: {
-    backgroundColor: LaundryColors.backgroundWhite, borderWidth: 1, borderColor: '#FDE68A',
-    borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8,
-    fontSize: 14, color: LaundryColors.amberDark,
-  },
-  devApplyButton: {
-    backgroundColor: LaundryColors.amber, borderRadius: 8,
-    paddingVertical: 8, alignItems: 'center', marginTop: 8,
-  },
-  devApplyButtonText: {
-    fontSize: 12, fontWeight: '700', color: LaundryColors.textWhite,
-  },
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
   submitButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',

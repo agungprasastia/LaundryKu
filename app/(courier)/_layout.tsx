@@ -1,10 +1,11 @@
 import { Tabs } from "expo-router";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { LaundryColors } from "@/constants/colors";
+import { useTheme } from '@/contexts/ThemeContext';
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function CourierLayout() {
+  const { colors: LaundryColors } = useTheme();
   return (
     <ProtectedRoute allowedRoles={["courier"]}>
       <Tabs
@@ -13,7 +14,7 @@ export default function CourierLayout() {
           tabBarActiveTintColor: LaundryColors.roleKurirIcon,
           tabBarInactiveTintColor: LaundryColors.textMuted,
           tabBarStyle: {
-            backgroundColor: LaundryColors.textWhite,
+            backgroundColor: LaundryColors.cardBg,
             borderTopWidth: 1,
             borderTopColor: LaundryColors.inputBorder,
             height: 65,

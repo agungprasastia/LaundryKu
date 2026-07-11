@@ -12,7 +12,8 @@ import {
 } from 'react-native';
 import { crossAlert } from '@/utils/crossAlert';
 import { Ionicons } from '@expo/vector-icons';
-import { LaundryColors } from '@/constants/colors';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import {
   getStatusLabel,
   getStatusColor,
@@ -28,6 +29,8 @@ import { TrackingSection } from '@/components/customer/TrackingSection';
 const IS_DUMMY_PAYMENT = process.env.EXPO_PUBLIC_USE_DUMMY_PAYMENT === 'true';
 
 export default function CustomerOrdersScreen() {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   // ─── State ───
   const [activeTab, setActiveTab] = useState<'active' | 'history'>('active');
   const [activeOrders, setActiveOrders] = useState<Order[]>([]);
@@ -634,7 +637,7 @@ export default function CustomerOrdersScreen() {
 }
 
 // ─── Main Styles ───
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
     backgroundColor: LaundryColors.backgroundWhite,

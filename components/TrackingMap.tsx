@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, View, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { LaundryColors } from '@/constants/colors';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import { OrderTracking } from '@/types/order';
 
 type TrackingMapProps = {
@@ -81,6 +82,8 @@ export default function TrackingMap({
   height = 220,
   showRouteLine = true,
 }: TrackingMapProps) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const courier = { lat: toCoordinate(courierLat), lng: toCoordinate(courierLng) };
   const pickup = { lat: toCoordinate(pickupLat), lng: toCoordinate(pickupLng) };
   const owner = { lat: toCoordinate(ownerLat), lng: toCoordinate(ownerLng) };
@@ -166,7 +169,7 @@ export default function TrackingMap({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   container: {
     overflow: 'hidden',
     borderRadius: 16,

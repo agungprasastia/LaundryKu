@@ -15,7 +15,8 @@ import { useRouter } from "expo-router";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
 import { crossAlert } from "@/utils/crossAlert";
-import { LaundryColors } from "@/constants/colors";
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import { useAuth } from "@/contexts/AuthContext";
 import * as courierService from "@/services/courierService";
 import * as walletService from "@/services/walletService";
@@ -31,6 +32,8 @@ import {
 import { getStatusBgColor, getStatusColor, getStatusLabel } from "@/constants/orderStatus";
 
 export default function CourierBerandaScreen() {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const router = useRouter();
   const { user } = useAuth();
   const verified = isVerified(user?.is_verified);
@@ -294,6 +297,8 @@ export default function CourierBerandaScreen() {
 }
 
 function MetricBox({ title, value, icon, color, bg }: { title: string; value: string; icon: any; color: string; bg: string }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <View style={styles.metricBox}>
       <View style={styles.metricBoxHeader}>
@@ -308,6 +313,8 @@ function MetricBox({ title, value, icon, color, bg }: { title: string; value: st
 }
 
 function TaskPreview({ task, onPress }: { task: CourierTask; onPress: () => void }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <TouchableOpacity style={styles.taskCard} onPress={onPress} activeOpacity={0.8}>
       <View style={styles.taskHeader}>
@@ -343,7 +350,7 @@ function TaskPreview({ task, onPress }: { task: CourierTask; onPress: () => void
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   loadingContainer: {
     flex: 1,

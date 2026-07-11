@@ -11,7 +11,8 @@ import {
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
 import { crossAlert } from "@/utils/crossAlert";
-import { LaundryColors } from "@/constants/colors";
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import {
   getStatusBgColor,
   getStatusColor,
@@ -36,6 +37,8 @@ import {
 type Tab = "active" | "history";
 
 export default function CourierTasksScreen() {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const { user } = useAuth();
   const verified = isVerified(user?.is_verified);
   const [tab, setTab] = useState<Tab>("active");
@@ -263,6 +266,8 @@ function TabButton({
   icon: any;
   onPress: () => void;
 }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <TouchableOpacity
       style={[styles.tabButton, active && styles.tabButtonActive]}
@@ -284,6 +289,8 @@ function TaskCard({
   task: CourierTask;
   onPress: () => void;
 }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const isPickup = task.type === "pickup" || task.current_phase === "pickup";
   
   return (
@@ -349,6 +356,8 @@ function TaskDetailModal({
   autoTaskId: string | null;
   currentLocation: { lat: number; lng: number } | null;
 }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   if (!task) return null;
   const actions = getTaskActions(task);
   const isPickup = task.type === "pickup" || task.current_phase === "pickup";
@@ -452,6 +461,8 @@ function TaskDetailModal({
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <View style={styles.detailRow}>
       <Text style={styles.detailLabel}>{label}</Text>
@@ -482,6 +493,8 @@ function getTaskActions(task: CourierTask) {
 }
 
 function StatusBadge({ status }: { status?: string }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   if (!status) return null;
   return (
     <View style={[styles.statusBadge, { backgroundColor: getStatusBgColor(status) }]}>
@@ -492,7 +505,7 @@ function StatusBadge({ status }: { status?: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   tabsContainer: {
     flexDirection: "row",
     backgroundColor: LaundryColors.surfaceSlate,

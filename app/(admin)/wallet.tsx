@@ -16,9 +16,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { crossAlert } from "@/utils/crossAlert";
 import * as adminService from "@/services/adminService";
 import { Wallet, WalletTransaction, Withdrawal, WithdrawalStatus, WithdrawPayload } from "@/types/wallet";
-import { LaundryColors } from "@/constants/colors";
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 
-const ADMIN_BLUE = LaundryColors.primary;
+
 
 // ─── Helpers ────────────────────────────────────────
 function formatMoney(amount: number | undefined | null): string {
@@ -43,6 +44,8 @@ function formatDate(dateStr?: string | null): string {
 
 function getErrorMessage(err: unknown, fallback: string): string {
   if (err && typeof err === "object" && "response" in err) {
+  const { isDarkMode, colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
     const axiosErr = err as { response?: { data?: { message?: string } } };
     return axiosErr.response?.data?.message || fallback;
   }
@@ -67,7 +70,7 @@ function statusColor(status: WithdrawalStatus): { text: string; bg: string } {
   if (status === "pending") return { text: "#F59E0B", bg: "#FEF3C7" };
   if (status === "failed" || status === "rejected")
     return { text: "#EF4444", bg: "#FEF2F2" };
-  return { text: LaundryColors.textSecondary, bg: "#F1F5F9" };
+  return { text: "#94A3B8", bg: "#F1F5F9" };
 }
 
 // ─── Tab Button ─────────────────────────────────────
@@ -84,6 +87,8 @@ function TabButton({
   count?: number;
   onPress: () => void;
 }) {
+  const { isDarkMode, colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <TouchableOpacity
       style={[styles.tabBtn, active && styles.tabBtnActive]}
@@ -106,6 +111,8 @@ function TabButton({
 
 // ─── Main Screen ────────────────────────────────────
 export default function AdminWalletScreen() {
+  const { isDarkMode, colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [pendingWithdrawals, setPendingWithdrawals] = useState<Withdrawal[]>([]);
@@ -280,7 +287,7 @@ export default function AdminWalletScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={LaundryColors.background} />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -339,7 +346,7 @@ export default function AdminWalletScreen() {
                 onPress={() => setWithdrawModalOpen(true)}
                 activeOpacity={0.9}
               >
-                <Ionicons name="cash-outline" size={18} color={ADMIN_BLUE} />
+                <Ionicons name="cash-outline" size={18} color={LaundryColors.primary} />
                 <Text style={styles.withdrawBtnText}>Tarik Saldo</Text>
               </TouchableOpacity>
             </View>
@@ -587,7 +594,7 @@ export default function AdminWalletScreen() {
                   <Ionicons
                     name="business"
                     size={18}
-                    color={withdrawMethod === "bank" ? ADMIN_BLUE : LaundryColors.textSecondary}
+                    color={withdrawMethod === "bank" ? LaundryColors.primary : LaundryColors.textSecondary}
                   />
                   <Text
                     style={[
@@ -606,7 +613,7 @@ export default function AdminWalletScreen() {
                   <Ionicons
                     name="phone-portrait"
                     size={18}
-                    color={withdrawMethod === "ewallet" ? ADMIN_BLUE : LaundryColors.textSecondary}
+                    color={withdrawMethod === "ewallet" ? LaundryColors.primary : LaundryColors.textSecondary}
                   />
                   <Text
                     style={[
@@ -708,6 +715,8 @@ function DetailRow({
   value: string;
   highlight?: boolean;
 }) {
+  const { isDarkMode, colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <View style={styles.detailRow}>
       <Text style={styles.detailLabel}>{label}</Text>
@@ -730,6 +739,8 @@ function PendingWithdrawalCard({
   onApprove: () => void;
   onReject: () => void;
 }) {
+  const { isDarkMode, colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const dest = item.bank_name
     ? `${item.bank_name} • ${item.bank_account_number || item.account_number || ""}`
     : item.e_wallet_provider
@@ -777,13 +788,15 @@ function PendingWithdrawalCard({
 }
 
 function TransactionCard({ item }: { item: WalletTransaction }) {
+  const { isDarkMode, colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const isCredit = item.type === "credit" || item.amount > 0;
   return (
     <View style={styles.listItemCard}>
       <View
         style={[
           styles.listIconBox,
-          { backgroundColor: isCredit ? "#ECFDF5" : "#FEF2F2" },
+          { backgroundColor: isCredit ? (isDarkMode ? '#064E3B' : '#ECFDF5') : LaundryColors.errorBg },
         ]}
       >
         <Ionicons
@@ -812,6 +825,8 @@ function TransactionCard({ item }: { item: WalletTransaction }) {
 }
 
 function WithdrawalHistoryCard({ item }: { item: Withdrawal }) {
+  const { isDarkMode, colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const sc = statusColor(item.status);
   const dest = item.bank_name
     ? `${item.bank_name} • ${item.bank_account_number || item.account_number || ""}`
@@ -845,7 +860,7 @@ function WithdrawalHistoryCard({ item }: { item: Withdrawal }) {
 
 // ─── Styles ─────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: LaundryColors.background,
@@ -868,7 +883,7 @@ const styles = StyleSheet.create({
 
   /* Header */
   header: {
-    backgroundColor: LaundryColors.textWhite,
+    backgroundColor: LaundryColors.cardBg,
     paddingTop: Platform.OS === "ios" ? 56 : 40,
     paddingBottom: 16,
     paddingHorizontal: 20,
@@ -891,13 +906,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#FEF2F2",
+    backgroundColor: LaundryColors.errorBg,
     marginHorizontal: 20,
     marginTop: 12,
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: "#FECACA",
+    borderColor: LaundryColors.errorBorder,
   },
   errorBannerText: {
     flex: 1,
@@ -915,7 +930,7 @@ const styles = StyleSheet.create({
   walletCardWrapper: {
     marginHorizontal: 20,
     marginTop: 16,
-    shadowColor: ADMIN_BLUE,
+    shadowColor: LaundryColors.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.25,
     shadowRadius: 20,
@@ -925,7 +940,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 24,
     overflow: "hidden",
-    backgroundColor: ADMIN_BLUE,
+    backgroundColor: LaundryColors.primary,
   },
   decoCircle1: {
     position: "absolute",
@@ -997,7 +1012,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginHorizontal: 20,
     marginTop: 24,
-    backgroundColor: LaundryColors.textWhite,
+    backgroundColor: LaundryColors.cardBg,
     borderRadius: 16,
     padding: 4,
     borderWidth: 1,
@@ -1013,7 +1028,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   tabBtnActive: {
-    backgroundColor: ADMIN_BLUE,
+    backgroundColor: LaundryColors.primary,
   },
   tabBtnText: {
     fontSize: 12,
@@ -1024,7 +1039,7 @@ const styles = StyleSheet.create({
     color: LaundryColors.textWhite,
   },
   tabBadge: {
-    backgroundColor: "#FEF2F2",
+    backgroundColor: LaundryColors.errorBg,
     borderRadius: 12,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -1069,7 +1084,7 @@ const styles = StyleSheet.create({
 
   /* Pending Withdrawal Card */
   pendingCard: {
-    backgroundColor: LaundryColors.textWhite,
+    backgroundColor: LaundryColors.cardBg,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -1084,7 +1099,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 16,
-    backgroundColor: "#EBF5FF",
+    backgroundColor: LaundryColors.cardSelected,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -1130,8 +1145,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: "#FECACA",
-    backgroundColor: "#FEF2F2",
+    borderColor: LaundryColors.errorBorder,
+    backgroundColor: LaundryColors.errorBg,
   },
   rejectActionText: {
     fontSize: 14,
@@ -1158,7 +1173,7 @@ const styles = StyleSheet.create({
   listItemCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: LaundryColors.textWhite,
+    backgroundColor: LaundryColors.cardBg,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -1230,7 +1245,7 @@ const styles = StyleSheet.create({
 
   /* Detail box in modal */
   detailBox: {
-    backgroundColor: LaundryColors.textWhite,
+    backgroundColor: LaundryColors.cardBg,
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -1260,7 +1275,7 @@ const styles = StyleSheet.create({
   detailValueHighlight: {
     fontSize: 16,
     fontWeight: "800",
-    color: ADMIN_BLUE,
+    color: LaundryColors.primary,
   },
 
   /* Form */
@@ -1274,7 +1289,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   notesInput: {
-    backgroundColor: LaundryColors.textWhite,
+    backgroundColor: LaundryColors.cardBg,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
     borderRadius: 12,
@@ -1335,21 +1350,21 @@ const styles = StyleSheet.create({
   withdrawBtn: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: LaundryColors.textWhite,
+    backgroundColor: LaundryColors.cardBg,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 99,
     gap: 6,
   },
   withdrawBtnText: {
-    color: ADMIN_BLUE,
+    color: LaundryColors.primary,
     fontWeight: "700",
     fontSize: 14,
   },
 
   /* Withdraw Modal */
   withdrawAvailableBox: {
-    backgroundColor: "#EBF5FF",
+    backgroundColor: LaundryColors.cardSelected,
     padding: 16,
     borderRadius: 16,
     borderWidth: 1,
@@ -1369,7 +1384,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   withdrawInput: {
-    backgroundColor: LaundryColors.textWhite,
+    backgroundColor: LaundryColors.cardBg,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
     borderRadius: 12,
@@ -1397,8 +1412,8 @@ const styles = StyleSheet.create({
     backgroundColor: LaundryColors.surfaceSlate,
   },
   methodTabActive: {
-    borderColor: ADMIN_BLUE,
-    backgroundColor: "#EBF5FF",
+    borderColor: LaundryColors.primary,
+    backgroundColor: LaundryColors.cardSelected,
   },
   methodTabText: {
     fontSize: 14,
@@ -1406,7 +1421,7 @@ const styles = StyleSheet.create({
     color: LaundryColors.textSecondary,
   },
   methodTabTextActive: {
-    color: ADMIN_BLUE,
+    color: LaundryColors.primary,
   },
   methodContentBox: {
     backgroundColor: LaundryColors.surfaceSlate,
@@ -1417,7 +1432,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   submitWithdrawBtn: {
-    backgroundColor: ADMIN_BLUE,
+    backgroundColor: LaundryColors.primary,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: "center",

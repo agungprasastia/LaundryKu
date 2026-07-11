@@ -10,7 +10,8 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { LaundryColors } from "@/constants/colors";
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 
 export const formatMoney = (value?: number | null) => {
   if (value == null) return "-";
@@ -40,6 +41,8 @@ export function OwnerScreen({
   children,
   refreshControl,
 }: ScreenProps) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <View style={styles.container}>
       <ScrollView
@@ -59,6 +62,8 @@ export function OwnerScreen({
 }
 
 export function LoadingState({ text }: { text: string }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <View style={styles.loadingContainer}>
       <ActivityIndicator size="large" color={LaundryColors.roleMitraIcon} />
@@ -74,6 +79,8 @@ export function ErrorState({
   message: string;
   onRetry: () => void;
 }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <View style={styles.errorBanner}>
       <Ionicons name="alert-circle" size={20} color={LaundryColors.error} />
@@ -96,6 +103,8 @@ export function EmptyState({
   message?: string;
   icon?: any;
 }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <View style={styles.emptyCard}>
       <Ionicons name={icon} size={40} color={LaundryColors.textMuted} />
@@ -106,6 +115,8 @@ export function EmptyState({
 }
 
 export function VerificationGate() {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <View style={styles.emptyCard}>
       <Ionicons
@@ -129,6 +140,8 @@ export function InfoRow({
   label: string;
   value?: React.ReactNode;
 }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <View style={styles.infoRow}>
       <Text style={styles.infoLabel}>{label}</Text>
@@ -146,6 +159,8 @@ export function PrimaryButton({
   onPress: () => void;
   disabled?: boolean;
 }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <TouchableOpacity
       style={[styles.primaryButton, disabled && styles.disabled]}
@@ -165,6 +180,8 @@ export function SecondaryButton({
   text: string;
   onPress: () => void;
 }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <TouchableOpacity
       style={styles.secondaryButton}
@@ -183,6 +200,8 @@ export function DangerButton({
   text: string;
   onPress: () => void;
 }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <TouchableOpacity
       style={styles.dangerButton}
@@ -194,7 +213,7 @@ export function DangerButton({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
     paddingTop: Platform.OS === "ios" ? 20 : 10,
@@ -349,4 +368,4 @@ const styles = StyleSheet.create({
   disabled: { opacity: 0.6 },
 });
 
-export const ownerStyles = styles;
+export const ownerStyles = createStyles;

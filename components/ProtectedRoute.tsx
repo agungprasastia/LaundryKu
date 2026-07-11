@@ -3,7 +3,8 @@ import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types/user';
-import { LaundryColors } from '@/constants/colors';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 
 interface ProtectedRouteProps {
   allowedRoles: UserRole[];
@@ -18,6 +19,8 @@ interface ProtectedRouteProps {
  * - Shows loading spinner while checking session
  */
 export default function ProtectedRoute({ allowedRoles, children }: ProtectedRouteProps) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
 const redirectToRoleDashboard = useCallback((role: UserRole) => {
@@ -77,7 +80,7 @@ const redirectToRoleDashboard = useCallback((role: UserRole) => {
   return <>{children}</>;
 }
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   loadingContainer: {
     flex: 1,
     alignItems: 'center',

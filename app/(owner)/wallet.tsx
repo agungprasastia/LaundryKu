@@ -14,7 +14,8 @@ import { crossAlert } from "@/utils/crossAlert";
 import * as walletService from "@/services/walletService";
 import { useAuth } from "@/contexts/AuthContext";
 import { Wallet, WalletTransaction, Withdrawal, WithdrawPayload } from "@/types/wallet";
-import { LaundryColors } from "@/constants/colors";
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import {
   EmptyState,
   ErrorState,
@@ -45,6 +46,8 @@ const emptyForm: WithdrawForm = {
 };
 
 export default function OwnerWalletScreen() {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const { user } = useAuth();
   const verified = isVerified(user?.is_verified);
   const [wallet, setWallet] = useState<Wallet | null>(null);
@@ -349,6 +352,8 @@ export default function OwnerWalletScreen() {
 }
 
 function TransactionCard({ item }: { item: WalletTransaction }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const isIncome = item.type === "credit" || item.amount > 0;
   return (
     <View style={styles.listItemCard}>
@@ -369,6 +374,8 @@ function TransactionCard({ item }: { item: WalletTransaction }) {
 }
 
 function WithdrawalCard({ item }: { item: Withdrawal }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   let statusColor = LaundryColors.textSecondary;
   let statusBg = "#F1F5F9";
   
@@ -416,6 +423,8 @@ function FormInput(props: {
   placeholder?: string;
   onChangeText: (value: string) => void;
 }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <View style={styles.inputGroup}>
       <Text style={styles.inputLabel}>{props.label}</Text>
@@ -431,7 +440,7 @@ function FormInput(props: {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   sectionHeading: { fontSize: 16, fontWeight: "700", color: LaundryColors.textPrimary, marginTop: 24, marginBottom: 12 },
   
   walletCardWrapper: {

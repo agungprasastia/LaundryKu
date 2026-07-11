@@ -1,10 +1,11 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { LaundryColors } from '@/constants/colors';
+import { useTheme } from '@/contexts/ThemeContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function CustomerLayout() {
+  const { colors: LaundryColors } = useTheme();
   return (
     <ProtectedRoute allowedRoles={['customer']}>
       <Tabs

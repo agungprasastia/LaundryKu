@@ -7,7 +7,8 @@ import {
   Modal,
   Platform,
 } from 'react-native';
-import { LaundryColors } from '@/constants/colors';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import { AlertButton, setGlobalAlert } from './crossAlert';
 
 // ─── Context ───
@@ -31,6 +32,8 @@ interface AlertState {
  * On native, crossAlert() already uses Alert.alert directly, so this is only needed for web.
  */
 export function AlertProvider({ children }: { children: React.ReactNode }) {
+  const { isDarkMode, colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const [alertState, setAlertState] = useState<AlertState>({
     visible: false,
     title: '',
@@ -137,7 +140,7 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
 }
 
 // ─── Styles ───
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -146,7 +149,7 @@ const styles = StyleSheet.create({
     padding: 40,
   },
   dialogCard: {
-    backgroundColor: LaundryColors.textWhite,
+    backgroundColor: LaundryColors.cardBg,
     borderRadius: 18,
     paddingTop: 24,
     paddingHorizontal: 24,
@@ -206,7 +209,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   dialogButtonTextCancel: {
-    color: '#6B7280',
+    color: LaundryColors.textSecondary,
   },
   dialogButtonTextDestructive: {
     color: LaundryColors.error,

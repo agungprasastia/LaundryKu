@@ -1,5 +1,5 @@
 import { Text, View } from 'react-native';
-import { LaundryColors } from '@/constants/colors';
+import { useTheme } from '@/contexts/ThemeContext';
 import TrackingMap, { normalizeCourierLocation } from '@/components/TrackingMap';
 import { getStatusLabel } from '@/constants/orderStatus';
 import { Order, OrderTracking } from '@/types/order';
@@ -19,6 +19,7 @@ function formatTimelineDate(dateStr: string): string {
 }
 
 export function TrackingSection({ order, tracking }: { order: Order; tracking: OrderTracking | null }) {
+  const { colors: LaundryColors } = useTheme();
   const courierLocation = normalizeCourierLocation(tracking);
   const updatedText = courierLocation.updatedAt ? formatTimelineDate(courierLocation.updatedAt) : null;
 

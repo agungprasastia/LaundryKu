@@ -11,12 +11,15 @@ import {
 } from 'react-native';
 import { crossAlert } from '@/utils/crossAlert';
 import { useRouter } from 'expo-router';
-import { LaundryColors } from '@/constants/colors';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { SettingsModal, HelpModal, AboutModal } from '@/components/ProfileModals';
 
 export default function ProfilScreen() {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const [settingsModal, setSettingsModal] = useState(false);
   const [helpModal, setHelpModal] = useState(false);
   const [aboutModal, setAboutModal] = useState(false);
@@ -168,10 +171,10 @@ export default function ProfilScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
-    backgroundColor: LaundryColors.textWhite,
+    backgroundColor: LaundryColors.cardBg,
     paddingTop: Platform.OS === 'ios' ? 56 : 40,
     paddingBottom: 16,
     paddingHorizontal: 20,
@@ -183,7 +186,7 @@ const styles = StyleSheet.create({
 
   // Profile card
   profileCard: {
-    backgroundColor: LaundryColors.textWhite,
+    backgroundColor: LaundryColors.cardBg,
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
@@ -206,7 +209,7 @@ const styles = StyleSheet.create({
 
   // Menu
   menuCard: {
-    backgroundColor: LaundryColors.textWhite, borderRadius: 16,
+    backgroundColor: LaundryColors.cardBg, borderRadius: 16,
     borderWidth: 1, borderColor: LaundryColors.inputBorder, marginBottom: 16,
     overflow: 'hidden',
   },
@@ -225,8 +228,8 @@ const styles = StyleSheet.create({
   // Logout
   logoutButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    backgroundColor: '#FEF2F2', borderRadius: 16, height: 50, gap: 8,
-    borderWidth: 1, borderColor: '#FECACA',
+    backgroundColor: LaundryColors.errorBg, borderRadius: 16, height: 50, gap: 8,
+    borderWidth: 1, borderColor: LaundryColors.errorBorder,
   },
   logoutText: { fontSize: 16, fontWeight: '700', color: LaundryColors.error },
 

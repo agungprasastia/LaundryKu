@@ -13,7 +13,8 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { LaundryColors } from "@/constants/colors";
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import {
   getStatusBgColor,
   getStatusColor,
@@ -43,6 +44,8 @@ const activeStatuses = [
 ];
 
 export default function OwnerBerandaScreen() {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const router = useRouter();
   const { user } = useAuth();
   const isVerified = verified(user?.is_verified);
@@ -244,6 +247,8 @@ export default function OwnerBerandaScreen() {
 }
 
 function MetricBox({ title, value, icon, color, bg }: { title: string; value: string; icon: any; color: string; bg: string }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <View style={styles.metricBox}>
       <View style={styles.metricBoxHeader}>
@@ -258,6 +263,8 @@ function MetricBox({ title, value, icon, color, bg }: { title: string; value: st
 }
 
 function Badge({ status }: { status: string }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <View style={[styles.badge, { backgroundColor: getStatusBgColor(status) }]}>
       <Text style={[styles.badgeText, { color: getStatusColor(status) }]}>{getStatusLabel(status)}</Text>
@@ -266,6 +273,8 @@ function Badge({ status }: { status: string }) {
 }
 
 function OrderCard({ order, onPress }: { order: Order; onPress: () => void }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   return (
     <TouchableOpacity style={styles.orderCard} onPress={onPress} activeOpacity={0.8}>
       <View style={styles.orderHeader}>
@@ -292,7 +301,7 @@ function OrderCard({ order, onPress }: { order: Order; onPress: () => void }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   loadingContainer: {
     flex: 1,

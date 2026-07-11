@@ -11,14 +11,19 @@ import {
   ScrollView,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  useWindowDimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { LaundryColors } from '@/constants/colors';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
 
 export default function WelcomeScreen() {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
+  const { width: SCREEN_WIDTH } = useWindowDimensions();
   const router = useRouter();
 
   // Animations
@@ -138,7 +143,7 @@ export default function WelcomeScreen() {
           </Animated.View>
 
           {/* Illustration area with icons */}
-          <Animated.View style={[styles.illustrationArea, { opacity: illustrationFade }]}>
+          <Animated.View style={[styles.illustrationArea, { opacity: illustrationFade, width: SCREEN_WIDTH }]}>
             {/* Left side - basket/folded clothes */}
             <View style={styles.illustLeft}>
               <View style={styles.illustPlant}>
@@ -202,7 +207,7 @@ export default function WelcomeScreen() {
             style={styles.featuresScroll}
           >
             {features.map((item) => (
-              <View key={item.id} style={styles.featureCardWrap}>
+              <View key={item.id} style={[styles.featureCardWrap, { width: SCREEN_WIDTH }]}>
                 <View style={styles.featureCard}>
                   <View style={[styles.featureIconWrap, { backgroundColor: LaundryColors.rolePelangganBg }]}>
                     {item.iconFamily === 'Ionicons' ? (
@@ -264,7 +269,7 @@ export default function WelcomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: LaundryColors.background,
@@ -320,7 +325,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     justifyContent: 'center',
-    width: SCREEN_WIDTH,
     paddingHorizontal: 20,
     height: 130,
     marginTop: 10,
@@ -453,7 +457,6 @@ const styles = StyleSheet.create({
     marginBottom: 26,
   },
   featureCardWrap: {
-    width: SCREEN_WIDTH,
     paddingHorizontal: 24,
   },
   featureCard: {

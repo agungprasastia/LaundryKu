@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
-import { LaundryColors } from '@/constants/colors';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import {
   ALL_ORDER_STATUSES,
   getStatusColor,
@@ -23,6 +24,8 @@ function formatTimelineDate(dateStr: string): string {
 }
 
 export function StatusTimeline({ order }: { order: Order }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const currentStatusIndex = ALL_ORDER_STATUSES.indexOf(order.status);
   const trackingMap = new Map<string, { timestamp: string; description?: string }>();
 
@@ -85,7 +88,7 @@ export function StatusTimeline({ order }: { order: Order }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   container: { marginTop: 8, paddingLeft: 4 },
   step: { position: 'relative' },
   connector: {

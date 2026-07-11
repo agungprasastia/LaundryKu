@@ -14,7 +14,8 @@ import { crossAlert } from "@/utils/crossAlert";
 import * as serviceService from "@/services/serviceService";
 import { useAuth } from "@/contexts/AuthContext";
 import { LaundryService } from "@/types/service";
-import { LaundryColors } from "@/constants/colors";
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import {
   EmptyState,
   ErrorState,
@@ -46,6 +47,9 @@ const emptyForm: ServiceForm = {
 };
 
 export default function OwnerServicesScreen() {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
+  const sharedOwnerStyles = useAppStyles(ownerStyles);
   const { user } = useAuth();
   const verified = isVerified(user?.is_verified);
   const [services, setServices] = useState<LaundryService[]>([]);
@@ -254,11 +258,14 @@ function ServiceCard({
   onEdit: () => void;
   onDeactivate: () => void;
 }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
+  const sharedOwnerStyles = useAppStyles(ownerStyles);
   const active = service.is_active !== false && service.is_active !== 0;
 
   return (
     <View style={styles.card}>
-      <View style={ownerStyles.row}>
+      <View style={sharedOwnerStyles.row}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flex: 1 }}>
           <View style={[styles.iconWrapper, { backgroundColor: active ? "#EBF5FF" : "#F1F5F9" }]}>
             <Ionicons name="shirt" size={20} color={active ? "#2563EB" : LaundryColors.textMuted} />
@@ -306,6 +313,9 @@ function ServiceCard({
 }
 
 function StatusBadge({ active }: { active: boolean }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
+  const sharedOwnerStyles = useAppStyles(ownerStyles);
   return (
     <View style={[styles.badge, { backgroundColor: active ? "#ECFDF5" : "#FEF2F2" }]}>
       <Text style={[styles.badgeText, { color: active ? "#10B981" : LaundryColors.error }]}>
@@ -332,6 +342,9 @@ function ServiceModal({
   onClose: () => void;
   onSubmit: () => void;
 }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
+  const sharedOwnerStyles = useAppStyles(ownerStyles);
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View style={styles.modalOverlay}>
@@ -398,6 +411,9 @@ function FormInput(props: {
   multiline?: boolean;
   onChangeText: (value: string) => void;
 }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
+  const sharedOwnerStyles = useAppStyles(ownerStyles);
   return (
     <View style={styles.inputGroup}>
       <Text style={styles.inputLabel}>{props.label}</Text>
@@ -419,7 +435,7 @@ function FormInput(props: {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   toolbar: {
     flexDirection: "row",
     justifyContent: "space-between",

@@ -14,7 +14,8 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { LaundryColors } from '@/constants/colors';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import { useAuth } from '@/contexts/AuthContext';
 import { getStatusLabel, getStatusColor, getStatusBgColor } from '@/constants/orderStatus';
 import * as serviceService from '@/services/serviceService';
@@ -25,6 +26,8 @@ import { Order } from '@/types/order';
 import { Notification } from '@/types/notification';
 
 export default function CustomerBerandaScreen() {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const { user } = useAuth();
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -318,7 +321,7 @@ export default function CustomerBerandaScreen() {
 }
 
 // ─── Styles ──────────────────────────────────────
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   scrollContent: { paddingBottom: 20 },
 

@@ -1,10 +1,11 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { LaundryColors } from '@/constants/colors';
+import { useTheme } from '@/contexts/ThemeContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function AdminLayout() {
+  const { colors: LaundryColors } = useTheme();
   return (
     <ProtectedRoute allowedRoles={['admin']}>
       <Tabs
@@ -13,7 +14,7 @@ export default function AdminLayout() {
           tabBarActiveTintColor: LaundryColors.primary,
           tabBarInactiveTintColor: LaundryColors.textMuted,
           tabBarStyle: {
-            backgroundColor: LaundryColors.textWhite,
+            backgroundColor: LaundryColors.cardBg,
             borderTopWidth: 1,
             borderTopColor: LaundryColors.inputBorder,
             height: 65,

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, StyleSheet, ScrollView, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LaundryColors } from '@/constants/colors';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 
 interface ModalProps {
   visible: boolean;
@@ -11,7 +12,8 @@ interface ModalProps {
 export const SettingsModal = ({ visible, onClose }: ModalProps) => {
   const [pushNotif, setPushNotif] = useState(true);
   const [emailNotif, setEmailNotif] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const { isDarkMode, setTheme, colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
 
   return (
     <Modal visible={visible} transparent animationType="slide">
@@ -27,17 +29,17 @@ export const SettingsModal = ({ visible, onClose }: ModalProps) => {
             <Text style={styles.sectionTitle}>Notifikasi</Text>
             <View style={styles.settingRow}>
               <Text style={styles.settingLabel}>Notifikasi Push</Text>
-              <Switch value={pushNotif} onValueChange={setPushNotif} trackColor={{ true: LaundryColors.primary, false: '#e2e8f0' }} thumbColor="#fff" />
+              <Switch value={pushNotif} onValueChange={setPushNotif} trackColor={{ true: LaundryColors.primary, false: LaundryColors.inputBorder }} thumbColor="#fff" />
             </View>
             <View style={styles.settingRow}>
               <Text style={styles.settingLabel}>Notifikasi Email</Text>
-              <Switch value={emailNotif} onValueChange={setEmailNotif} trackColor={{ true: LaundryColors.primary, false: '#e2e8f0' }} thumbColor="#fff" />
+              <Switch value={emailNotif} onValueChange={setEmailNotif} trackColor={{ true: LaundryColors.primary, false: LaundryColors.inputBorder }} thumbColor="#fff" />
             </View>
             
             <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Tampilan</Text>
             <View style={styles.settingRow}>
               <Text style={styles.settingLabel}>Mode Gelap</Text>
-              <Switch value={darkMode} onValueChange={setDarkMode} trackColor={{ true: LaundryColors.primary, false: '#e2e8f0' }} thumbColor="#fff" />
+              <Switch value={isDarkMode} onValueChange={setTheme} trackColor={{ true: LaundryColors.primary, false: LaundryColors.inputBorder }} thumbColor="#fff" />
             </View>
           </ScrollView>
         </View>
@@ -47,6 +49,9 @@ export const SettingsModal = ({ visible, onClose }: ModalProps) => {
 };
 
 export const HelpModal = ({ visible, onClose }: ModalProps) => {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
+  
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View style={styles.modalOverlay}>
@@ -92,6 +97,9 @@ export const HelpModal = ({ visible, onClose }: ModalProps) => {
 };
 
 export const AboutModal = ({ visible, onClose }: ModalProps) => {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
+
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.modalOverlayFade}>
@@ -120,7 +128,7 @@ export const AboutModal = ({ visible, onClose }: ModalProps) => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   modalOverlay: {
     flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end',
   },

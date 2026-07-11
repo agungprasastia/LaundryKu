@@ -9,12 +9,15 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
-import { LaundryColors } from '@/constants/colors';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import { Ionicons } from '@expo/vector-icons';
 import * as adminService from '@/services/adminService';
 import { PendingUser } from '@/types/user';
 
 export default function VerifikasiScreen() {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -241,10 +244,10 @@ export default function VerifikasiScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
-    backgroundColor: LaundryColors.textWhite,
+    backgroundColor: LaundryColors.cardBg,
     paddingTop: Platform.OS === 'ios' ? 56 : 40,
     paddingBottom: 16,
     paddingHorizontal: 20,
@@ -264,12 +267,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#FEF2F2',
+    backgroundColor: LaundryColors.errorBg,
     borderRadius: 12,
     padding: 12,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: LaundryColors.errorBorder,
   },
   errorText: { flex: 1, fontSize: 12, color: LaundryColors.error, fontWeight: '500' },
   retryText: { fontSize: 12, color: LaundryColors.primary, fontWeight: '700' },
@@ -290,7 +293,7 @@ const styles = StyleSheet.create({
 
   // User card
   userCard: {
-    backgroundColor: LaundryColors.textWhite,
+    backgroundColor: LaundryColors.cardBg,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,

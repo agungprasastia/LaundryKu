@@ -15,12 +15,15 @@ import {
 import { crossAlert } from '@/utils/crossAlert';
 import { useRouter } from 'expo-router';
 import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
-import { LaundryColors } from '@/constants/colors';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import { useAuth } from '@/contexts/AuthContext';
 
 type RoleType = 'pelanggan' | 'mitra' | 'kurir';
 
 export default function LoginScreen() {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const router = useRouter();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
@@ -350,7 +353,7 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: LaundryColors.background,
@@ -482,12 +485,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#FEF2F2',
+    backgroundColor: LaundryColors.errorBg,
     borderRadius: 12,
     padding: 12,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: LaundryColors.errorBorder,
   },
   errorText: {
     flex: 1,

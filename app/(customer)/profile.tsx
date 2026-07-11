@@ -15,13 +15,16 @@ import {
 import { crossAlert } from '@/utils/crossAlert';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { LaundryColors } from '@/constants/colors';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import { useAuth } from '@/contexts/AuthContext';
 import * as notificationService from '@/services/notificationService';
 import { Notification } from '@/types/notification';
 import { SettingsModal, HelpModal, AboutModal } from '@/components/ProfileModals';
 
 export default function CustomerProfileScreen() {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const router = useRouter();
   const { user, logout, updateProfile } = useAuth();
 
@@ -351,7 +354,7 @@ export default function CustomerProfileScreen() {
 }
 
 // ─── Styles ──────────────────────────────────────
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
     backgroundColor: LaundryColors.backgroundWhite,
@@ -385,7 +388,7 @@ const styles = StyleSheet.create({
 
   // Menu
   menuCard: {
-    backgroundColor: LaundryColors.textWhite, borderRadius: 16,
+    backgroundColor: LaundryColors.cardBg, borderRadius: 16,
     borderWidth: 1, borderColor: LaundryColors.inputBorder, marginBottom: 16,
     overflow: 'hidden',
   },

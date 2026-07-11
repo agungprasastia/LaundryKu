@@ -11,7 +11,8 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { crossAlert } from "@/utils/crossAlert";
-import { LaundryColors } from "@/constants/colors";
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import {
   ALL_ORDER_STATUSES,
   getStatusBgColor,
@@ -43,6 +44,9 @@ const ver = (v: any) => v === true || v === 1;
 const em = (e: any, f: string) => e?.response?.data?.message || e?.message || f;
 
 export default function OwnerOrdersScreen() {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
+  const sharedOwnerStyles = useAppStyles(ownerStyles);
   const { user } = useAuth();
   const verified = ver(user?.is_verified);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -211,11 +215,11 @@ export default function OwnerOrdersScreen() {
         orders.map((o) => (
           <TouchableOpacity
             key={o.order_id}
-            style={ownerStyles.card}
+            style={sharedOwnerStyles.card}
             onPress={() => open(o)}
             activeOpacity={0.8}
           >
-            <View style={ownerStyles.row}>
+            <View style={sharedOwnerStyles.row}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flex: 1, marginRight: 8 }}>
                 <Ionicons name="basket" size={20} color={LaundryColors.roleMitraIcon} />
                 <Text style={styles.title} numberOfLines={1} ellipsizeMode="middle">{o.order_id}</Text>
@@ -245,7 +249,7 @@ export default function OwnerOrdersScreen() {
       <Modal visible={modal} transparent animationType="slide">
         <View style={styles.overlay}>
           <View style={styles.sheet}>
-            <View style={ownerStyles.row}>
+            <View style={sharedOwnerStyles.row}>
               <Text style={styles.sheetTitle}>Detail Order</Text>
               <TouchableOpacity onPress={() => setModal(false)}>
                 <Ionicons name="close-circle" size={28} color={LaundryColors.textMuted} />
@@ -321,7 +325,7 @@ export default function OwnerOrdersScreen() {
       <Modal visible={courierModal} transparent animationType="slide">
         <View style={styles.overlay}>
           <View style={styles.sheet}>
-            <View style={ownerStyles.row}>
+            <View style={sharedOwnerStyles.row}>
               <Text style={styles.sheetTitle}>Pilih Kurir</Text>
               <TouchableOpacity onPress={() => setCourierModal(false)}>
                 <Ionicons name="close-circle" size={28} color={LaundryColors.textMuted} />
@@ -334,7 +338,7 @@ export default function OwnerOrdersScreen() {
                 couriers.map((c) => (
                   <TouchableOpacity
                     key={c.user_id}
-                    style={ownerStyles.card}
+                    style={sharedOwnerStyles.card}
                     onPress={() => assign(c)}
                   >
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
@@ -360,7 +364,7 @@ export default function OwnerOrdersScreen() {
       <Modal visible={weightModal} transparent animationType="slide">
         <View style={styles.overlay}>
           <View style={styles.sheet}>
-            <View style={ownerStyles.row}>
+            <View style={sharedOwnerStyles.row}>
               <Text style={styles.sheetTitle}>Input Berat Laundry (Kg)</Text>
               <TouchableOpacity onPress={() => setWeightModal(false)}>
                 <Ionicons name="close-circle" size={28} color={LaundryColors.textMuted} />
@@ -386,6 +390,9 @@ export default function OwnerOrdersScreen() {
 }
 
 function OwnerTrackingPanel({ order, tracking }: { order: Order; tracking: OrderTracking | null }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
+  const sharedOwnerStyles = useAppStyles(ownerStyles);
   const courierLocation = normalizeCourierLocation(tracking);
   return (
     <View style={styles.mapBlock}>
@@ -417,6 +424,9 @@ function OwnerTrackingPanel({ order, tracking }: { order: Order; tracking: Order
 }
 
 function Action({ order, busy, status, showCouriers, weight, activate }: any) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
+  const sharedOwnerStyles = useAppStyles(ownerStyles);
   switch (order.status) {
     case "WAITING_OWNER_CONFIRMATION":
       return <PrimaryButton text="Konfirmasi Order" onPress={() => status("CONFIRMED")} disabled={busy} />;
@@ -438,6 +448,9 @@ function Action({ order, busy, status, showCouriers, weight, activate }: any) {
 }
 
 function Badge({ st }: { st: string }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
+  const sharedOwnerStyles = useAppStyles(ownerStyles);
   return (
     <View style={[styles.badge, { backgroundColor: getStatusBgColor(st) }]}>
       <Text style={[styles.badgeText, { color: getStatusColor(st) }]}>
@@ -448,6 +461,9 @@ function Badge({ st }: { st: string }) {
 }
 
 function Info({ k, v, bold, highlight }: { k: string; v: any; bold?: boolean; highlight?: boolean }) {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
+  const sharedOwnerStyles = useAppStyles(ownerStyles);
   return (
     <View style={styles.infoRow}>
       <Text style={styles.infoLabel}>{k}</Text>
@@ -456,7 +472,7 @@ function Info({ k, v, bold, highlight }: { k: string; v: any; bold?: boolean; hi
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   title: { fontSize: 16, fontWeight: "700", color: LaundryColors.textPrimary },
   customerName: { fontSize: 16, fontWeight: "700", color: LaundryColors.textPrimary, marginTop: 4 },
   serviceName: { fontSize: 14, color: LaundryColors.textSecondary, marginTop: 2 },

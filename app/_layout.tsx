@@ -6,6 +6,7 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { AlertProvider } from '@/utils/AlertProvider';
+import { ThemeProvider as AppThemeProvider } from '@/contexts/ThemeContext';
 
 export const unstable_settings = {
   anchor: 'index',
@@ -16,20 +17,22 @@ export default function RootLayout() {
 
   return (
     <AlertProvider>
-      <AuthProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="(admin)" />
-            <Stack.Screen name="(customer)" />
-            <Stack.Screen name="(owner)" />
-            <Stack.Screen name="(courier)" />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </AuthProvider>
+      <AppThemeProvider>
+        <AuthProvider>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
+              <Stack.Screen name="index" />
+              <Stack.Screen name="(auth)" />
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="(admin)" />
+              <Stack.Screen name="(customer)" />
+              <Stack.Screen name="(owner)" />
+              <Stack.Screen name="(courier)" />
+            </Stack>
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </AuthProvider>
+      </AppThemeProvider>
     </AlertProvider>
   );
 }

@@ -10,7 +10,8 @@ import {
 } from "react-native";
 import { crossAlert } from "@/utils/crossAlert";
 import { useRouter } from "expo-router";
-import { LaundryColors } from "@/constants/colors";
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/contexts/AuthContext";
 import { SettingsModal, HelpModal, AboutModal } from '@/components/ProfileModals';
@@ -25,10 +26,11 @@ import {
   isVerified,
   LoadingState,
   OwnerScreen,
-  ownerStyles,
 } from "@/components/owner/roleComponents";
 
 export default function OwnerProfileScreen() {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const router = useRouter();
   const { user, logout, updateProfile } = useAuth();
   const [items, setItems] = useState<Notification[]>([]);
@@ -367,7 +369,7 @@ export default function OwnerProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(15,23,42,.4)",
@@ -475,7 +477,7 @@ const styles = StyleSheet.create({
 
   // Menu
   menuCard: {
-    backgroundColor: LaundryColors.textWhite, borderRadius: 16,
+    backgroundColor: LaundryColors.cardBg, borderRadius: 16,
     borderWidth: 1, borderColor: LaundryColors.inputBorder, marginBottom: 20,
     overflow: 'hidden',
   },

@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { RefreshControl, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { LaundryColors } from "@/constants/colors";
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import { useAuth } from "@/contexts/AuthContext";
 import * as courierService from "@/services/courierService";
 import { CourierEarnings } from "@/types/order";
@@ -17,6 +18,8 @@ import {
 } from "@/components/courier/roleComponents";
 
 export default function CourierEarningsScreen() {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const { user } = useAuth();
   const verified = isVerified(user?.is_verified);
   const [earnings, setEarnings] = useState<CourierEarnings | null>(null);
@@ -162,7 +165,7 @@ export default function CourierEarningsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   totalEarningsCard: {
     backgroundColor: LaundryColors.roleKurirIcon,
     borderRadius: 24,

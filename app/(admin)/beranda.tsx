@@ -14,13 +14,16 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { crossAlert } from '@/utils/crossAlert';
-import { LaundryColors } from '@/constants/colors';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import { useAuth } from '@/contexts/AuthContext';
 import * as adminService from '@/services/adminService';
 import { PendingUser } from '@/types/user';
 
 // ─── Component ───────────────────────────────────
 export default function AdminBerandaScreen() {
+  const { isDarkMode, colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const router = useRouter();
   const { user } = useAuth();
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -81,7 +84,7 @@ export default function AdminBerandaScreen() {
       change: metrics?.users_change || '',
       changeSub: metrics?.users_change ? 'vs kemarin' : '',
       color: LaundryColors.primary,
-      bg: '#EBF5FF',
+      bg: LaundryColors.rolePelangganBg,
     },
     {
       icon: 'person',
@@ -90,7 +93,7 @@ export default function AdminBerandaScreen() {
       change: '',
       changeSub: '',
       color: LaundryColors.primary,
-      bg: '#EBF5FF',
+      bg: LaundryColors.rolePelangganBg,
     },
     {
       icon: 'bicycle',
@@ -99,7 +102,7 @@ export default function AdminBerandaScreen() {
       change: '',
       changeSub: '',
       color: LaundryColors.warning,
-      bg: '#FFF7ED',
+      bg: LaundryColors.roleKurirBg,
     },
     {
       icon: 'business',
@@ -108,7 +111,7 @@ export default function AdminBerandaScreen() {
       change: '',
       changeSub: '',
       color: LaundryColors.success,
-      bg: '#ECFDF5',
+      bg: LaundryColors.roleMitraBg,
     },
     {
       icon: 'cube',
@@ -117,7 +120,7 @@ export default function AdminBerandaScreen() {
       change: metrics?.orders_change || '',
       changeSub: metrics?.orders_change ? 'vs kemarin' : '',
       color: LaundryColors.success,
-      bg: '#ECFDF5',
+      bg: LaundryColors.roleMitraBg,
     },
     {
       icon: 'bicycle',
@@ -126,7 +129,7 @@ export default function AdminBerandaScreen() {
       change: metrics?.couriers_change || '',
       changeSub: metrics?.couriers_change ? 'vs kemarin' : '',
       color: LaundryColors.warning,
-      bg: '#FFF7ED',
+      bg: LaundryColors.roleKurirBg,
     },
     {
       icon: 'cash',
@@ -137,16 +140,16 @@ export default function AdminBerandaScreen() {
       change: metrics?.revenue_change || '',
       changeSub: metrics?.revenue_change ? 'vs kemarin' : '',
       color: LaundryColors.error,
-      bg: '#FEF2F2',
+      bg: LaundryColors.errorBg,
     },
   ];
 
   const quickActions = [
-    { icon: 'checkmark-circle', label: 'Verifikasi\nMitra', color: LaundryColors.primary, bg: '#EBF5FF', onPress: () => router.push('/(admin)/verifikasi') },
-    { icon: 'checkmark-circle', label: 'Verifikasi\nKurir', color: LaundryColors.primary, bg: '#EBF5FF', onPress: () => router.push('/(admin)/verifikasi') },
-    { icon: 'people', label: 'Kelola\nPengguna', color: LaundryColors.primary, bg: '#EBF5FF', onPress: () => router.push('/(admin)/pengguna') },
-    { icon: 'wallet', label: 'Wallet\nPlatform', color: LaundryColors.primary, bg: '#EBF5FF', onPress: () => router.push('/(admin)/wallet') },
-    { icon: 'desktop', label: 'Laporan\nAnalytics', color: LaundryColors.primary, bg: '#EBF5FF', onPress: () => router.push('/(admin)/laporan') },
+    { icon: 'checkmark-circle', label: 'Verifikasi\nMitra', color: LaundryColors.primary, bg: LaundryColors.rolePelangganBg, onPress: () => router.push('/(admin)/verifikasi') },
+    { icon: 'checkmark-circle', label: 'Verifikasi\nKurir', color: LaundryColors.primary, bg: LaundryColors.rolePelangganBg, onPress: () => router.push('/(admin)/verifikasi') },
+    { icon: 'people', label: 'Kelola\nPengguna', color: LaundryColors.primary, bg: LaundryColors.rolePelangganBg, onPress: () => router.push('/(admin)/pengguna') },
+    { icon: 'wallet', label: 'Wallet\nPlatform', color: LaundryColors.primary, bg: LaundryColors.rolePelangganBg, onPress: () => router.push('/(admin)/wallet') },
+    { icon: 'desktop', label: 'Laporan\nAnalytics', color: LaundryColors.primary, bg: LaundryColors.rolePelangganBg, onPress: () => router.push('/(admin)/laporan') },
   ];
 
   const handleUnavailableFeature = () => {
@@ -171,7 +174,7 @@ export default function AdminBerandaScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={LaundryColors.background} />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -280,7 +283,7 @@ export default function AdminBerandaScreen() {
                   ]}
                 >
                   <View style={[styles.pendingAvatar, {
-                    backgroundColor: item.role === 'owner' ? '#EBF5FF' : '#FFF7ED'
+                    backgroundColor: item.role === 'owner' ? LaundryColors.roleMitraBg : LaundryColors.roleKurirBg
                   }]}>
                     <Text style={{ fontSize: 20 }}>
                       {item.role === 'owner' ? '🏪' : '👤'}
@@ -336,7 +339,7 @@ export default function AdminBerandaScreen() {
 }
 
 // ─── Styles ──────────────────────────────────────
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: LaundryColors.background,
@@ -362,13 +365,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#FEF2F2',
+    backgroundColor: LaundryColors.errorBg,
     marginHorizontal: 20,
     marginTop: 12,
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: LaundryColors.errorBorder,
   },
   errorBannerText: {
     flex: 1,
@@ -399,7 +402,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: LaundryColors.textWhite,
+    backgroundColor: LaundryColors.cardBg,
     paddingTop: Platform.OS === 'ios' ? 56 : 40,
     paddingBottom: 16,
     paddingHorizontal: 20,
@@ -489,7 +492,7 @@ const styles = StyleSheet.create({
     width: '48%',
     flexGrow: 1,
     flexBasis: '45%',
-    backgroundColor: LaundryColors.textWhite,
+    backgroundColor: LaundryColors.cardBg,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
@@ -523,7 +526,7 @@ const styles = StyleSheet.create({
   /* Quick Actions */
   quickActionsCard: {
     marginHorizontal: 20,
-    backgroundColor: LaundryColors.textWhite,
+    backgroundColor: LaundryColors.cardBg,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
@@ -556,7 +559,7 @@ const styles = StyleSheet.create({
   /* Pending Verifications */
   pendingCard: {
     marginHorizontal: 20,
-    backgroundColor: LaundryColors.textWhite,
+    backgroundColor: LaundryColors.cardBg,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
@@ -602,7 +605,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   pendingBadge: {
-    backgroundColor: '#FFF7ED',
+    backgroundColor: LaundryColors.roleKurirBg,
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -628,7 +631,7 @@ const styles = StyleSheet.create({
   /* System Status */
   systemStatusCard: {
     marginHorizontal: 20,
-    backgroundColor: LaundryColors.textWhite,
+    backgroundColor: LaundryColors.cardBg,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,

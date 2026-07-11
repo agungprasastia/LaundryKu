@@ -10,11 +10,14 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { crossAlert } from '@/utils/crossAlert';
-import { LaundryColors } from '@/constants/colors';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import { useAuth } from '@/contexts/AuthContext';
 import * as authService from '@/services/authService';
 
 export default function WaitingVerificationScreen() {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const router = useRouter();
   const { user, logout, refreshProfile } = useAuth();
 
@@ -114,7 +117,7 @@ export default function WaitingVerificationScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (LaundryColors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: LaundryColors.background,
