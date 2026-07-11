@@ -4,12 +4,12 @@ import {
   View,
   Text,
   StyleSheet,
-  StatusBar,
   Platform,
   ScrollView,
   NativeSyntheticEvent,
   NativeScrollEvent,
   useWindowDimensions,
+  StatusBar,
 } from 'react-native';
 import Animated, { 
   useSharedValue, 

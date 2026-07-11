@@ -1,12 +1,12 @@
 import { ThemeColors } from '@/constants/colors';
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { RefreshControl, StyleSheet, Text, View } from "react-native";
+import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
 import { useAuth } from "@/contexts/AuthContext";
 import * as courierService from "@/services/courierService";
-import { CourierEarnings } from "@/types/order";
 import {
   CourierScreen,
   EmptyState,
@@ -23,44 +23,42 @@ export default function CourierEarningsScreen() {
   const styles = useAppStyles(createStyles);
   const { user } = useAuth();
   const verified = isVerified(user?.is_verified);
-  const [earnings, setEarnings] = useState<CourierEarnings | null>(null);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState("");
 
-  const loadEarnings = useCallback(async () => {
-    if (!verified) {
-      setLoading(false);
-      return;
-    }
-    try {
-      setError("");
+  const {
+    data: earnings = null,
+    isLoading: loading,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: ['courier', 'earnings'],
+    queryFn: async () => {
       const response = await courierService.getMyEarnings();
-      setEarnings(response.success ? response.data || null : null);
-    } catch (err) {
-      setError(getErrorMessage(err, "Gagal memuat pendapatan"));
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [verified]);
+      if (!response.success) throw new Error(response.message || "Gagal memuat pendapatan");
+      return response.data || null;
+    },
+    enabled: verified,
+  });
 
-  useEffect(() => {
-    loadEarnings();
-  }, [loadEarnings]);
+  const error = queryError ? getErrorMessage(queryError, "Gagal memuat pendapatan") : "";
+
+  const loadEarnings = async () => {
+    await refetch();
+  };
 
   const refreshControl = useMemo(
     () => (
       <RefreshControl
         refreshing={refreshing}
-        onRefresh={() => {
+        onRefresh={async () => {
           setRefreshing(true);
-          loadEarnings();
+          await refetch();
+          setRefreshing(false);
         }}
         colors={[LaundryColors.roleKurirIcon]}
       />
     ),
-    [loadEarnings, refreshing],
+    [refetch, refreshing, LaundryColors.roleKurirIcon],
   );
 
   if (!verified)

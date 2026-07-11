@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   View,
   Animated,
-  StatusBar,
   ScrollView,
   Platform,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import { useRouter } from "expo-router";
 import * as Location from "expo-location";

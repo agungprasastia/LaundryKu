@@ -1,5 +1,5 @@
 import { ThemeColors } from '@/constants/colors';
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Modal,
   RefreshControl,
@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import InteractiveButton from '@/components/ui/InteractiveButton';
 import { Ionicons } from "@expo/vector-icons";
 import { crossAlert } from "@/utils/crossAlert";
@@ -16,7 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import * as walletService from "@/services/walletService";
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
-import { Wallet, WalletTransaction, Withdrawal, WithdrawPayload } from "@/types/wallet";
+import { WalletTransaction, Withdrawal, WithdrawPayload } from "@/types/wallet";
 import {
   CourierScreen,
   EmptyState,
@@ -44,61 +45,77 @@ export default function CourierWalletScreen() {
   const styles = useAppStyles(createStyles);
   const { user } = useAuth();
   const verified = isVerified(user?.is_verified);
-  const [wallet, setWallet] = useState<Wallet | null>(null);
-  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
-  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
   const [method, setMethod] = useState<Method>("bank");
   const [form, setForm] = useState(emptyForm);
-  const [error, setError] = useState("");
 
-  const loadWallet = useCallback(async () => {
-    if (!verified) {
-      setLoading(false);
-      return;
-    }
-    try {
-      setError("");
-      const [walletRes, txRes, wdRes] = await Promise.allSettled([
-        walletService.getMyWallet(),
-        walletService.getMyTransactions(),
-        walletService.getMyWithdrawals(),
-      ]);
-      if (walletRes.status === "fulfilled" && walletRes.value.success)
-        setWallet(walletRes.value.data || null);
-      if (txRes.status === "fulfilled" && txRes.value.success)
-        setTransactions(
-          Array.isArray(txRes.value.data) ? txRes.value.data : [],
-        );
-      if (wdRes.status === "fulfilled" && wdRes.value.success)
-        setWithdrawals(Array.isArray(wdRes.value.data) ? wdRes.value.data : []);
-    } catch (err) {
-      setError(getErrorMessage(err, "Gagal memuat wallet"));
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [verified]);
+  const {
+    data: wallet = null,
+    isLoading: walletLoading,
+    error: walletError,
+    refetch: refetchWallet,
+  } = useQuery({
+    queryKey: ['courier', 'wallet'],
+    queryFn: async () => {
+      const response = await walletService.getMyWallet();
+      if (!response.success) throw new Error(response.message || "Gagal memuat wallet");
+      return response.data || null;
+    },
+    enabled: verified,
+  });
 
-  useEffect(() => {
-    loadWallet();
-  }, [loadWallet]);
+  const {
+    data: transactions = [],
+    isLoading: txLoading,
+    error: txError,
+    refetch: refetchTx,
+  } = useQuery({
+    queryKey: ['courier', 'transactions'],
+    queryFn: async () => {
+      const response = await walletService.getMyTransactions();
+      if (!response.success) throw new Error(response.message || "Gagal memuat transaksi");
+      return Array.isArray(response.data) ? response.data : [];
+    },
+    enabled: verified,
+  });
+
+  const {
+    data: withdrawals = [],
+    isLoading: wdLoading,
+    error: wdError,
+    refetch: refetchWd,
+  } = useQuery({
+    queryKey: ['courier', 'withdrawals'],
+    queryFn: async () => {
+      const response = await walletService.getMyWithdrawals();
+      if (!response.success) throw new Error(response.message || "Gagal memuat penarikan");
+      return Array.isArray(response.data) ? response.data : [];
+    },
+    enabled: verified,
+  });
+
+  const loading = verified && (walletLoading || txLoading || wdLoading);
+  const error = (walletError || txError || wdError) ? getErrorMessage(walletError || txError || wdError, "Gagal memuat data wallet") : "";
+
+  const loadWallet = async () => {
+    await Promise.all([refetchWallet(), refetchTx(), refetchWd()]);
+  };
 
   const refreshControl = useMemo(
     () => (
       <RefreshControl
         refreshing={refreshing}
-        onRefresh={() => {
+        onRefresh={async () => {
           setRefreshing(true);
-          loadWallet();
+          await loadWallet();
+          setRefreshing(false);
         }}
         colors={[LaundryColors.roleKurirIcon]}
       />
     ),
-    [loadWallet, refreshing],
+    [refreshing, LaundryColors.roleKurirIcon],
   );
 
   const available = wallet?.available_balance ?? wallet?.balance ?? 0;
@@ -106,12 +123,27 @@ export default function CourierWalletScreen() {
 
   const closeWithdrawModal = () => {
     setModalOpen(false);
-    setSubmitting(false);
     setMethod("bank");
     setForm(emptyForm);
   };
 
-  const submitWithdraw = async () => {
+  const withdrawMutation = useMutation({
+    mutationFn: walletService.requestWithdraw,
+    onSuccess: () => {
+      crossAlert("Berhasil", "Penarikan saldo berhasil diajukan");
+      closeWithdrawModal();
+      queryClient.invalidateQueries({ queryKey: ['courier', 'wallet'] });
+      queryClient.invalidateQueries({ queryKey: ['courier', 'transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['courier', 'withdrawals'] });
+    },
+    onError: (err) => {
+      crossAlert("Error", getErrorMessage(err, "Gagal mengajukan penarikan"));
+    }
+  });
+
+  const submitting = withdrawMutation.isPending;
+
+  const submitWithdraw = () => {
     const amount = Number(form.amount.replace(/\./g, ""));
     
     if (!amount || amount <= 0)
@@ -141,17 +173,7 @@ export default function CourierWalletScreen() {
           e_wallet_number: form.e_wallet_number.trim(),
         };
 
-    setSubmitting(true);
-    try {
-      await walletService.requestWithdraw(payload);
-      crossAlert("Berhasil", "Penarikan saldo berhasil diajukan");
-      closeWithdrawModal();
-      await loadWallet();
-    } catch (err) {
-      crossAlert("Error", getErrorMessage(err, "Gagal mengajukan penarikan"));
-    } finally {
-      setSubmitting(false);
-    }
+    withdrawMutation.mutate(payload);
   };
 
   if (!verified)
@@ -381,7 +403,7 @@ function WithdrawModal({
                   label="Nomor Rekening"
                   value={form.bank_account_number}
                   onChangeText={(bank_account_number) =>
-                    onFormChange({ ...form, bank_account_number })
+                     onFormChange({ ...form, bank_account_number })
                   }
                   placeholder="Masukkan nomor rekening"
                   keyboardType="numeric"
@@ -393,7 +415,7 @@ function WithdrawModal({
                   label="Provider E-Wallet"
                   value={form.e_wallet_provider}
                   onChangeText={(e_wallet_provider) =>
-                    onFormChange({ ...form, e_wallet_provider })
+                     onFormChange({ ...form, e_wallet_provider })
                   }
                   placeholder="Misal: GoPay / OVO / DANA"
                 />
@@ -401,7 +423,7 @@ function WithdrawModal({
                   label="Nomor HP / E-Wallet"
                   value={form.e_wallet_number}
                   onChangeText={(e_wallet_number) =>
-                    onFormChange({ ...form, e_wallet_number })
+                     onFormChange({ ...form, e_wallet_number })
                   }
                   placeholder="0812xxxxxx"
                   keyboardType="numeric"

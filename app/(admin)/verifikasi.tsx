@@ -1,5 +1,6 @@
 import { ThemeColors } from '@/constants/colors';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   View,
   Text,
@@ -15,44 +16,36 @@ import { useAppStyles } from '@/hooks/useAppStyles';
 import { Ionicons } from '@expo/vector-icons';
 import * as adminService from '@/services/adminService';
 import { getErrorMessage } from '@/utils/helpers';
-import { PendingUser } from '@/types/user';
 
 export default function VerifikasiScreen() {
   const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
-  const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
-  const [verifyingId, setVerifyingId] = useState<string | null>(null);
-  const [error, setError] = useState('');
+  const [errorState, setErrorState] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
-  const fetchPendingUsers = useCallback(async () => {
-    try {
-      setError('');
+  const {
+    data: pendingUsers = [],
+    isLoading: loading,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: ['admin', 'pendingUsers'],
+    queryFn: async () => {
       const response = await adminService.getPendingUsers();
-      if (response.success && response.data) {
-        setPendingUsers(Array.isArray(response.data) ? response.data : []);
-      } else {
-        setPendingUsers([]);
-      }
-    } catch (err: unknown) {
-      const msg = getErrorMessage(err, 'Gagal memuat data');
-      setError(msg);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
+      if (!response.success) throw new Error(response.message || 'Gagal memuat data');
+      return Array.isArray(response.data) ? response.data : [];
+    },
+  });
 
-  useEffect(() => {
-    fetchPendingUsers();
-  }, [fetchPendingUsers]);
+  const error = queryError ? getErrorMessage(queryError, 'Gagal memuat data') : errorState;
 
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
-    fetchPendingUsers();
+    await refetch();
+    setRefreshing(false);
   };
 
   // Step 1: Show inline confirmation
@@ -64,32 +57,31 @@ export default function VerifikasiScreen() {
     setConfirmingId(null);
   };
 
+  const verifyMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await adminService.verifyUser(userId, true);
+      if (!response.success) throw new Error(response.message || 'Gagal memverifikasi pengguna');
+      return userId;
+    },
+    onSuccess: (userId) => {
+      const verifiedUser = pendingUsers.find(u => u.user_id === userId);
+      setSuccessMsg(`✅ ${verifiedUser?.full_name || 'User'} berhasil diverifikasi!`);
+      setTimeout(() => setSuccessMsg(''), 4000);
+      queryClient.invalidateQueries({ queryKey: ['admin', 'pendingUsers'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'metrics'] });
+    },
+    onError: (err: unknown) => {
+      const msg = getErrorMessage(err, 'Gagal memverifikasi');
+      setErrorState(msg);
+      setTimeout(() => setErrorState(''), 4000);
+    },
+  });
+
   // Step 2: Actually verify
   const doVerify = async (userId: string) => {
     setConfirmingId(null);
-    setVerifyingId(userId);
     setSuccessMsg('');
-    try {
-      const response = await adminService.verifyUser(userId, true);
-      if (response.success) {
-        // Show inline success message
-        const verifiedUser = pendingUsers.find(u => u.user_id === userId);
-        setSuccessMsg(`✅ ${verifiedUser?.full_name || 'User'} berhasil diverifikasi!`);
-        // Remove from list immediately
-        setPendingUsers(prev => prev.filter(u => u.user_id !== userId));
-        // Auto-hide success after 4 seconds
-        setTimeout(() => setSuccessMsg(''), 4000);
-      } else {
-        setError(response.message || 'Gagal memverifikasi pengguna');
-        setTimeout(() => setError(''), 4000);
-      }
-    } catch (err: unknown) {
-      const msg = getErrorMessage(err, 'Gagal memverifikasi');
-      setError(msg);
-      setTimeout(() => setError(''), 4000);
-    } finally {
-      setVerifyingId(null);
-    }
+    verifyMutation.mutate(userId);
   };
 
   if (loading) {
@@ -219,12 +211,15 @@ export default function VerifikasiScreen() {
               </View>
             ) : (
               <TouchableOpacity
-                style={[styles.verifyButton, verifyingId === user.user_id && styles.verifyButtonDisabled]}
+                style={[
+                  styles.verifyButton,
+                  verifyMutation.isPending && verifyMutation.variables === user.user_id && styles.verifyButtonDisabled,
+                ]}
                 onPress={() => handleVerify(user.user_id)}
-                disabled={verifyingId === user.user_id}
+                disabled={verifyMutation.isPending && verifyMutation.variables === user.user_id}
                 activeOpacity={0.8}
               >
-                {verifyingId === user.user_id ? (
+                {verifyMutation.isPending && verifyMutation.variables === user.user_id ? (
                   <>
                     <ActivityIndicator size="small" color={LaundryColors.textWhite} />
                     <Text style={styles.verifyButtonText}>Memverifikasi...</Text>

@@ -1,5 +1,6 @@
 import { ThemeColors } from '@/constants/colors';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { getErrorMessage } from '@/utils/getErrorMessage';
 import {
   View,
@@ -15,38 +16,32 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
 import { Ionicons } from '@expo/vector-icons';
 import * as adminService from '@/services/adminService';
-import { PendingUser } from '@/types/user';
 
 export default function PenggunaScreen() {
   const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
-  const [users, setUsers] = useState<PendingUser[]>([]);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState('');
 
-  const fetchUsers = useCallback(async () => {
-    try {
-      setError('');
+  const {
+    data: users = [],
+    isLoading: loading,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: ['admin', 'pendingUsers'],
+    queryFn: async () => {
       const response = await adminService.getPendingUsers();
-      if (response.success && response.data) {
-        setUsers(Array.isArray(response.data) ? response.data : []);
-      }
-    } catch (err) {
-      setError(getErrorMessage(err, 'Gagal memuat data'));
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
+      if (!response.success) throw new Error(response.message || 'Gagal memuat data');
+      return Array.isArray(response.data) ? response.data : [];
+    },
+  });
 
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+  const error = queryError ? getErrorMessage(queryError, 'Gagal memuat data') : '';
 
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
-    fetchUsers();
+    await refetch();
+    setRefreshing(false);
   };
 
   if (loading) {
@@ -199,5 +194,3 @@ const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   statusBadge: { backgroundColor: '#FFF7ED', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
   statusBadgeText: { fontSize: 10, fontWeight: '600', color: LaundryColors.warning },
 });
-
-

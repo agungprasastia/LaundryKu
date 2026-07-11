@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThemeColors } from '@/constants/colors';
 import {
   View,
@@ -11,7 +11,9 @@ import {
   RefreshControl,
   Modal,
 } from 'react-native';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { crossAlert } from '@/utils/crossAlert';
+import { getErrorMessage } from '@/utils/helpers';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
@@ -33,13 +35,11 @@ const IS_DUMMY_PAYMENT = process.env.EXPO_PUBLIC_USE_DUMMY_PAYMENT === 'true';
 export default function CustomerOrdersScreen() {
   const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
+  const queryClient = useQueryClient();
+
   // ─── State ───
   const [activeTab, setActiveTab] = useState<'active' | 'history'>('active');
-  const [activeOrders, setActiveOrders] = useState<Order[]>([]);
-  const [historyOrders, setHistoryOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState('');
 
   // Detail modal
   const [showDetail, setShowDetail] = useState(false);
@@ -50,43 +50,49 @@ export default function CustomerOrdersScreen() {
   // Invoice/Payment
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [invoiceLoading, setInvoiceLoading] = useState(false);
-  const [paymentLoading, setPaymentLoading] = useState(false);
-  const [completeLoading, setCompleteLoading] = useState(false);
-  const [callbackLoading, setCallbackLoading] = useState(false);
   const [lastPaymentId, setLastPaymentId] = useState<string | null>(null);
 
   // ─── Fetch ───
-  const fetchOrders = useCallback(async () => {
-    try {
-      setError('');
-      const [activeRes, historyRes] = await Promise.allSettled([
-        orderService.getMyOrders(),
-        orderService.getMyOrdersHistory(),
-      ]);
+  const {
+    data: activeOrders = [],
+    isLoading: activeLoading,
+    error: activeError,
+    refetch: refetchActive,
+  } = useQuery({
+    queryKey: ['customer', 'orders'],
+    queryFn: async () => {
+      const response = await orderService.getMyOrders();
+      if (!response.success) throw new Error(response.message || 'Gagal memuat pesanan');
+      return Array.isArray(response.data) ? response.data : [];
+    },
+  });
 
-      if (activeRes.status === 'fulfilled' && activeRes.value?.success && activeRes.value.data) {
-        setActiveOrders(Array.isArray(activeRes.value.data) ? activeRes.value.data : []);
-      } else {
-        setActiveOrders([]);
-      }
+  const {
+    data: historyOrders = [],
+    isLoading: historyLoading,
+    error: historyError,
+    refetch: refetchHistory,
+  } = useQuery({
+    queryKey: ['customer', 'ordersHistory'],
+    queryFn: async () => {
+      const response = await orderService.getMyOrdersHistory();
+      if (!response.success) throw new Error(response.message || 'Gagal memuat riwayat');
+      return Array.isArray(response.data) ? response.data : [];
+    },
+  });
 
-      if (historyRes.status === 'fulfilled' && historyRes.value?.success && historyRes.value.data) {
-        setHistoryOrders(Array.isArray(historyRes.value.data) ? historyRes.value.data : []);
-      } else {
-        setHistoryOrders([]);
-      }
-    } catch (err: unknown) {
-      const msg = (err as AxiosError<{message: string}>)?.response?.data?.message || (err as Error)?.message || 'Gagal memuat pesanan';
-      setError(msg);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
+  const loading = activeLoading || historyLoading;
+  const error = (activeError || historyError) ? getErrorMessage(activeError || historyError, 'Gagal memuat pesanan') : '';
 
-  useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
+  const fetchOrders = async () => {
+    await Promise.all([refetchActive(), refetchHistory()]);
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchOrders();
+    setRefreshing(false);
+  };
 
   useEffect(() => {
     if (!showDetail || !detailOrder || detailOrder.status === 'COMPLETED') return;
@@ -102,11 +108,6 @@ export default function CustomerOrdersScreen() {
 
     return () => clearInterval(interval);
   }, [detailOrder, showDetail]);
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchOrders();
-  };
 
   // ─── Open Detail ───
   const openDetail = async (order: Order) => {
@@ -130,14 +131,12 @@ export default function CustomerOrdersScreen() {
         setTrackingData(trackingRes.value.data);
       }
 
-      // Fetch invoice if available
       const resolvedOrder = orderRes.status === 'fulfilled' && orderRes.value?.data
         ? orderRes.value.data : order;
       if (resolvedOrder.invoice_id) {
         await fetchInvoice(resolvedOrder.invoice_id);
       }
     } catch (err: unknown) {
-      // Don't crash — keep showing whatever data we got
       console.warn('Error loading order detail:', err);
     } finally {
       setDetailLoading(false);
@@ -160,17 +159,11 @@ export default function CustomerOrdersScreen() {
   };
 
   // ─── Create Payment ───
-  const handleCreatePayment = async () => {
-    if (!invoice) return;
-    setPaymentLoading(true);
-    try {
-      const res = await paymentService.createPayment({
-        invoice_id: invoice.invoice_id,
-        payment_method: 'e_wallet',
-      });
+  const createPaymentMutation = useMutation({
+    mutationFn: paymentService.createPayment,
+    onSuccess: (res) => {
       if (res.success) {
         const paymentData = res.data;
-        // Save payment_id for dummy callback
         if (paymentData?.payment_id) {
           setLastPaymentId(paymentData.payment_id);
         }
@@ -181,61 +174,92 @@ export default function CustomerOrdersScreen() {
           `Status: ${paymentData?.status || 'pending'}` +
           (paymentData?.payment_method ? `\nMetode: ${paymentData.payment_method}` : ''),
         );
-        // Refresh invoice
-        if (invoice.invoice_id) {
-          await fetchInvoice(invoice.invoice_id);
+        if (invoice?.invoice_id) {
+          fetchInvoice(invoice.invoice_id);
         }
       } else {
-        // Handle 409 — existing pending payment
         if (res.data?.payment_id) {
           setLastPaymentId(res.data.payment_id);
         }
         crossAlert('Gagal', res.message || 'Gagal membuat payment');
       }
-    } catch (err: unknown) {
+    },
+    onError: (err: unknown) => {
       const axiosErr = err as AxiosError<{data?: {payment_id: string}, message?: string}>;
       if (axiosErr?.response?.status === 409 && axiosErr?.response?.data?.data?.payment_id) {
         setLastPaymentId(axiosErr.response.data.data.payment_id);
       }
       const msg = axiosErr?.response?.data?.message || (err as Error)?.message || 'Gagal membuat payment';
       crossAlert('Error', msg);
-    } finally {
-      setPaymentLoading(false);
     }
+  });
+
+  const paymentLoading = createPaymentMutation.isPending;
+
+  const handleCreatePayment = () => {
+    if (!invoice) return;
+    createPaymentMutation.mutate({
+      invoice_id: invoice.invoice_id,
+      payment_method: 'e_wallet',
+    });
   };
 
   // ─── Simulate Payment Callback (Dummy) ───
-  const handleDummyCallback = async () => {
+  const simulatePaymentMutation = useMutation({
+    mutationFn: paymentService.simulatePaymentCallback,
+    onSuccess: async (res) => {
+      if (res.success) {
+        crossAlert('Berhasil', 'Simulasi pembayaran berhasil! Invoice sudah terbayar.');
+        if (detailOrder) {
+          await openDetail(detailOrder);
+        }
+        queryClient.invalidateQueries({ queryKey: ['customer', 'orders'] });
+        queryClient.invalidateQueries({ queryKey: ['customer', 'ordersHistory'] });
+      } else {
+        crossAlert('Gagal', res.message || 'Simulasi payment gagal');
+      }
+    },
+    onError: (err: unknown) => {
+      const msg = (err as AxiosError<{message: string}>)?.response?.data?.message || (err as Error)?.message || 'Simulasi payment gagal';
+      crossAlert('Error', msg);
+    }
+  });
+
+  const callbackLoading = simulatePaymentMutation.isPending;
+
+  const handleDummyCallback = () => {
     if (!lastPaymentId) {
       crossAlert('Info', 'Belum ada payment. Tap "Bayar Sekarang" dulu untuk membuat payment.');
       return;
     }
-    setCallbackLoading(true);
-    try {
-      const res = await paymentService.simulatePaymentCallback({
-        payment_id: lastPaymentId,
-        status: 'success',
-      });
-      if (res.success) {
-        crossAlert('Berhasil', 'Simulasi pembayaran berhasil! Invoice sudah terbayar.');
-        // Refresh detail
-        if (detailOrder) {
-          await openDetail(detailOrder);
-        }
-        fetchOrders();
-      } else {
-        crossAlert('Gagal', res.message || 'Simulasi payment gagal');
-      }
-    } catch (err: unknown) {
-      const msg = (err as AxiosError<{message: string}>)?.response?.data?.message || (err as Error)?.message || 'Simulasi payment gagal';
-      crossAlert('Error', msg);
-    } finally {
-      setCallbackLoading(false);
-    }
+    simulatePaymentMutation.mutate({
+      payment_id: lastPaymentId,
+      status: 'success',
+    });
   };
 
   // ─── Complete Order ───
-  const handleCompleteOrder = async () => {
+  const completeOrderMutation = useMutation({
+    mutationFn: orderService.completeOrder,
+    onSuccess: (res) => {
+      if (res.success) {
+        crossAlert('Berhasil', 'Pesanan berhasil diselesaikan!');
+        setShowDetail(false);
+        queryClient.invalidateQueries({ queryKey: ['customer', 'orders'] });
+        queryClient.invalidateQueries({ queryKey: ['customer', 'ordersHistory'] });
+      } else {
+        crossAlert('Gagal', res.message || 'Gagal menyelesaikan pesanan');
+      }
+    },
+    onError: (err: unknown) => {
+      const msg = (err as AxiosError<{message: string}>)?.response?.data?.message || (err as Error)?.message || 'Gagal menyelesaikan pesanan';
+      crossAlert('Error', msg);
+    }
+  });
+
+  const completeLoading = completeOrderMutation.isPending;
+
+  const handleCompleteOrder = () => {
     if (!detailOrder) return;
     crossAlert(
       'Konfirmasi Selesai',
@@ -244,23 +268,8 @@ export default function CustomerOrdersScreen() {
         { text: 'Batal', style: 'cancel' },
         {
           text: 'Konfirmasi',
-          onPress: async () => {
-            setCompleteLoading(true);
-            try {
-              const res = await orderService.completeOrder(detailOrder.order_id);
-              if (res.success) {
-                crossAlert('Berhasil', 'Pesanan berhasil diselesaikan!');
-                setShowDetail(false);
-                fetchOrders();
-              } else {
-                crossAlert('Gagal', res.message || 'Gagal menyelesaikan pesanan');
-              }
-            } catch (err: unknown) {
-              const msg = (err as AxiosError<{message: string}>)?.response?.data?.message || (err as Error)?.message || 'Gagal menyelesaikan pesanan';
-              crossAlert('Error', msg);
-            } finally {
-              setCompleteLoading(false);
-            }
+          onPress: () => {
+            completeOrderMutation.mutate(detailOrder.order_id);
           },
         },
       ]
@@ -285,7 +294,6 @@ export default function CustomerOrdersScreen() {
 
   const displayOrders = activeTab === 'active' ? activeOrders : historyOrders;
 
-  // ─── Loading ───
   if (loading) {
     return (
       <View style={styles.container}>
@@ -333,17 +341,6 @@ export default function CustomerOrdersScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[LaundryColors.primary]} />
         }
       >
-        {/* Error */}
-        {error ? (
-          <View style={styles.errorBanner}>
-            <Ionicons name="alert-circle" size={18} color={LaundryColors.error} />
-            <Text style={styles.errorText}>{error}</Text>
-            <TouchableOpacity onPress={onRefresh}>
-              <Text style={styles.retryText}>Coba Lagi</Text>
-            </TouchableOpacity>
-          </View>
-        ) : null}
-
         {/* Empty */}
         {displayOrders.length === 0 && !error ? (
           <View style={styles.emptyContainer}>
@@ -638,7 +635,6 @@ export default function CustomerOrdersScreen() {
   );
 }
 
-// ─── Main Styles ───
 const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
@@ -772,6 +768,3 @@ const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   },
   completeButtonText: { fontSize: 16, fontWeight: '700', color: LaundryColors.textWhite },
 });
-
-
-

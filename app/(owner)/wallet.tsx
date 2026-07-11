@@ -1,5 +1,5 @@
 import { ThemeColors } from '@/constants/colors';
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Modal,
   RefreshControl,
@@ -9,12 +9,13 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import InteractiveButton from '@/components/ui/InteractiveButton';
 import { Ionicons } from "@expo/vector-icons";
 import { crossAlert } from "@/utils/crossAlert";
 import * as walletService from "@/services/walletService";
 import { useAuth } from "@/contexts/AuthContext";
-import { Wallet, WalletTransaction, Withdrawal, WithdrawPayload } from "@/types/wallet";
+import { WalletTransaction, Withdrawal, WithdrawPayload } from "@/types/wallet";
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
 import {
@@ -51,67 +52,64 @@ export default function OwnerWalletScreen() {
   const styles = useAppStyles(createStyles);
   const { user } = useAuth();
   const verified = isVerified(user?.is_verified);
-  const [wallet, setWallet] = useState<Wallet | null>(null);
-  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
-  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState("");
   
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<WithdrawForm>(emptyForm);
   const [withdrawMethod, setWithdrawMethod] = useState<"bank" | "ewallet">("bank");
 
-  const loadWallet = useCallback(async () => {
-    if (!verified) {
-      setLoading(false);
-      return;
-    }
+  const {
+    data: wallet = null,
+    isLoading: walletLoading,
+    error: walletError,
+    refetch: refetchWallet,
+  } = useQuery({
+    queryKey: ['owner', 'wallet'],
+    queryFn: async () => {
+      const response = await walletService.getMyWallet();
+      if (!response.success) throw new Error(response.message || "Gagal memuat wallet");
+      return response.data || null;
+    },
+    enabled: verified,
+  });
 
-    try {
-      setError("");
-      const [walletResult, transactionResult, withdrawalResult] =
-        await Promise.allSettled([
-          walletService.getMyWallet(),
-          walletService.getMyTransactions(),
-          walletService.getMyWithdrawals(),
-        ]);
+  const {
+    data: transactions = [],
+    isLoading: txLoading,
+    error: txError,
+    refetch: refetchTx,
+  } = useQuery({
+    queryKey: ['owner', 'transactions'],
+    queryFn: async () => {
+      const response = await walletService.getMyTransactions();
+      if (!response.success) throw new Error(response.message || "Gagal memuat transaksi");
+      return Array.isArray(response.data) ? response.data : [];
+    },
+    enabled: verified,
+  });
 
-      if (walletResult.status === "fulfilled" && walletResult.value.success) {
-        setWallet(walletResult.value.data || null);
-      }
-      if (
-        transactionResult.status === "fulfilled" &&
-        transactionResult.value.success
-      ) {
-        setTransactions(
-          Array.isArray(transactionResult.value.data)
-            ? transactionResult.value.data
-            : [],
-        );
-      }
-      if (
-        withdrawalResult.status === "fulfilled" &&
-        withdrawalResult.value.success
-      ) {
-        setWithdrawals(
-          Array.isArray(withdrawalResult.value.data)
-            ? withdrawalResult.value.data
-            : [],
-        );
-      }
-    } catch (err) {
-      setError(getErrorMessage(err, "Gagal memuat wallet"));
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [verified]);
+  const {
+    data: withdrawals = [],
+    isLoading: wdLoading,
+    error: wdError,
+    refetch: refetchWd,
+  } = useQuery({
+    queryKey: ['owner', 'withdrawals'],
+    queryFn: async () => {
+      const response = await walletService.getMyWithdrawals();
+      if (!response.success) throw new Error(response.message || "Gagal memuat penarikan");
+      return Array.isArray(response.data) ? response.data : [];
+    },
+    enabled: verified,
+  });
 
-  useEffect(() => {
-    loadWallet();
-  }, [loadWallet]);
+  const loading = verified && (walletLoading || txLoading || wdLoading);
+  const error = (walletError || txError || wdError) ? getErrorMessage(walletError || txError || wdError, "Gagal memuat data wallet") : "";
+
+  const loadWallet = async () => {
+    await Promise.all([refetchWallet(), refetchTx(), refetchWd()]);
+  };
 
   const availableBalance = Number(
     wallet?.available_balance ?? wallet?.balance ?? 0,
@@ -121,9 +119,10 @@ export default function OwnerWalletScreen() {
   const refreshControl = (
     <RefreshControl
       refreshing={refreshing}
-      onRefresh={() => {
+      onRefresh={async () => {
         setRefreshing(true);
-        loadWallet();
+        await loadWallet();
+        setRefreshing(false);
       }}
       colors={[LaundryColors.roleMitraIcon]}
     />
@@ -131,12 +130,28 @@ export default function OwnerWalletScreen() {
 
   const closeWithdrawModal = () => {
     setWithdrawModalOpen(false);
-    setSubmitting(false);
     setForm(emptyForm);
     setWithdrawMethod("bank");
   };
 
-  const submitWithdraw = async () => {
+  const withdrawMutation = useMutation({
+    mutationFn: walletService.requestWithdraw,
+    onSuccess: () => {
+      crossAlert("Berhasil", "Withdraw diajukan");
+      closeWithdrawModal();
+      queryClient.invalidateQueries({ queryKey: ['owner', 'wallet'] });
+      queryClient.invalidateQueries({ queryKey: ['owner', 'transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['owner', 'withdrawals'] });
+      queryClient.invalidateQueries({ queryKey: ['owner', 'summary'] });
+    },
+    onError: (err) => {
+      crossAlert("Error", getErrorMessage(err, "Gagal memproses penarikan"));
+    }
+  });
+
+  const submitting = withdrawMutation.isPending;
+
+  const submitWithdraw = () => {
     const amount = Number(form.amount.replace(/\./g, ""));
     const bankName = form.bank_name.trim();
     const bankAccountNumber = form.bank_account_number.trim();
@@ -172,17 +187,7 @@ export default function OwnerWalletScreen() {
           e_wallet_provider: eWalletProvider,
         };
 
-    setSubmitting(true);
-    try {
-      await walletService.requestWithdraw(payload);
-      crossAlert("Berhasil", "Withdraw diajukan");
-      closeWithdrawModal();
-      loadWallet();
-    } catch (err) {
-      crossAlert("Error", getErrorMessage(err, "Gagal memproses penarikan"));
-    } finally {
-      setSubmitting(false);
-    }
+    withdrawMutation.mutate(payload);
   };
 
   if (!verified) {

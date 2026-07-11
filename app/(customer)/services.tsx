@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   Linking,
 } from 'react-native';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { crossAlert } from '@/utils/crossAlert';
 import { getErrorMessage } from '@/utils/helpers';
 import { useRouter } from 'expo-router';
@@ -28,16 +29,13 @@ import { useAppStyles } from '@/hooks/useAppStyles';
 import * as Location from 'expo-location';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
-
 export default function CustomerServicesScreen() {
   const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   const router = useRouter();
+  const queryClient = useQueryClient();
 
-  const [services, setServices] = useState<LaundryService[]>([]);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState('');
 
   // Detail modal
   const [selectedService, setSelectedService] = useState<LaundryService | null>(null);
@@ -54,40 +52,32 @@ export default function CustomerServicesScreen() {
   const [pickupDate, setPickupDate] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [pickerMode, setPickerMode] = useState<'date' | 'time' | 'datetime'>('date');
-  const [submitting, setSubmitting] = useState(false);
 
   // GPS location state
   const [locationStatus, setLocationStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [locationError, setLocationError] = useState('');
 
-  const fetchServices = useCallback(async () => {
-    try {
-      setError('');
+  const {
+    data: services = [],
+    isLoading: loading,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: ['customer', 'services'],
+    queryFn: async () => {
       const response = await serviceService.getServices();
-      if (response.success && response.data) {
-        const all = Array.isArray(response.data) ? response.data : [];
-        // Only show active services
-        const active = all.filter((s) => s.is_active === true || s.is_active === 1);
-        setServices(active);
-      } else {
-        setServices([]);
-      }
-    } catch (err: unknown) {
-      const msg = getErrorMessage(err, 'Gagal memuat layanan');
-      setError(msg);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
+      if (!response.success) throw new Error(response.message || 'Gagal memuat layanan');
+      const all = Array.isArray(response.data) ? response.data : [];
+      return all.filter((s) => s.is_active === true || s.is_active === 1);
+    },
+  });
 
-  useEffect(() => {
-    fetchServices();
-  }, [fetchServices]);
+  const error = queryError ? getErrorMessage(queryError, 'Gagal memuat layanan') : '';
 
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
-    fetchServices();
+    await refetch();
+    setRefreshing(false);
   };
 
   const formatPrice = (price?: number) => {
@@ -134,7 +124,6 @@ export default function CustomerServicesScreen() {
     setLocationError('');
 
     try {
-      // Request permission
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         setLocationStatus('error');
@@ -150,7 +139,6 @@ export default function CustomerServicesScreen() {
         return;
       }
 
-      // Get current location
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
@@ -165,7 +153,6 @@ export default function CustomerServicesScreen() {
       crossAlert('Gagal Mengambil Lokasi', msg, [{ text: 'OK' }]);
     }
   };
-
 
   const onDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     if (event?.type === 'dismissed') {
@@ -182,9 +169,7 @@ export default function CustomerServicesScreen() {
         return;
       }
       
-      // Jika mode time selesai
       if (selectedDate) {
-        // Gabungkan tanggal yang disimpan sebelumnya dengan jam dari picker saat ini
         const finalDate = pickupDate ? new Date(pickupDate) : new Date();
         finalDate.setHours(selectedDate.getHours());
         finalDate.setMinutes(selectedDate.getMinutes());
@@ -202,7 +187,6 @@ export default function CustomerServicesScreen() {
         setPickupScheduledAt(`${yy}-${mm}-${dd} ${hh}:${min}:${ss}`);
       }
     } else {
-      // iOS
       setShowDatePicker(false);
       if (selectedDate) {
         setPickupDate(selectedDate);
@@ -241,7 +225,6 @@ export default function CustomerServicesScreen() {
       return 'Silakan tekan tombol Gunakan Lokasi Saya Saat Ini terlebih dahulu.';
     }
 
-    // Basic date format validation (YYYY-MM-DD HH:mm:ss)
     const dateRegex = /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/;
     if (!dateRegex.test(pickupScheduledAt.trim())) {
       return 'Format tanggal harus YYYY-MM-DD HH:mm:ss';
@@ -250,6 +233,36 @@ export default function CustomerServicesScreen() {
     return null;
   };
 
+  const createOrderMutation = useMutation({
+    mutationFn: orderService.createOrder,
+    onSuccess: (response) => {
+      const orderId = response.data?.order_id || 'N/A';
+      crossAlert(
+        'Pesanan Berhasil',
+        `Pesanan berhasil dibuat!\n\nOrder ID: ${orderId}`,
+        [
+          {
+            text: 'Lihat Pesanan',
+            onPress: () => {
+              closeOrderModal();
+              router.push('/(customer)/orders');
+            },
+          },
+          {
+            text: 'OK',
+            onPress: closeOrderModal,
+          },
+        ]
+      );
+      queryClient.invalidateQueries({ queryKey: ['customer', 'orders'] });
+    },
+    onError: (err) => {
+      crossAlert('Error', getErrorMessage(err, 'Gagal membuat pesanan'));
+    }
+  });
+
+  const submitting = createOrderMutation.isPending;
+
   const handleSubmitOrder = async () => {
     const validationError = validateOrderForm();
     if (validationError) {
@@ -257,48 +270,17 @@ export default function CustomerServicesScreen() {
       return;
     }
 
-    setSubmitting(true);
-    try {
-      const payload: CreateOrderPayload = {
-        service_id: orderServiceId,
-        pickup_address: pickupAddress.trim(),
-        pickup_lat: pickupLat!,
-        pickup_lng: pickupLng!,
-        pickup_scheduled_at: pickupScheduledAt.trim(),
-      };
+    const payload: CreateOrderPayload = {
+      service_id: orderServiceId,
+      pickup_address: pickupAddress.trim(),
+      pickup_lat: pickupLat!,
+      pickup_lng: pickupLng!,
+      pickup_scheduled_at: pickupScheduledAt.trim(),
+    };
 
-      const response = await orderService.createOrder(payload);
-      if (response.success) {
-        const orderId = response.data?.order_id || 'N/A';
-        crossAlert(
-          'Pesanan Berhasil',
-          `Pesanan berhasil dibuat!\n\nOrder ID: ${orderId}`,
-          [
-            {
-              text: 'Lihat Pesanan',
-              onPress: () => {
-                closeOrderModal();
-                router.push('/(customer)/orders');
-              },
-            },
-            {
-              text: 'OK',
-              onPress: closeOrderModal,
-            },
-          ]
-        );
-      } else {
-        crossAlert('Gagal', response.message || 'Gagal membuat pesanan');
-      }
-    } catch (err: unknown) {
-      const msg = getErrorMessage(err, 'Gagal membuat pesanan');
-      crossAlert('Error', msg);
-    } finally {
-      setSubmitting(false);
-    }
+    createOrderMutation.mutate(payload);
   };
 
-  // ─── Loading ───
   if (loading) {
     return (
       <View style={styles.container}>
@@ -508,14 +490,12 @@ export default function CustomerServicesScreen() {
                 </Text>
               </InteractiveButton>
 
-              {/* Show coordinates (small debug text) when location is obtained */}
               {locationStatus === 'success' && pickupLat != null && pickupLng != null && (
                 <Text style={styles.locationCoords}>
                   📍 {pickupLat.toFixed(6)}, {pickupLng.toFixed(6)}
                 </Text>
               )}
 
-              {/* Location error */}
               {locationStatus === 'error' && locationError ? (
                 <Text style={styles.locationErrorText}>⚠️ {locationError}</Text>
               ) : null}
@@ -591,8 +571,6 @@ export default function CustomerServicesScreen() {
     </View>
   );
 }
-
-
 
 const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
@@ -723,12 +701,6 @@ const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
     fontSize: 14, color: LaundryColors.textPrimary,
   },
   
-  
-  inputHint: {
-    fontSize: 10, color: LaundryColors.textMuted, marginTop: 4, marginBottom: 4,
-  },
-
-  /* GPS Location */
   locationButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 10, borderWidth: 1.5, borderColor: LaundryColors.primary,
@@ -754,18 +726,6 @@ const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   locationErrorText: {
     fontSize: 12, color: LaundryColors.error, marginTop: 6,
   },
-
-  /* Dev Mode Manual Coords */
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 
   submitButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',

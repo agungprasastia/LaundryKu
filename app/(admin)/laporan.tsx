@@ -1,5 +1,6 @@
 import { ThemeColors } from '@/constants/colors';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   View,
   Text,
@@ -14,40 +15,33 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as adminService from '@/services/adminService';
-import { AdminAnalytics } from '@/types/api';
 import { getErrorMessage } from '@/utils/helpers';
 
 export default function LaporanScreen() {
   const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
-  const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState('');
 
-  const fetchAnalytics = useCallback(async () => {
-    try {
-      setError('');
+  const {
+    data: analytics = null,
+    isLoading: loading,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: ['admin', 'analytics'],
+    queryFn: async () => {
       const response = await adminService.getAnalytics();
-      if (response.success && response.data) {
-        setAnalytics(response.data);
-      }
-    } catch (err: unknown) {
-      const msg = getErrorMessage(err, 'Gagal memuat data');
-      setError(msg);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
+      if (!response.success) throw new Error(response.message || 'Gagal memuat data');
+      return response.data || null;
+    },
+  });
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, [fetchAnalytics]);
+  const error = queryError ? getErrorMessage(queryError, 'Gagal memuat data') : '';
 
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
-    fetchAnalytics();
+    await refetch();
+    setRefreshing(false);
   };
 
   const formatCurrency = (value: number | undefined | null): string => {
