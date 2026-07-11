@@ -24,7 +24,7 @@ import { getErrorMessage } from '@/utils/helpers';
 type RoleType = 'pelanggan' | 'mitra' | 'kurir';
 
 export default function LoginScreen() {
-  const { colors: LaundryColors } = useTheme();
+  const { isDarkMode, colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   const router = useRouter();
   const { login } = useAuth();
@@ -151,7 +151,7 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={LaundryColors.headerBg} />
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={LaundryColors.headerBg} />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoid}

@@ -38,7 +38,7 @@ const activeStatuses = [
 ];
 
 export default function OwnerBerandaScreen() {
-  const { colors: LaundryColors } = useTheme();
+  const { isDarkMode, colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   const router = useRouter();
   const { user } = useAuth();
@@ -167,7 +167,7 @@ export default function OwnerBerandaScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={LaundryColors.backgroundWhite} />
       
       <ScrollView
         contentContainerStyle={styles.body}

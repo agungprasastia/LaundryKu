@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, PressableProps, StyleProp, ViewStyle, Platform, GestureResponderEvent } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -14,6 +14,14 @@ export interface InteractiveButtonProps extends PressableProps {
   hapticFeedback?: boolean;
 }
 
+interface WebStyle extends ViewStyle {
+  cursor?: 'pointer';
+  outlineWidth?: number;
+  outlineStyle?: 'solid' | 'dotted' | 'dashed';
+  outlineColor?: string;
+  outlineOffset?: number;
+}
+
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function InteractiveButton({
@@ -27,6 +35,7 @@ export default function InteractiveButton({
   ...props
 }: InteractiveButtonProps) {
   const scale = useSharedValue(1);
+  const [isFocused, setIsFocused] = useState(false);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -55,15 +64,41 @@ export default function InteractiveButton({
     if (onPressOut) onPressOut(e);
   };
 
+  const webFocusStyle: WebStyle = Platform.OS === 'web' && isFocused ? {
+    outlineWidth: 2,
+    outlineStyle: 'solid',
+    outlineColor: '#2563EB',
+    outlineOffset: 2,
+  } : {};
+
+  const webCursorStyle: WebStyle = Platform.OS === 'web' ? {
+    cursor: 'pointer',
+  } : {};
+
   return (
     <AnimatedPressable
-      style={[style, animatedStyle]}
+      style={[
+        webCursorStyle,
+        style,
+        animatedStyle,
+        webFocusStyle,
+      ]}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       onPress={onPress}
+      onFocus={(e) => {
+        setIsFocused(true);
+        if (props.onFocus) props.onFocus(e);
+      }}
+      onBlur={(e) => {
+        setIsFocused(false);
+        if (props.onBlur) props.onBlur(e);
+      }}
       {...props}
     >
       {children}
     </AnimatedPressable>
   );
 }
+
+

@@ -33,7 +33,7 @@ import { getStatusBgColor, getStatusColor, getStatusLabel } from "@/constants/or
 import { useQuery } from '@tanstack/react-query';
 
 export default function CourierBerandaScreen() {
-  const { colors: LaundryColors } = useTheme();
+  const { isDarkMode, colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   const router = useRouter();
   const { user } = useAuth();
@@ -204,7 +204,7 @@ export default function CourierBerandaScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={LaundryColors.backgroundWhite} />
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={LaundryColors.backgroundWhite} />
       
       <ScrollView
         contentContainerStyle={styles.body}

@@ -17,7 +17,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import * as authService from '@/services/authService';
 
 export default function WaitingVerificationScreen() {
-  const { colors: LaundryColors } = useTheme();
+  const { isDarkMode, colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   const router = useRouter();
   const { user, logout, refreshProfile } = useAuth();
@@ -53,7 +53,7 @@ export default function WaitingVerificationScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={LaundryColors.headerBg} />
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={LaundryColors.headerBg} />
 
       <View style={styles.headerSection}>
         <View style={styles.headerBubble1} />

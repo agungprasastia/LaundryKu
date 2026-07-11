@@ -32,7 +32,7 @@ import InteractiveButton from '@/components/ui/InteractiveButton';
 
 
 export default function WelcomeScreen() {
-  const { colors: LaundryColors } = useTheme();
+  const { isDarkMode, colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const router = useRouter();
@@ -141,7 +141,7 @@ export default function WelcomeScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={LaundryColors.headerBg} />
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={LaundryColors.headerBg} />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}

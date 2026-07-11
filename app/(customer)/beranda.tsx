@@ -27,7 +27,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ThemeColors } from '@/constants/colors';
 
 export default function CustomerBerandaScreen() {
-  const { colors: LaundryColors } = useTheme();
+  const { isDarkMode, colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   const { user } = useAuth();
   const router = useRouter();
@@ -153,7 +153,7 @@ export default function CustomerBerandaScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={LaundryColors.backgroundWhite} />
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor={LaundryColors.backgroundWhite} />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
