@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { ThemeColors } from "@/constants/colors";
 import {
   Modal,
   RefreshControl,
@@ -74,7 +75,7 @@ export default function OwnerOrdersScreen() {
       setError("");
       const r = await ownerService.getOwnerOrders();
       setOrders(r.success && Array.isArray(r.data) ? r.data : []);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(em(e, "Gagal memuat pesanan"));
     } finally {
       setLoading(false);
@@ -117,7 +118,7 @@ export default function OwnerOrdersScreen() {
       await orderService.updateOrderStatus(detail.order_id, s);
       crossAlert("Berhasil", "Status diperbarui");
       await refreshDetail();
-    } catch (e: any) {
+    } catch (e: unknown) {
       crossAlert("Error", em(e, "Gagal update status"));
     } finally {
       setBusy(false);
@@ -130,7 +131,7 @@ export default function OwnerOrdersScreen() {
       const r = await courierService.getAvailableCouriers();
       setCouriers(r.success && Array.isArray(r.data) ? r.data : []);
       setCourierModal(true);
-    } catch (e: any) {
+    } catch (e: unknown) {
       crossAlert("Error", em(e, "Gagal memuat kurir"));
     } finally {
       setBusy(false);
@@ -147,7 +148,7 @@ export default function OwnerOrdersScreen() {
       crossAlert("Berhasil", "Kurir ditugaskan");
       setCourierModal(false);
       await refreshDetail();
-    } catch (e: any) {
+    } catch (e: unknown) {
       crossAlert("Error", em(e, "Gagal assign kurir"));
     } finally {
       setBusy(false);
@@ -166,7 +167,7 @@ export default function OwnerOrdersScreen() {
       setWeightModal(false);
       setWeight("");
       await refreshDetail();
-    } catch (e: any) {
+    } catch (e: unknown) {
       crossAlert("Error", em(e, "Gagal input berat"));
     } finally {
       setBusy(false);
@@ -180,7 +181,7 @@ export default function OwnerOrdersScreen() {
       await orderService.activateDelivery(detail.order_id);
       crossAlert("Berhasil", "Delivery diaktifkan");
       await refreshDetail();
-    } catch (e: any) {
+    } catch (e: unknown) {
       crossAlert("Error", em(e, "Gagal activate delivery"));
     } finally {
       setBusy(false);
@@ -390,9 +391,7 @@ export default function OwnerOrdersScreen() {
 }
 
 function OwnerTrackingPanel({ order, tracking }: { order: Order; tracking: OrderTracking | null }) {
-  const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
-  const sharedOwnerStyles = useAppStyles(ownerStyles);
   const courierLocation = normalizeCourierLocation(tracking);
   return (
     <View style={styles.mapBlock}>
@@ -424,9 +423,7 @@ function OwnerTrackingPanel({ order, tracking }: { order: Order; tracking: Order
 }
 
 function Action({ order, busy, status, showCouriers, weight, activate }: any) {
-  const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
-  const sharedOwnerStyles = useAppStyles(ownerStyles);
   switch (order.status) {
     case "WAITING_OWNER_CONFIRMATION":
       return <PrimaryButton text="Konfirmasi Order" onPress={() => status("CONFIRMED")} disabled={busy} />;
@@ -448,9 +445,7 @@ function Action({ order, busy, status, showCouriers, weight, activate }: any) {
 }
 
 function Badge({ st }: { st: string }) {
-  const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
-  const sharedOwnerStyles = useAppStyles(ownerStyles);
   return (
     <View style={[styles.badge, { backgroundColor: getStatusBgColor(st) }]}>
       <Text style={[styles.badgeText, { color: getStatusColor(st) }]}>
@@ -463,7 +458,6 @@ function Badge({ st }: { st: string }) {
 function Info({ k, v, bold, highlight }: { k: string; v: any; bold?: boolean; highlight?: boolean }) {
   const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
-  const sharedOwnerStyles = useAppStyles(ownerStyles);
   return (
     <View style={styles.infoRow}>
       <Text style={styles.infoLabel}>{k}</Text>
@@ -472,7 +466,7 @@ function Info({ k, v, bold, highlight }: { k: string; v: any; bold?: boolean; hi
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   title: { fontSize: 16, fontWeight: "700", color: LaundryColors.textPrimary },
   customerName: { fontSize: 16, fontWeight: "700", color: LaundryColors.textPrimary, marginTop: 4 },
   serviceName: { fontSize: 14, color: LaundryColors.textSecondary, marginTop: 2 },

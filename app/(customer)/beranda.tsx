@@ -1,18 +1,17 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { getErrorMessage } from '@/utils/getErrorMessage';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   Platform,
   ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
   Animated,
   StatusBar,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import InteractiveButton from '@/components/ui/InteractiveButton';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
@@ -22,8 +21,10 @@ import * as serviceService from '@/services/serviceService';
 import * as orderService from '@/services/orderService';
 import * as notificationService from '@/services/notificationService';
 import { LaundryService } from '@/types/service';
-import { Order } from '@/types/order';
-import { Notification } from '@/types/notification';
+import { useQuery } from '@tanstack/react-query';
+
+// ─── Styles ──────────────────────────────────────
+import { ThemeColors } from '@/constants/colors';
 
 export default function CustomerBerandaScreen() {
   const { colors: LaundryColors } = useTheme();
@@ -33,51 +34,53 @@ export default function CustomerBerandaScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
-  const [services, setServices] = useState<LaundryService[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState('');
+
+  const {
+    data: servicesRes,
+    isLoading: isLoadingServices,
+    error: servicesError,
+    refetch: refetchServices,
+  } = useQuery({
+    queryKey: ['customer', 'services'],
+    queryFn: () => serviceService.getServices(),
+  });
+
+  const {
+    data: ordersRes,
+    isLoading: isLoadingOrders,
+    error: ordersError,
+    refetch: refetchOrders,
+  } = useQuery({
+    queryKey: ['customer', 'orders'],
+    queryFn: () => orderService.getMyOrders(),
+  });
+
+  const {
+    data: notifsRes,
+    isLoading: isLoadingNotifs,
+    error: notifsError,
+    refetch: refetchNotifs,
+  } = useQuery({
+    queryKey: ['customer', 'notifications'],
+    queryFn: () => notificationService.getNotifications(),
+  });
+
+  const loading = isLoadingServices || isLoadingOrders || isLoadingNotifs;
+  const error = (servicesError || ordersError || notifsError) ? 'Gagal memuat data' : '';
+
+  const services = (servicesRes?.success && Array.isArray(servicesRes.data) ? servicesRes.data : [])
+    .filter((s: LaundryService) => s.is_active === true || s.is_active === 1)
+    .slice(0, 3);
+  
+  const orders = (ordersRes?.success && Array.isArray(ordersRes.data) ? ordersRes.data : [])
+    .slice(0, 3);
+  
+  const notifications = (notifsRes?.success && Array.isArray(notifsRes.data) ? notifsRes.data : []);
 
   const unreadCount = notifications.filter(
     (n) => !n.is_read || n.is_read === 0
   ).length;
-
-  const fetchData = useCallback(async () => {
-    try {
-      setError('');
-      const [servicesRes, ordersRes, notifsRes] = await Promise.allSettled([
-        serviceService.getServices(),
-        orderService.getMyOrders(),
-        notificationService.getNotifications(),
-      ]);
-
-      if (servicesRes.status === 'fulfilled' && servicesRes.value?.success && servicesRes.value.data) {
-        const activeServices = (Array.isArray(servicesRes.value.data) ? servicesRes.value.data : [])
-          .filter((s: LaundryService) => s.is_active === true || s.is_active === 1);
-        setServices(activeServices.slice(0, 3));
-      }
-
-      if (ordersRes.status === 'fulfilled' && ordersRes.value?.success && ordersRes.value.data) {
-        const allOrders = Array.isArray(ordersRes.value.data) ? ordersRes.value.data : [];
-        setOrders(allOrders.slice(0, 3));
-      }
-
-      if (notifsRes.status === 'fulfilled' && notifsRes.value?.success && notifsRes.value.data) {
-        setNotifications(Array.isArray(notifsRes.value.data) ? notifsRes.value.data : []);
-      }
-    } catch (err) {
-      setError(getErrorMessage(err, 'Gagal memuat data'));
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
 
   useEffect(() => {
     Animated.parallel([
@@ -86,9 +89,10 @@ export default function CustomerBerandaScreen() {
     ]).start();
   }, [fadeAnim, slideAnim]);
 
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
-    fetchData();
+    await Promise.all([refetchServices(), refetchOrders(), refetchNotifs()]);
+    setRefreshing(false);
   };
 
   const formatPrice = (price?: number) => {
@@ -168,7 +172,7 @@ export default function CustomerBerandaScreen() {
               <Text style={styles.headerSub}>Selamat datang di LaundryKu</Text>
             </View>
           </View>
-          <TouchableOpacity
+          <InteractiveButton
             style={styles.notifButton}
             onPress={() => router.push('/(customer)/profile')}
           >
@@ -178,7 +182,7 @@ export default function CustomerBerandaScreen() {
                 <Text style={styles.notifBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
               </View>
             )}
-          </TouchableOpacity>
+          </InteractiveButton>
         </View>
 
         <Animated.View style={[styles.animatedContent, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
@@ -187,9 +191,9 @@ export default function CustomerBerandaScreen() {
             <View style={styles.errorBanner}>
               <Ionicons name="alert-circle" size={18} color={LaundryColors.error} />
               <Text style={styles.errorBannerText}>{error}</Text>
-              <TouchableOpacity onPress={onRefresh}>
+              <InteractiveButton onPress={onRefresh}>
                 <Text style={styles.retryText}>Coba Lagi</Text>
-              </TouchableOpacity>
+              </InteractiveButton>
             </View>
           ) : null}
 
@@ -201,17 +205,16 @@ export default function CustomerBerandaScreen() {
           <View style={styles.quickActionsCard}>
             <View style={styles.quickActionsRow}>
               {quickActions.map((action, i) => (
-                <TouchableOpacity
+                <InteractiveButton
                   key={i}
                   style={styles.quickActionItem}
-                  activeOpacity={0.7}
                   onPress={action.onPress}
                 >
                   <View style={[styles.quickActionIcon, { backgroundColor: action.bg }]}>
                     <Ionicons name={action.icon} size={24} color={action.color} />
                   </View>
                   <Text style={styles.quickActionLabel}>{action.label}</Text>
-                </TouchableOpacity>
+                </InteractiveButton>
               ))}
             </View>
           </View>
@@ -219,9 +222,9 @@ export default function CustomerBerandaScreen() {
           {/* ─── LAYANAN TERATAS ─── */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Layanan Populer</Text>
-            <TouchableOpacity onPress={() => router.push('/(customer)/services')}>
+            <InteractiveButton onPress={() => router.push('/(customer)/services')}>
               <Text style={styles.linkText}>Lihat Semua {'>'}</Text>
-            </TouchableOpacity>
+            </InteractiveButton>
           </View>
 
           {services.length === 0 ? (
@@ -231,10 +234,9 @@ export default function CustomerBerandaScreen() {
             </View>
           ) : (
             services.map((svc) => (
-              <TouchableOpacity
+              <InteractiveButton
                 key={svc.service_id}
                 style={styles.serviceCard}
-                activeOpacity={0.7}
                 onPress={() => router.push('/(customer)/services')}
               >
                 <View style={styles.serviceIconWrap}>
@@ -250,35 +252,34 @@ export default function CustomerBerandaScreen() {
                   <Text style={styles.servicePrice}>{formatPrice(svc.price_per_kg_customer)}</Text>
                   <Text style={styles.servicePriceUnit}>/kg</Text>
                 </View>
-              </TouchableOpacity>
+              </InteractiveButton>
             ))
           )}
 
           {/* ─── PESANAN TERBARU ─── */}
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Pesanan Terbaru</Text>
-            <TouchableOpacity onPress={() => router.push('/(customer)/orders')}>
+            <InteractiveButton onPress={() => router.push('/(customer)/orders')}>
               <Text style={styles.linkText}>Lihat Semua {'>'}</Text>
-            </TouchableOpacity>
+            </InteractiveButton>
           </View>
 
           {orders.length === 0 ? (
             <View style={styles.emptyCard}>
               <Ionicons name="cube-outline" size={32} color={LaundryColors.textMuted} />
               <Text style={styles.emptyText}>Belum ada pesanan</Text>
-              <TouchableOpacity
+              <InteractiveButton
                 style={styles.emptyButton}
                 onPress={() => router.push('/(customer)/services')}
               >
                 <Text style={styles.emptyButtonText}>Pesan Sekarang</Text>
-              </TouchableOpacity>
+              </InteractiveButton>
             </View>
           ) : (
             orders.map((order) => (
-              <TouchableOpacity
+              <InteractiveButton
                 key={order.order_id}
                 style={styles.orderCard}
-                activeOpacity={0.7}
                 onPress={() => router.push('/(customer)/orders')}
               >
                 <View style={styles.orderCardTop}>
@@ -309,7 +310,7 @@ export default function CustomerBerandaScreen() {
                     ) : null}
                   </View>
                 </View>
-              </TouchableOpacity>
+              </InteractiveButton>
             ))
           )}
 
@@ -320,8 +321,7 @@ export default function CustomerBerandaScreen() {
   );
 }
 
-// ─── Styles ──────────────────────────────────────
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   scrollContent: { paddingBottom: 20 },
 

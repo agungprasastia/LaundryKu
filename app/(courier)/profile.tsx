@@ -1,3 +1,4 @@
+import { ThemeColors } from '@/constants/colors';
 import React, { useCallback, useEffect, useState } from "react";
 import { RefreshControl, StyleSheet, Text, TouchableOpacity, View, Modal, TextInput } from "react-native";
 import { useRouter } from "expo-router";
@@ -65,7 +66,7 @@ export default function CourierProfileScreen() {
       });
       crossAlert("Berhasil", "Profil diperbarui");
       setEditModal(false);
-    } catch (e: any) {
+    } catch (e: unknown) {
       crossAlert("Error", getErrorMessage(e, "Gagal memperbarui profil"));
     } finally {
       setSaving(false);
@@ -174,7 +175,7 @@ export default function CourierProfileScreen() {
             activeOpacity={0.7}
           >
             <View style={[styles.menuIcon, { backgroundColor: `${item.color}15` }]}>
-              <Ionicons name={item.icon as any} size={20} color={item.color} />
+              <Ionicons name={item.icon as React.ComponentProps<typeof Ionicons>["name"]} size={20} color={item.color} />
             </View>
             <Text style={styles.menuLabel}>{item.label}</Text>
             {item.label === 'Notifikasi' && unreadCount > 0 && (
@@ -312,7 +313,7 @@ export default function CourierProfileScreen() {
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(15,23,42,.4)",

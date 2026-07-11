@@ -1,3 +1,4 @@
+import { ThemeColors } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -88,7 +89,7 @@ export function StatusTimeline({ order }: { order: Order }) {
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: { marginTop: 8, paddingLeft: 4 },
   step: { position: 'relative' },
   connector: {

@@ -14,6 +14,7 @@ import { crossAlert } from "@/utils/crossAlert";
 import * as serviceService from "@/services/serviceService";
 import { useAuth } from "@/contexts/AuthContext";
 import { LaundryService } from "@/types/service";
+import { ThemeColors } from "@/constants/colors";
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
 import {
@@ -49,7 +50,6 @@ const emptyForm: ServiceForm = {
 export default function OwnerServicesScreen() {
   const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
-  const sharedOwnerStyles = useAppStyles(ownerStyles);
   const { user } = useAuth();
   const verified = isVerified(user?.is_verified);
   const [services, setServices] = useState<LaundryService[]>([]);
@@ -315,7 +315,6 @@ function ServiceCard({
 function StatusBadge({ active }: { active: boolean }) {
   const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
-  const sharedOwnerStyles = useAppStyles(ownerStyles);
   return (
     <View style={[styles.badge, { backgroundColor: active ? "#ECFDF5" : "#FEF2F2" }]}>
       <Text style={[styles.badgeText, { color: active ? "#10B981" : LaundryColors.error }]}>
@@ -344,7 +343,6 @@ function ServiceModal({
 }) {
   const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
-  const sharedOwnerStyles = useAppStyles(ownerStyles);
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View style={styles.modalOverlay}>
@@ -413,7 +411,6 @@ function FormInput(props: {
 }) {
   const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
-  const sharedOwnerStyles = useAppStyles(ownerStyles);
   return (
     <View style={styles.inputGroup}>
       <Text style={styles.inputLabel}>{props.label}</Text>
@@ -435,7 +432,7 @@ function FormInput(props: {
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   toolbar: {
     flexDirection: "row",
     justifyContent: "space-between",

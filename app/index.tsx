@@ -1,11 +1,9 @@
-import React, { useRef, useEffect, useState } from 'react';
+import { ThemeColors } from '@/constants/colors';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
-  Animated,
-  Dimensions,
   StatusBar,
   Platform,
   ScrollView,
@@ -13,10 +11,22 @@ import {
   NativeScrollEvent,
   useWindowDimensions,
 } from 'react-native';
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withTiming, 
+  withSpring, 
+  withRepeat, 
+  withSequence,
+  withDelay
+} from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LaundrySpacing } from '@/constants/spacing';
+import { LaundryTypography } from '@/constants/typography';
+import InteractiveButton from '@/components/ui/InteractiveButton';
 
 
 
@@ -26,17 +36,15 @@ export default function WelcomeScreen() {
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const router = useRouter();
 
-  // Animations
-  const logoScale = useRef(new Animated.Value(0.8)).current;
-  const logoOpacity = useRef(new Animated.Value(0)).current;
-  const illustrationFade = useRef(new Animated.Value(0)).current;
-  const contentFade = useRef(new Animated.Value(0)).current;
-  const contentSlide = useRef(new Animated.Value(30)).current;
-  const buttonFade = useRef(new Animated.Value(0)).current;
-  const buttonSlide = useRef(new Animated.Value(20)).current;
-  const masukScale = useRef(new Animated.Value(1)).current;
-  const daftarScale = useRef(new Animated.Value(1)).current;
-
+  // Animations (Reanimated)
+  const logoScale = useSharedValue(0.8);
+  const logoOpacity = useSharedValue(0);
+  const illustrationFade = useSharedValue(0);
+  const contentFade = useSharedValue(0);
+  const contentSlide = useSharedValue(30);
+  const buttonFade = useSharedValue(0);
+  const buttonSlide = useSharedValue(20);
+  
   // Carousel state
   const [activeSlide, setActiveSlide] = useState(0);
 
@@ -74,45 +82,61 @@ export default function WelcomeScreen() {
   };
 
   // Floating bubbles
-  const bubble1 = useRef(new Animated.Value(0)).current;
-  const bubble2 = useRef(new Animated.Value(0)).current;
-  const bubble3 = useRef(new Animated.Value(0)).current;
+  const bubble1 = useSharedValue(0);
+  const bubble2 = useSharedValue(0);
+  const bubble3 = useSharedValue(0);
 
   useEffect(() => {
     // Staggered entrance
-    Animated.sequence([
-      Animated.parallel([
-        Animated.spring(logoScale, { toValue: 1, friction: 6, tension: 40, useNativeDriver: true }),
-        Animated.timing(logoOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
-      ]),
-      Animated.timing(illustrationFade, { toValue: 1, duration: 500, useNativeDriver: true }),
-      Animated.parallel([
-        Animated.timing(contentFade, { toValue: 1, duration: 400, useNativeDriver: true }),
-        Animated.timing(contentSlide, { toValue: 0, duration: 400, useNativeDriver: true }),
-      ]),
-      Animated.parallel([
-        Animated.timing(buttonFade, { toValue: 1, duration: 300, useNativeDriver: true }),
-        Animated.spring(buttonSlide, { toValue: 0, friction: 8, tension: 40, useNativeDriver: true }),
-      ]),
-    ]).start();
+    logoScale.value = withSpring(1, { damping: 12, stiffness: 90 });
+    logoOpacity.value = withTiming(1, { duration: 500 });
+    
+    illustrationFade.value = withDelay(200, withTiming(1, { duration: 500 }));
+    
+    contentFade.value = withDelay(400, withTiming(1, { duration: 400 }));
+    contentSlide.value = withDelay(400, withTiming(0, { duration: 400 }));
+    
+    buttonFade.value = withDelay(600, withTiming(1, { duration: 300 }));
+    buttonSlide.value = withDelay(600, withSpring(0, { damping: 12, stiffness: 90 }));
 
     // Floating bubbles loop
-    const float = (anim: Animated.Value, dur: number) => {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(anim, { toValue: -10, duration: dur, useNativeDriver: true }),
-          Animated.timing(anim, { toValue: 10, duration: dur, useNativeDriver: true }),
-        ])
-      ).start();
+    const float = (anim: import("react-native-reanimated").SharedValue<number>, dur: number) => {
+      anim.value = withRepeat(
+        withSequence(
+          withTiming(-10, { duration: dur }),
+          withTiming(10, { duration: dur })
+        ),
+        -1, // infinite
+        true // reverse
+      );
     };
     float(bubble1, 2400);
     float(bubble2, 3000);
     float(bubble3, 2700);
-  }, [bubble1, bubble2, bubble3, buttonFade, buttonSlide, contentFade, contentSlide, illustrationFade, logoOpacity, logoScale]);
+  }, []);
 
-  const animatePress = (anim: Animated.Value, down: boolean) => {
-    Animated.spring(anim, { toValue: down ? 0.96 : 1, friction: 3, tension: 40, useNativeDriver: true }).start();
-  };
+  const logoStyle = useAnimatedStyle(() => ({
+    opacity: logoOpacity.value,
+    transform: [{ scale: logoScale.value }],
+  }));
+
+  const illustStyle = useAnimatedStyle(() => ({
+    opacity: illustrationFade.value,
+  }));
+
+  const contentStyle = useAnimatedStyle(() => ({
+    opacity: contentFade.value,
+    transform: [{ translateY: contentSlide.value }],
+  }));
+
+  const buttonStyle = useAnimatedStyle(() => ({
+    opacity: buttonFade.value,
+    transform: [{ translateY: buttonSlide.value }],
+  }));
+
+  const b1Style = useAnimatedStyle(() => ({ transform: [{ translateY: bubble1.value }] }));
+  const b2Style = useAnimatedStyle(() => ({ transform: [{ translateY: bubble2.value }] }));
+  const b3Style = useAnimatedStyle(() => ({ transform: [{ translateY: bubble3.value }] }));
 
   return (
     <View style={styles.container}>
@@ -125,14 +149,14 @@ export default function WelcomeScreen() {
         {/* ===== HEADER SECTION ===== */}
         <View style={styles.headerSection}>
           {/* Floating bubbles */}
-          <Animated.View style={[styles.bubble, styles.bubbleTopRight, { transform: [{ translateY: bubble1 }] }]} />
-          <Animated.View style={[styles.bubble, styles.bubbleTopLeft, { transform: [{ translateY: bubble2 }] }]} />
-          <Animated.View style={[styles.bubble, styles.bubbleMidRight, { transform: [{ translateY: bubble3 }] }]} />
-          <Animated.View style={[styles.bubble, styles.bubbleSmall1, { transform: [{ translateY: bubble1 }] }]} />
-          <Animated.View style={[styles.bubble, styles.bubbleSmall2, { transform: [{ translateY: bubble2 }] }]} />
+          <Animated.View style={[styles.bubble, styles.bubbleTopRight, b1Style]} />
+          <Animated.View style={[styles.bubble, styles.bubbleTopLeft, b2Style]} />
+          <Animated.View style={[styles.bubble, styles.bubbleMidRight, b3Style]} />
+          <Animated.View style={[styles.bubble, styles.bubbleSmall1, b1Style]} />
+          <Animated.View style={[styles.bubble, styles.bubbleSmall2, b2Style]} />
 
           {/* Logo */}
-          <Animated.View style={[styles.logoArea, { opacity: logoOpacity, transform: [{ scale: logoScale }] }]}>
+          <Animated.View style={[styles.logoArea, logoStyle]}>
             <View style={styles.logoIcon}>
               <Ionicons name="water" size={30} color={LaundryColors.primary} />
             </View>
@@ -143,7 +167,7 @@ export default function WelcomeScreen() {
           </Animated.View>
 
           {/* Illustration area with icons */}
-          <Animated.View style={[styles.illustrationArea, { opacity: illustrationFade, width: SCREEN_WIDTH }]}>
+          <Animated.View style={[styles.illustrationArea, { width: SCREEN_WIDTH }, illustStyle]}>
             {/* Left side - basket/folded clothes */}
             <View style={styles.illustLeft}>
               <View style={styles.illustPlant}>
@@ -183,12 +207,7 @@ export default function WelcomeScreen() {
         </View>
 
         {/* ===== CONTENT CARD ===== */}
-        <Animated.View
-          style={[
-            styles.contentCard,
-            { opacity: contentFade, transform: [{ translateY: contentSlide }] },
-          ]}
-        >
+        <Animated.View style={[styles.contentCard, contentStyle]}>
           <Text style={styles.welcomeTitle}>
             Selamat Datang{'\n'}di <Text style={styles.welcomeTitleAccent}>LaundryKu</Text>
           </Text>
@@ -211,9 +230,9 @@ export default function WelcomeScreen() {
                 <View style={styles.featureCard}>
                   <View style={[styles.featureIconWrap, { backgroundColor: LaundryColors.rolePelangganBg }]}>
                     {item.iconFamily === 'Ionicons' ? (
-                      <Ionicons name={item.icon as any} size={36} color={LaundryColors.primary} />
+                      <Ionicons name={item.icon as React.ComponentProps<typeof Ionicons>["name"]} size={36} color={LaundryColors.primary} />
                     ) : (
-                      <MaterialCommunityIcons name={item.icon as any} size={36} color={LaundryColors.primary} />
+                      <MaterialCommunityIcons name={item.icon as React.ComponentProps<typeof MaterialCommunityIcons>["name"]} size={36} color={LaundryColors.primary} />
                     )}
                   </View>
                   <Text style={styles.featureTitleBig}>{item.title}</Text>
@@ -224,34 +243,24 @@ export default function WelcomeScreen() {
           </ScrollView>
 
           {/* Buttons */}
-          <Animated.View style={[styles.buttonsArea, { opacity: buttonFade, transform: [{ translateY: buttonSlide }] }]}>
+          <Animated.View style={[styles.buttonsArea, buttonStyle]}>
             {/* Masuk button */}
-            <Animated.View style={{ transform: [{ scale: masukScale }] }}>
-              <TouchableOpacity
-                style={styles.masukButton}
-                onPress={() => router.push('/(auth)/login')}
-                onPressIn={() => animatePress(masukScale, true)}
-                onPressOut={() => animatePress(masukScale, false)}
-                activeOpacity={0.9}
-              >
-                <Ionicons name="log-in-outline" size={20} color={LaundryColors.textWhite} />
-                <Text style={styles.masukText}>Masuk</Text>
-              </TouchableOpacity>
-            </Animated.View>
+            <InteractiveButton
+              style={styles.masukButton}
+              onPress={() => router.push('/(auth)/login')}
+            >
+              <Ionicons name="log-in-outline" size={20} color={LaundryColors.textWhite} />
+              <Text style={styles.masukText}>Masuk</Text>
+            </InteractiveButton>
 
             {/* Daftar button */}
-            <Animated.View style={{ transform: [{ scale: daftarScale }] }}>
-              <TouchableOpacity
-                style={styles.daftarButton}
-                onPress={() => router.push('/(auth)/register')}
-                onPressIn={() => animatePress(daftarScale, true)}
-                onPressOut={() => animatePress(daftarScale, false)}
-                activeOpacity={0.9}
-              >
-                <Ionicons name="person-add-outline" size={20} color={LaundryColors.primary} />
-                <Text style={styles.daftarText}>Daftar</Text>
-              </TouchableOpacity>
-            </Animated.View>
+            <InteractiveButton
+              style={styles.daftarButton}
+              onPress={() => router.push('/(auth)/register')}
+            >
+              <Ionicons name="person-add-outline" size={20} color={LaundryColors.primary} />
+              <Text style={styles.daftarText}>Daftar</Text>
+            </InteractiveButton>
 
             {/* Pagination dots */}
             <View style={styles.dotsRow}>
@@ -269,7 +278,7 @@ export default function WelcomeScreen() {
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: LaundryColors.background,
@@ -291,7 +300,7 @@ const createStyles = (LaundryColors: any) => StyleSheet.create({
   /* Bubbles */
   bubble: {
     position: 'absolute',
-    borderRadius: 999,
+    borderRadius: LaundrySpacing.radius.full,
     backgroundColor: 'rgba(37, 99, 235, 0.06)',
   },
   bubbleTopRight: { width: 120, height: 120, top: -30, right: -40 },
@@ -301,33 +310,33 @@ const createStyles = (LaundryColors: any) => StyleSheet.create({
   bubbleSmall2: { width: 20, height: 20, top: 50, right: 80, backgroundColor: 'rgba(37, 99, 235, 0.1)' },
 
   /* Logo */
-  logoArea: { alignItems: 'center', marginBottom: 20 },
+  logoArea: { alignItems: 'center', marginBottom: LaundrySpacing.spacing.lg },
   logoIcon: {
     width: 60,
     height: 60,
-    borderRadius: 18,
+    borderRadius: LaundrySpacing.radius.xl,
     backgroundColor: LaundryColors.backgroundWhite,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: LaundrySpacing.spacing.sm,
     shadowColor: LaundryColors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 10,
     elevation: 6,
   },
-  logoText: { fontSize: 24, fontWeight: '800', color: LaundryColors.textPrimary, letterSpacing: -0.5 },
+  logoText: { fontSize: LaundryTypography.size.xxl, fontWeight: LaundryTypography.weight.bold, color: LaundryColors.textPrimary, letterSpacing: -0.5 },
   logoAccent: { color: LaundryColors.primary },
-  logoSub: { fontSize: 14, color: LaundryColors.textSecondary, marginTop: 2 },
+  logoSub: { fontSize: LaundryTypography.size.base, color: LaundryColors.textSecondary, marginTop: LaundrySpacing.spacing.xs },
 
   /* Illustration */
   illustrationArea: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: LaundrySpacing.spacing.lg,
     height: 130,
-    marginTop: 10,
+    marginTop: LaundrySpacing.spacing.sm,
   },
   illustLeft: {
     flex: 1,
@@ -349,16 +358,16 @@ const createStyles = (LaundryColors: any) => StyleSheet.create({
   illustBasket: {
     width: 64,
     height: 64,
-    borderRadius: 16,
+    borderRadius: LaundrySpacing.radius.xl,
     backgroundColor: 'rgba(37, 99, 235, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 4,
+    marginBottom: LaundrySpacing.spacing.xs,
   },
   illustStack: {
     width: 32,
     height: 32,
-    borderRadius: 8,
+    borderRadius: LaundrySpacing.radius.md,
     backgroundColor: 'rgba(37, 99, 235, 0.06)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -374,21 +383,21 @@ const createStyles = (LaundryColors: any) => StyleSheet.create({
   illustBag: {
     width: 72,
     height: 72,
-    borderRadius: 18,
+    borderRadius: LaundrySpacing.radius.xl,
     backgroundColor: 'rgba(37, 99, 235, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   illustBagLabel: {
-    fontSize: 8,
-    fontWeight: '700',
+    fontSize: LaundryTypography.size.xs,
+    fontWeight: LaundryTypography.weight.bold,
     color: LaundryColors.primary,
     marginTop: -2,
   },
   illustHanger: {
     flexDirection: 'row',
     gap: 6,
-    marginTop: 4,
+    marginTop: LaundrySpacing.spacing.xs,
     opacity: 0.5,
   },
   illustRight: {
@@ -411,11 +420,11 @@ const createStyles = (LaundryColors: any) => StyleSheet.create({
   illustTruck: {
     width: 60,
     height: 50,
-    borderRadius: 16,
+    borderRadius: LaundrySpacing.radius.xl,
     backgroundColor: 'rgba(37, 99, 235, 0.06)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 4,
+    marginBottom: LaundrySpacing.spacing.xs,
   },
 
   /* ========== CONTENT CARD ========== */
@@ -423,8 +432,8 @@ const createStyles = (LaundryColors: any) => StyleSheet.create({
     backgroundColor: LaundryColors.backgroundWhite,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    marginTop: -24,
-    paddingHorizontal: 24,
+    marginTop: -LaundrySpacing.spacing.xl,
+    paddingHorizontal: LaundrySpacing.spacing.xl,
     paddingTop: 30,
     paddingBottom: 28,
     flex: 1,
@@ -435,57 +444,57 @@ const createStyles = (LaundryColors: any) => StyleSheet.create({
     elevation: 8,
   },
   welcomeTitle: {
-    fontSize: 24,
-    fontWeight: '800',
+    fontSize: LaundryTypography.size.xxl,
+    fontWeight: LaundryTypography.weight.bold,
     color: LaundryColors.textPrimary,
     textAlign: 'center',
     lineHeight: 32,
-    marginBottom: 10,
+    marginBottom: LaundrySpacing.spacing.sm,
   },
   welcomeTitleAccent: { color: LaundryColors.primary },
   welcomeDesc: {
-    fontSize: 14,
+    fontSize: LaundryTypography.size.base,
     color: LaundryColors.textSecondary,
     textAlign: 'center',
     lineHeight: 20,
-    marginBottom: 24,
+    marginBottom: LaundrySpacing.spacing.xl,
   },
 
   /* Features */
   featuresScroll: {
-    marginHorizontal: -24,
+    marginHorizontal: -LaundrySpacing.spacing.xl,
     marginBottom: 26,
   },
   featureCardWrap: {
-    paddingHorizontal: 24,
+    paddingHorizontal: LaundrySpacing.spacing.xl,
   },
   featureCard: {
     flex: 1,
     backgroundColor: LaundryColors.backgroundWhite,
-    borderRadius: 20,
+    borderRadius: LaundrySpacing.radius.xl,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
-    paddingVertical: 24,
-    paddingHorizontal: 20,
+    paddingVertical: LaundrySpacing.spacing.xl,
+    paddingHorizontal: LaundrySpacing.spacing.lg,
     alignItems: 'center',
   },
   featureIconWrap: {
     width: 64,
     height: 64,
-    borderRadius: 20,
+    borderRadius: LaundrySpacing.radius.xl,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    marginBottom: LaundrySpacing.spacing.base,
   },
   featureTitleBig: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: LaundryTypography.size.lg,
+    fontWeight: LaundryTypography.weight.bold,
     color: LaundryColors.textPrimary,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: LaundrySpacing.spacing.sm,
   },
   featureDescBig: {
-    fontSize: 14,
+    fontSize: LaundryTypography.size.base,
     color: LaundryColors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
@@ -494,16 +503,16 @@ const createStyles = (LaundryColors: any) => StyleSheet.create({
 
   /* Buttons */
   buttonsArea: {
-    gap: 12,
+    gap: LaundrySpacing.spacing.md,
   },
   masukButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: LaundryColors.primary,
-    borderRadius: 16,
+    borderRadius: LaundrySpacing.radius.xl,
     height: 54,
-    gap: 8,
+    gap: LaundrySpacing.spacing.sm,
     shadowColor: LaundryColors.primary,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
@@ -511,8 +520,8 @@ const createStyles = (LaundryColors: any) => StyleSheet.create({
     elevation: 6,
   },
   masukText: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: LaundryTypography.size.md,
+    fontWeight: LaundryTypography.weight.bold,
     color: LaundryColors.textWhite,
   },
   daftarButton: {
@@ -520,15 +529,15 @@ const createStyles = (LaundryColors: any) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: LaundryColors.backgroundWhite,
-    borderRadius: 16,
+    borderRadius: LaundrySpacing.radius.xl,
     height: 54,
-    gap: 8,
+    gap: LaundrySpacing.spacing.sm,
     borderWidth: 1.5,
     borderColor: LaundryColors.inputBorder,
   },
   daftarText: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: LaundryTypography.size.md,
+    fontWeight: LaundryTypography.weight.bold,
     color: LaundryColors.textPrimary,
   },
 
@@ -538,18 +547,17 @@ const createStyles = (LaundryColors: any) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    marginTop: 4,
+    marginTop: LaundrySpacing.spacing.xs,
   },
   dot: {
     width: 8,
     height: 8,
-    borderRadius: 4,
+    borderRadius: LaundrySpacing.radius.sm,
     backgroundColor: LaundryColors.inputBorder,
   },
   dotActive: {
-    width: 24,
+    width: LaundrySpacing.spacing.xl,
     backgroundColor: LaundryColors.primary,
-    borderRadius: 4,
+    borderRadius: LaundrySpacing.radius.sm,
   },
 });
-

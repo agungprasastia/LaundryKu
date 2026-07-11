@@ -22,6 +22,9 @@ import * as notificationService from '@/services/notificationService';
 import { Notification } from '@/types/notification';
 import { SettingsModal, HelpModal, AboutModal } from '@/components/ProfileModals';
 
+// ─── Styles ──────────────────────────────────────
+import { ThemeColors } from '@/constants/colors';
+
 export default function CustomerProfileScreen() {
   const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
@@ -67,7 +70,7 @@ export default function CustomerProfileScreen() {
       });
       crossAlert("Berhasil", "Profil diperbarui");
       setEditModal(false);
-    } catch (e: any) {
+    } catch (e: unknown) {
       crossAlert("Error", getErrorMessage(e, "Gagal memperbarui profil"));
     } finally {
       setSaving(false);
@@ -198,7 +201,7 @@ export default function CustomerProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={[styles.menuIcon, { backgroundColor: `${item.color}15` }]}>
-                <Ionicons name={item.icon as any} size={20} color={item.color} />
+                <Ionicons name={item.icon as React.ComponentProps<typeof Ionicons>["name"]} size={20} color={item.color} />
               </View>
               <Text style={styles.menuLabel}>{item.label}</Text>
               {item.label === 'Notifikasi' && unreadCount > 0 && (
@@ -353,8 +356,7 @@ export default function CustomerProfileScreen() {
   );
 }
 
-// ─── Styles ──────────────────────────────────────
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
     backgroundColor: LaundryColors.backgroundWhite,

@@ -1,3 +1,4 @@
+import { ThemeColors } from '@/constants/colors';
 import React, { useState, useEffect, useCallback } from 'react';
 import { getErrorMessage } from '@/utils/getErrorMessage';
 import {
@@ -143,7 +144,7 @@ export default function PenggunaScreen() {
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
     backgroundColor: LaundryColors.cardBg,

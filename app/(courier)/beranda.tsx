@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   RefreshControl,
   StyleSheet,
@@ -20,8 +20,8 @@ import { useAppStyles } from '@/hooks/useAppStyles';
 import { useAuth } from "@/contexts/AuthContext";
 import * as courierService from "@/services/courierService";
 import * as walletService from "@/services/walletService";
-import { CourierEarnings, CourierTask } from "@/types/order";
-import { Wallet } from "@/types/wallet";
+import { CourierTask } from "@/types/order";
+import { ThemeColors } from "@/constants/colors";
 import {
   ErrorState,
   formatMoney,
@@ -30,6 +30,7 @@ import {
   VerificationGate,
 } from "@/components/courier/roleComponents";
 import { getStatusBgColor, getStatusColor, getStatusLabel } from "@/constants/orderStatus";
+import { useQuery } from '@tanstack/react-query';
 
 export default function CourierBerandaScreen() {
   const { colors: LaundryColors } = useTheme();
@@ -41,45 +42,48 @@ export default function CourierBerandaScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
-  const [tasks, setTasks] = useState<CourierTask[]>([]);
-  const [earnings, setEarnings] = useState<CourierEarnings | null>(null);
-  const [wallet, setWallet] = useState<Wallet | null>(null);
-  const [loading, setLoading] = useState(verified);
   const [refreshing, setRefreshing] = useState(false);
   const [updatingLocation, setUpdatingLocation] = useState(false);
-  const [error, setError] = useState("");
 
-  const loadDashboard = useCallback(async () => {
-    if (!verified) return;
+  const {
+    data: tasksRes,
+    isLoading: isLoadingTasks,
+    error: tasksError,
+    refetch: refetchTasks,
+  } = useQuery({
+    queryKey: ['courier', 'tasks'],
+    queryFn: () => courierService.getMyTasks(),
+    enabled: verified,
+  });
 
-    try {
-      setError("");
-      const [taskRes, earningRes, walletRes] = await Promise.allSettled([
-        courierService.getMyTasks(),
-        courierService.getMyEarnings(),
-        walletService.getMyWallet(),
-      ]);
+  const {
+    data: earningsRes,
+    isLoading: isLoadingEarnings,
+    error: earningsError,
+    refetch: refetchEarnings,
+  } = useQuery({
+    queryKey: ['courier', 'earnings'],
+    queryFn: () => courierService.getMyEarnings(),
+    enabled: verified,
+  });
 
-      if (taskRes.status === "fulfilled" && taskRes.value.success) {
-        setTasks(Array.isArray(taskRes.value.data) ? taskRes.value.data : []);
-      }
-      if (earningRes.status === "fulfilled" && earningRes.value.success) {
-        setEarnings(earningRes.value.data || null);
-      }
-      if (walletRes.status === "fulfilled" && walletRes.value.success) {
-        setWallet(walletRes.value.data || null);
-      }
-    } catch (err) {
-      setError(getErrorMessage(err, "Gagal memuat beranda kurir"));
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [verified]);
+  const {
+    data: walletRes,
+    isLoading: isLoadingWallet,
+    error: walletError,
+    refetch: refetchWallet,
+  } = useQuery({
+    queryKey: ['courier', 'wallet'],
+    queryFn: () => walletService.getMyWallet(),
+    enabled: verified,
+  });
 
-  useEffect(() => {
-    loadDashboard();
-  }, [loadDashboard]);
+  const loading = verified && (isLoadingTasks || isLoadingEarnings || isLoadingWallet);
+  const error = (tasksError || earningsError || walletError) ? "Gagal memuat beranda kurir" : "";
+
+  const tasks = tasksRes?.success && Array.isArray(tasksRes.data) ? tasksRes.data : [];
+  const earnings = earningsRes?.success ? earningsRes.data : null;
+  const wallet = walletRes?.success ? walletRes.data : null;
 
   useEffect(() => {
     Animated.parallel([
@@ -92,13 +96,16 @@ export default function CourierBerandaScreen() {
   const availableBalance = wallet?.available_balance ?? wallet?.balance ?? 0;
   const pendingBalance = wallet?.pending_balance ?? 0;
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([refetchTasks(), refetchEarnings(), refetchWallet()]);
+    setRefreshing(false);
+  };
+
   const refreshControl = (
     <RefreshControl
       refreshing={refreshing}
-      onRefresh={() => {
-        setRefreshing(true);
-        loadDashboard();
-      }}
+      onRefresh={onRefresh}
       colors={[LaundryColors.roleKurirIcon]}
     />
   );
@@ -227,7 +234,7 @@ export default function CourierBerandaScreen() {
         </View>
 
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }], paddingHorizontal: 20, paddingTop: 20 }}>
-          {error ? <ErrorState message={error} onRetry={loadDashboard} /> : null}
+          {error ? <ErrorState message={error} onRetry={onRefresh} /> : null}
 
           {/* METRICS */}
           <View style={styles.metricsWrapper}>
@@ -296,8 +303,7 @@ export default function CourierBerandaScreen() {
   );
 }
 
-function MetricBox({ title, value, icon, color, bg }: { title: string; value: string; icon: any; color: string; bg: string }) {
-  const { colors: LaundryColors } = useTheme();
+function MetricBox({ title, value, icon, color, bg }: { title: string; value: string; icon: keyof typeof import("@expo/vector-icons").Ionicons.glyphMap; color: string; bg: string }) {
   const styles = useAppStyles(createStyles);
   return (
     <View style={styles.metricBox}>
@@ -350,7 +356,7 @@ function TaskPreview({ task, onPress }: { task: CourierTask; onPress: () => void
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   loadingContainer: {
     flex: 1,

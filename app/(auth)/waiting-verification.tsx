@@ -1,3 +1,4 @@
+import { ThemeColors } from '@/constants/colors';
 import React from 'react';
 import {
   View,
@@ -117,7 +118,7 @@ export default function WaitingVerificationScreen() {
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: LaundryColors.background,

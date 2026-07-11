@@ -1,3 +1,4 @@
+import { ThemeColors } from '@/constants/colors';
 import React, { useState, useCallback, createContext, useEffect } from 'react';
 import {
   View,
@@ -7,7 +8,6 @@ import {
   Modal,
   Platform,
 } from 'react-native';
-import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
 import { AlertButton, setGlobalAlert } from './crossAlert';
 
@@ -32,7 +32,6 @@ interface AlertState {
  * On native, crossAlert() already uses Alert.alert directly, so this is only needed for web.
  */
 export function AlertProvider({ children }: { children: React.ReactNode }) {
-  const { isDarkMode, colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   const [alertState, setAlertState] = useState<AlertState>({
     visible: false,
@@ -140,7 +139,7 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
 }
 
 // ─── Styles ───
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',

@@ -1,3 +1,4 @@
+import { ThemeColors } from '@/constants/colors';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -29,8 +30,8 @@ export default function LaporanScreen() {
       if (response.success && response.data) {
         setAnalytics(response.data);
       }
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || 'Gagal memuat data';
+    } catch (err: unknown) {
+      const msg = (err as any)?.response?.data?.message || (err as any)?.message || 'Gagal memuat data';
       setError(msg);
     } finally {
       setLoading(false);
@@ -185,7 +186,7 @@ export default function LaporanScreen() {
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
     backgroundColor: LaundryColors.cardBg,

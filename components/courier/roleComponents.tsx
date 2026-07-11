@@ -1,4 +1,5 @@
 import React from "react";
+import { ThemeColors } from '@/constants/colors';
 import {
   ActivityIndicator,
   Platform,
@@ -12,14 +13,17 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
+import { getErrorMessage } from '@/utils/helpers';
+import { formatMoney as baseFormatMoney, formatDate as baseFormatDate } from '@/utils/formatters';
 
 export const isVerified = (value: unknown) => value === true || value === 1;
-export const getErrorMessage = (error: any, fallback: string) =>
-  error?.response?.data?.message || error?.message || fallback;
+export { getErrorMessage };
+
 export const formatMoney = (value?: number | null) =>
-  value == null ? "-" : `Rp ${Number(value).toLocaleString("id-ID")}`;
+  value == null ? "-" : baseFormatMoney(value);
+
 export const formatDate = (value?: string | null) =>
-  value ? new Date(value).toLocaleString("id-ID") : "-";
+  value ? baseFormatDate(value) : "-";
 
 export function CourierScreen({
   title,
@@ -32,7 +36,6 @@ export function CourierScreen({
   children: React.ReactNode;
   refreshControl?: React.ReactElement<RefreshControlProps>;
 }) {
-  const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   return (
     <View style={styles.container}>
@@ -92,7 +95,7 @@ export function EmptyState({
 }: {
   title: string;
   message?: string;
-  icon?: any;
+  icon?: keyof typeof import("@expo/vector-icons").Ionicons.glyphMap;
 }) {
   const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
@@ -132,7 +135,6 @@ export function InfoRow({
   label: string;
   value?: React.ReactNode;
 }) {
-  const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   return (
     <View style={styles.infoRow}>
@@ -151,7 +153,6 @@ export function PrimaryButton({
   onPress: () => void;
   disabled?: boolean;
 }) {
-  const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   return (
     <TouchableOpacity
@@ -172,7 +173,6 @@ export function StatusPill({
   text: string;
   accent?: boolean;
 }) {
-  const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   return (
     <View style={[styles.badge, accent && styles.badgeAccent]}>
@@ -183,7 +183,7 @@ export function StatusPill({
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
     paddingTop: Platform.OS === "ios" ? 20 : 10,

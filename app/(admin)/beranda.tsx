@@ -1,4 +1,5 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { ThemeColors } from '@/constants/colors';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -18,7 +19,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
 import { useAuth } from '@/contexts/AuthContext';
 import * as adminService from '@/services/adminService';
-import { PendingUser } from '@/types/user';
+import { useQuery } from '@tanstack/react-query';
 
 // ─── Component ───────────────────────────────────
 export default function AdminBerandaScreen() {
@@ -29,39 +30,33 @@ export default function AdminBerandaScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
-  // State for API data
-  const [metrics, setMetrics] = useState<any>(null);
-  const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState('');
 
-  const fetchData = useCallback(async () => {
-    try {
-      setError('');
-      const [metricsRes, pendingRes] = await Promise.all([
-        adminService.getDashboardMetrics(),
-        adminService.getPendingUsers(),
-      ]);
+  const {
+    data: metricsRes,
+    isLoading: isLoadingMetrics,
+    error: metricsError,
+    refetch: refetchMetrics,
+  } = useQuery({
+    queryKey: ['admin', 'metrics'],
+    queryFn: () => adminService.getDashboardMetrics(),
+  });
 
-      if (metricsRes.success && metricsRes.data) {
-        setMetrics(metricsRes.data);
-      }
-      if (pendingRes.success && pendingRes.data) {
-        setPendingUsers(Array.isArray(pendingRes.data) ? pendingRes.data : []);
-      }
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || 'Gagal memuat data dashboard';
-      setError(msg);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
+  const {
+    data: pendingRes,
+    isLoading: isLoadingPending,
+    error: pendingError,
+    refetch: refetchPending,
+  } = useQuery({
+    queryKey: ['admin', 'pendingUsers'],
+    queryFn: () => adminService.getPendingUsers(),
+  });
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  const loading = isLoadingMetrics || isLoadingPending;
+  const error = (metricsError || pendingError) ? 'Gagal memuat data dashboard' : '';
+
+  const metrics = metricsRes?.success ? metricsRes.data : null;
+  const pendingUsers = pendingRes?.success && Array.isArray(pendingRes.data) ? pendingRes.data : [];
 
   useEffect(() => {
     Animated.parallel([
@@ -70,12 +65,12 @@ export default function AdminBerandaScreen() {
     ]).start();
   }, [fadeAnim, slideAnim]);
 
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
-    fetchData();
+    await Promise.all([refetchMetrics(), refetchPending()]);
+    setRefreshing(false);
   };
 
-  // Build stats from API data
   const statsData = [
     {
       icon: 'people',
@@ -226,7 +221,7 @@ export default function AdminBerandaScreen() {
             {statsData.map((stat, i) => (
               <View key={i} style={styles.statCard}>
                 <View style={[styles.statIconWrap, { backgroundColor: stat.bg }]}>
-                  <Ionicons name={stat.icon as any} size={20} color={stat.color} />
+                  <Ionicons name={stat.icon as React.ComponentProps<typeof Ionicons>["name"]} size={20} color={stat.color} />
                 </View>
                 <Text style={styles.statLabel}>{stat.label}</Text>
                 <Text style={styles.statValue}>{stat.value}</Text>
@@ -251,7 +246,7 @@ export default function AdminBerandaScreen() {
               {quickActions.map((action, i) => (
                 <TouchableOpacity key={i} style={styles.quickActionItem} activeOpacity={0.7} onPress={action.onPress}>
                   <View style={[styles.quickActionIcon, { backgroundColor: action.bg }]}>
-                    <Ionicons name={action.icon as any} size={24} color={action.color} />
+                    <Ionicons name={action.icon as React.ComponentProps<typeof Ionicons>["name"]} size={24} color={action.color} />
                   </View>
                   <Text style={styles.quickActionLabel}>{action.label}</Text>
                 </TouchableOpacity>
@@ -339,7 +334,7 @@ export default function AdminBerandaScreen() {
 }
 
 // ─── Styles ──────────────────────────────────────
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: LaundryColors.background,
@@ -662,8 +657,3 @@ const createStyles = (LaundryColors: any) => StyleSheet.create({
     fontWeight: '500',
   },
 });
-
-
-
-
-

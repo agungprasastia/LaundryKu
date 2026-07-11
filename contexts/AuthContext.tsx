@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { User, UserRole, RegisterPayload, UpdateProfilePayload } from '@/types/user';
 import * as authService from '@/services/authService';
 import { saveToken, removeToken, getToken, setOnUnauthorized } from '@/services/api';
@@ -19,21 +20,35 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isStorageLoading, setIsStorageLoading] = useState(true);
   const isLoggingOut = useRef(false);
+  const queryClient = useQueryClient();
 
+  const { data: userResponse, isLoading: isProfileLoading, refetch: refreshProfileQuery } = useQuery({
+    queryKey: ['profile'],
+    queryFn: async () => {
+      const res = await authService.getProfile();
+      if (!res.success || !res.data) throw new Error(res.message || 'Gagal mengambil profil');
+      return res.data;
+    },
+    enabled: !!token, // Only fetch profile if we have a token
+    retry: false, // Do not retry on failure (likely 401)
+    staleTime: 5 * 60 * 1000, // cache for 5 minutes
+  });
+
+  const user = userResponse || null;
+  const isLoading = isStorageLoading || (!!token && isProfileLoading);
   const isAuthenticated = !!token && !!user;
 
   /**
    * Clear session state and storage
    */
   const clearSession = useCallback(async () => {
-    setUser(null);
     setToken(null);
+    queryClient.removeQueries({ queryKey: ['profile'] });
     await removeToken();
-  }, []);
+  }, [queryClient]);
 
   /**
    * Handle 401 unauthorized — auto logout without infinite loops
@@ -54,24 +69,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    */
   const loadSession = useCallback(async () => {
     try {
-      setIsLoading(true);
+      setIsStorageLoading(true);
       const storedToken = await getToken();
       if (storedToken) {
         setToken(storedToken);
-        // Try to fetch profile with stored token
-        const profileResponse = await authService.getProfile();
-        if (profileResponse.success && profileResponse.data) {
-          setUser(profileResponse.data);
-        } else {
-          // Token invalid, clear session
-          await clearSession();
-        }
       }
     } catch {
-      // Token expired or invalid
       await clearSession();
     } finally {
-      setIsLoading(false);
+      setIsStorageLoading(false);
     }
   }, [clearSession]);
 
@@ -93,20 +99,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await saveToken(newToken);
     setToken(newToken);
 
-    // Fetch profile
+    // Fetch profile immediately to resolve the login promise with role data
     const profileResponse = await authService.getProfile();
     if (!profileResponse.success || !profileResponse.data) {
       throw new Error(profileResponse.message || 'Gagal mengambil profil');
     }
 
     const userData = profileResponse.data;
-    setUser(userData);
+    queryClient.setQueryData(['profile'], userData);
 
     return {
       role: userData.role,
       isVerified: !!(userData.is_verified),
     };
-  }, []);
+  }, [queryClient]);
 
   /**
    * Register a new account
@@ -139,15 +145,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    * Refresh profile data from API
    */
   const refreshProfile = useCallback(async () => {
-    try {
-      const response = await authService.getProfile();
-      if (response.success && response.data) {
-        setUser(response.data);
-      }
-    } catch (error) {
-      console.warn('Failed to refresh profile:', error);
-    }
-  }, []);
+    await refreshProfileQuery();
+  }, [refreshProfileQuery]);
 
   /**
    * Update profile
@@ -158,12 +157,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error(response.message || 'Gagal mengupdate profil');
     }
     if (response.data) {
-      setUser(response.data);
+      queryClient.setQueryData(['profile'], response.data);
     } else {
-      // Refresh profile if response doesn't return updated data
-      await refreshProfile();
+      await refreshProfileQuery();
     }
-  }, [refreshProfile]);
+  }, [queryClient, refreshProfileQuery]);
 
   // Load session on mount
   useEffect(() => {
@@ -200,3 +198,4 @@ export function useAuth(): AuthContextType {
   }
   return context;
 }
+

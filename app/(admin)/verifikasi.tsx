@@ -1,3 +1,4 @@
+import { ThemeColors } from '@/constants/colors';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -35,8 +36,8 @@ export default function VerifikasiScreen() {
       } else {
         setPendingUsers([]);
       }
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || 'Gagal memuat data';
+    } catch (err: unknown) {
+      const msg = (err as any)?.response?.data?.message || (err as any)?.message || 'Gagal memuat data';
       setError(msg);
     } finally {
       setLoading(false);
@@ -81,8 +82,8 @@ export default function VerifikasiScreen() {
         setError(response.message || 'Gagal memverifikasi pengguna');
         setTimeout(() => setError(''), 4000);
       }
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || 'Gagal memverifikasi';
+    } catch (err: unknown) {
+      const msg = (err as any)?.response?.data?.message || (err as any)?.message || 'Gagal memverifikasi';
       setError(msg);
       setTimeout(() => setError(''), 4000);
     } finally {
@@ -244,7 +245,7 @@ export default function VerifikasiScreen() {
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
     backgroundColor: LaundryColors.cardBg,

@@ -1,3 +1,4 @@
+import { ThemeColors } from '@/constants/colors';
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -128,7 +129,7 @@ export default function RegisterScreen() {
     const backendRole: UserRole = ROLE_MAP[selectedRole as FrontendRole];
 
     // Build payload
-    const payload: any = {
+    const payload: import("@/types/user").RegisterPayload = {
       full_name: namaLengkap.trim(),
       email: email.trim(),
       password: password,
@@ -177,10 +178,10 @@ export default function RegisterScreen() {
       } else {
         setErrorMessage(result.message || 'Registrasi gagal');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       const msg =
-        error?.response?.data?.message ||
-        error?.message ||
+        (error as import("axios").AxiosError<{message: string}>)?.response?.data?.message ||
+        (error as Error)?.message ||
         'Registrasi gagal. Silakan coba lagi.';
       setErrorMessage(msg);
     } finally {
@@ -499,7 +500,7 @@ export default function RegisterScreen() {
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: LaundryColors.background,

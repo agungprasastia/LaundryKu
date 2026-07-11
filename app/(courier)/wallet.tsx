@@ -1,3 +1,4 @@
+import { ThemeColors } from '@/constants/colors';
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Modal,
@@ -6,9 +7,9 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
+import InteractiveButton from '@/components/ui/InteractiveButton';
 import { Ionicons } from "@expo/vector-icons";
 import { crossAlert } from "@/utils/crossAlert";
 import { useAuth } from "@/contexts/AuthContext";
@@ -191,14 +192,13 @@ export default function CourierWalletScreen() {
               <Text style={styles.walletMetaLabel}>Pending</Text>
               <Text style={styles.walletMetaValue}>{formatMoney(pending)}</Text>
             </View>
-            <TouchableOpacity
+            <InteractiveButton
               style={styles.withdrawBtn}
               onPress={() => setModalOpen(true)}
-              activeOpacity={0.9}
             >
               <Ionicons name="cash-outline" size={18} color={LaundryColors.roleKurirIcon} />
               <Text style={styles.withdrawBtnText}>Tarik Saldo</Text>
-            </TouchableOpacity>
+            </InteractiveButton>
           </View>
         </View>
       </View>
@@ -320,9 +320,9 @@ function WithdrawModal({
         <View style={styles.sheet}>
           <View style={styles.sheetHeaderRow}>
             <Text style={styles.sheetTitle}>Tarik Saldo</Text>
-            <TouchableOpacity onPress={onClose}>
+            <InteractiveButton onPress={onClose}>
               <Ionicons name="close-circle" size={28} color={LaundryColors.textMuted} />
-            </TouchableOpacity>
+            </InteractiveButton>
           </View>
 
           <ScrollView contentContainerStyle={{ paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
@@ -341,22 +341,20 @@ function WithdrawModal({
 
             <Text style={styles.inputLabel}>Pilih Metode Penarikan</Text>
             <View style={styles.methodTabsRow}>
-              <TouchableOpacity 
+              <InteractiveButton 
                 style={[styles.methodTab, method === "bank" && styles.methodTabActive]} 
                 onPress={() => onMethodChange("bank")}
-                activeOpacity={0.8}
               >
                 <Ionicons name="business" size={18} color={method === "bank" ? LaundryColors.roleKurirIcon : LaundryColors.textSecondary} />
                 <Text style={[styles.methodTabText, method === "bank" && styles.methodTabTextActive]}>Transfer Bank</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
+              </InteractiveButton>
+              <InteractiveButton 
                 style={[styles.methodTab, method === "ewallet" && styles.methodTabActive]} 
                 onPress={() => onMethodChange("ewallet")}
-                activeOpacity={0.8}
               >
                 <Ionicons name="phone-portrait" size={18} color={method === "ewallet" ? LaundryColors.roleKurirIcon : LaundryColors.textSecondary} />
                 <Text style={[styles.methodTabText, method === "ewallet" && styles.methodTabTextActive]}>E-Wallet</Text>
-              </TouchableOpacity>
+              </InteractiveButton>
             </View>
 
             {method === "bank" ? (
@@ -433,7 +431,7 @@ function FormInput(props: {
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   sectionHeading: { fontSize: 16, fontWeight: "700", color: LaundryColors.textPrimary, marginTop: 24, marginBottom: 12 },
   
   walletCardWrapper: {

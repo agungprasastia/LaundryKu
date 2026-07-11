@@ -1,3 +1,4 @@
+import { ThemeColors } from '@/constants/colors';
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, View, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
@@ -169,7 +170,7 @@ export default function TrackingMap({
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: {
     overflow: 'hidden',
     borderRadius: 16,

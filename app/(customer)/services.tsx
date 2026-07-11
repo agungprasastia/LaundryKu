@@ -5,7 +5,6 @@ import {
   StyleSheet,
   Platform,
   ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
   Modal,
@@ -15,18 +14,23 @@ import {
 } from 'react-native';
 import { crossAlert } from '@/utils/crossAlert';
 import { useRouter } from 'expo-router';
+import InteractiveButton from '@/components/ui/InteractiveButton';
 import { Ionicons } from '@expo/vector-icons';
-import { LaundryColors } from '@/constants/colors';
+
 import * as serviceService from '@/services/serviceService';
 import * as orderService from '@/services/orderService';
 import { LaundryService } from '@/types/service';
 import { CreateOrderPayload } from '@/types/order';
+import { ThemeColors } from '@/constants/colors';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAppStyles } from '@/hooks/useAppStyles';
 import * as Location from 'expo-location';
-import Constants from 'expo-constants';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 
 export default function CustomerServicesScreen() {
+  const { colors: LaundryColors } = useTheme();
+  const styles = useAppStyles(createStyles);
   const router = useRouter();
 
   const [services, setServices] = useState<LaundryService[]>([]);
@@ -67,8 +71,8 @@ export default function CustomerServicesScreen() {
       } else {
         setServices([]);
       }
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || 'Gagal memuat layanan';
+    } catch (err: unknown) {
+      const msg = (err as any)?.response?.data?.message || (err as any)?.message || 'Gagal memuat layanan';
       setError(msg);
     } finally {
       setLoading(false);
@@ -153,9 +157,9 @@ export default function CustomerServicesScreen() {
       setPickupLat(location.coords.latitude);
       setPickupLng(location.coords.longitude);
       setLocationStatus('success');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setLocationStatus('error');
-      const msg = err?.message || 'Gagal mengambil lokasi';
+      const msg = (err as any)?.message || 'Gagal mengambil lokasi';
       setLocationError(msg);
       crossAlert('Gagal Mengambil Lokasi', msg, [{ text: 'OK' }]);
     }
@@ -285,8 +289,8 @@ export default function CustomerServicesScreen() {
       } else {
         crossAlert('Gagal', response.message || 'Gagal membuat pesanan');
       }
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || 'Gagal membuat pesanan';
+    } catch (err: unknown) {
+      const msg = (err as any)?.response?.data?.message || (err as any)?.message || 'Gagal membuat pesanan';
       crossAlert('Error', msg);
     } finally {
       setSubmitting(false);
@@ -327,9 +331,9 @@ export default function CustomerServicesScreen() {
           <View style={styles.errorBanner}>
             <Ionicons name="alert-circle" size={18} color={LaundryColors.error} />
             <Text style={styles.errorText}>{error}</Text>
-            <TouchableOpacity onPress={onRefresh}>
+            <InteractiveButton onPress={onRefresh}>
               <Text style={styles.retryText}>Coba Lagi</Text>
-            </TouchableOpacity>
+            </InteractiveButton>
           </View>
         ) : null}
 
@@ -348,10 +352,9 @@ export default function CustomerServicesScreen() {
 
         {/* Service cards */}
         {services.map((svc) => (
-          <TouchableOpacity
+          <InteractiveButton
             key={svc.service_id}
             style={styles.serviceCard}
-            activeOpacity={0.7}
             onPress={() => handleViewDetail(svc)}
           >
             <View style={styles.serviceCardHeader}>
@@ -373,24 +376,22 @@ export default function CustomerServicesScreen() {
             ) : null}
 
             <View style={styles.serviceCardActions}>
-              <TouchableOpacity
+              <InteractiveButton
                 style={styles.detailButton}
                 onPress={() => handleViewDetail(svc)}
-                activeOpacity={0.7}
               >
                 <Ionicons name="information-circle-outline" size={16} color={LaundryColors.primary} />
                 <Text style={styles.detailButtonText}>Detail</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
+              </InteractiveButton>
+              <InteractiveButton
                 style={styles.orderButton}
                 onPress={() => handleOrderPress(svc)}
-                activeOpacity={0.7}
               >
                 <Ionicons name="cart" size={16} color={LaundryColors.textWhite} />
                 <Text style={styles.orderButtonText}>Pesan Sekarang</Text>
-              </TouchableOpacity>
+              </InteractiveButton>
             </View>
-          </TouchableOpacity>
+          </InteractiveButton>
         ))}
 
         <View style={{ height: 20 }} />
@@ -402,9 +403,9 @@ export default function CustomerServicesScreen() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Detail Layanan</Text>
-              <TouchableOpacity onPress={() => setShowDetail(false)}>
+              <InteractiveButton onPress={() => setShowDetail(false)}>
                 <Ionicons name="close-circle" size={28} color={LaundryColors.textMuted} />
-              </TouchableOpacity>
+              </InteractiveButton>
             </View>
 
             {selectedService ? (
@@ -429,14 +430,13 @@ export default function CustomerServicesScreen() {
                   </Text>
                 </View>
 
-                <TouchableOpacity
+                <InteractiveButton
                   style={styles.modalOrderButton}
                   onPress={() => handleOrderPress(selectedService)}
-                  activeOpacity={0.8}
                 >
                   <Ionicons name="cart" size={20} color={LaundryColors.textWhite} />
                   <Text style={styles.modalOrderButtonText}>Pesan Layanan Ini</Text>
-                </TouchableOpacity>
+                </InteractiveButton>
               </ScrollView>
             ) : null}
           </View>
@@ -452,9 +452,9 @@ export default function CustomerServicesScreen() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Buat Pesanan</Text>
-              <TouchableOpacity onPress={closeOrderModal} disabled={submitting}>
+              <InteractiveButton onPress={closeOrderModal} disabled={submitting}>
                 <Ionicons name="close-circle" size={28} color={LaundryColors.textMuted} />
-              </TouchableOpacity>
+              </InteractiveButton>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -477,7 +477,7 @@ export default function CustomerServicesScreen() {
               {/* ─── GPS Location Section ─── */}
               <Text style={styles.inputLabel}>Lokasi Pickup *</Text>
 
-              <TouchableOpacity
+              <InteractiveButton
                 style={[
                   styles.locationButton,
                   locationStatus === 'success' && styles.locationButtonSuccess,
@@ -485,7 +485,6 @@ export default function CustomerServicesScreen() {
                 ]}
                 onPress={handleGetLocation}
                 disabled={submitting || locationStatus === 'loading'}
-                activeOpacity={0.7}
               >
                 {locationStatus === 'loading' ? (
                   <ActivityIndicator size="small" color={LaundryColors.primary} />
@@ -506,7 +505,7 @@ export default function CustomerServicesScreen() {
                     ? 'Lokasi berhasil diambil'
                     : 'Gunakan Lokasi Saya Saat Ini'}
                 </Text>
-              </TouchableOpacity>
+              </InteractiveButton>
 
               {/* Show coordinates (small debug text) when location is obtained */}
               {locationStatus === 'success' && pickupLat != null && pickupLng != null && (
@@ -545,7 +544,7 @@ export default function CustomerServicesScreen() {
                 </View>
               ) : (
                 <>
-                  <TouchableOpacity 
+                  <InteractiveButton 
                     style={[styles.input, { justifyContent: 'center' }]} 
                     onPress={() => {
                       if (!submitting) {
@@ -553,12 +552,11 @@ export default function CustomerServicesScreen() {
                         setShowDatePicker(true);
                       }
                     }}
-                    activeOpacity={0.7}
                   >
                     <Text style={{ color: pickupScheduledAt ? LaundryColors.textPrimary : LaundryColors.inputPlaceholder }}>
                       {pickupScheduledAt || 'Pilih Jadwal Pickup'}
                     </Text>
-                  </TouchableOpacity>
+                  </InteractiveButton>
                   {showDatePicker && (
                     <DateTimePicker
                       value={pickupDate || new Date()}
@@ -571,11 +569,10 @@ export default function CustomerServicesScreen() {
                 </>
               )}
 
-              <TouchableOpacity
+              <InteractiveButton
                 style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
                 onPress={handleSubmitOrder}
                 disabled={submitting}
-                activeOpacity={0.8}
               >
                 {submitting ? (
                   <ActivityIndicator size="small" color={LaundryColors.textWhite} />
@@ -585,7 +582,7 @@ export default function CustomerServicesScreen() {
                     <Text style={styles.submitButtonText}>Buat Pesanan</Text>
                   </>
                 )}
-              </TouchableOpacity>
+              </InteractiveButton>
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
@@ -594,8 +591,9 @@ export default function CustomerServicesScreen() {
   );
 }
 
-// ─── Styles ──────────────────────────────────────
-const styles = StyleSheet.create({
+
+
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
     backgroundColor: LaundryColors.backgroundWhite,

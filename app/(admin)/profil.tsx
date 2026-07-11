@@ -1,3 +1,4 @@
+import { ThemeColors } from '@/constants/colors';
 import React, { useState } from 'react';
 import {
   View,
@@ -93,7 +94,7 @@ export default function ProfilScreen() {
               activeOpacity={0.7}
             >
               <View style={[styles.menuIcon, { backgroundColor: `${item.color}15` }]}>
-                <Ionicons name={item.icon as any} size={20} color={item.color} />
+                <Ionicons name={item.icon as React.ComponentProps<typeof Ionicons>["name"]} size={20} color={item.color} />
               </View>
               <Text style={styles.menuLabel}>{item.label}</Text>
               <Ionicons name="chevron-forward" size={18} color={LaundryColors.textMuted} />
@@ -171,7 +172,7 @@ export default function ProfilScreen() {
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
     backgroundColor: LaundryColors.cardBg,

@@ -6,30 +6,24 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
   Animated,
   StatusBar,
 } from "react-native";
 import { useRouter } from "expo-router";
+import InteractiveButton from '@/components/ui/InteractiveButton';
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
-import {
-  getStatusBgColor,
-  getStatusColor,
-  getStatusLabel,
-} from "@/constants/orderStatus";
 import { useAuth } from "@/contexts/AuthContext";
 import * as ownerService from "@/services/ownerService";
 import * as walletService from "@/services/walletService";
-import { Order } from "@/types/order";
-import { Wallet } from "@/types/wallet";
 import { VerificationGate, ErrorState } from "@/components/owner/roleComponents";
+import { MetricBox, OrderCard } from "@/components/owner/ownerBerandaComponents";
+import { ThemeColors } from '@/constants/colors';
+import { useQuery } from '@tanstack/react-query';
 
 const money = (n?: number) => "Rp " + Number(n || 0).toLocaleString("id-ID");
-const date = (v?: string) =>
-  v ? new Date(v).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-";
 const verified = (v: unknown) => v === true || v === 1;
 
 const activeStatuses = [
@@ -53,43 +47,46 @@ export default function OwnerBerandaScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
-  const [loading, setLoading] = useState(isVerified);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState("");
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [summary, setSummary] = useState<ownerService.OwnerReportSummary | null>(null);
-  const [wallet, setWallet] = useState<Wallet | null>(null);
 
-  const load = useCallback(async () => {
-    if (!isVerified) return;
-    try {
-      setError("");
-      const [summaryRes, ordersRes, walletRes] = await Promise.allSettled([
-        ownerService.getOwnerReportSummary(),
-        ownerService.getOwnerOrders(),
-        walletService.getMyWallet(),
-      ]);
-      if (summaryRes.status === "fulfilled" && summaryRes.value.success)
-        setSummary(summaryRes.value.data || null);
-      if (ordersRes.status === "fulfilled" && ordersRes.value.success)
-        setOrders(
-          Array.isArray(ordersRes.value.data) ? ordersRes.value.data : [],
-        );
-      if (walletRes.status === "fulfilled" && walletRes.value.success)
-        setWallet(walletRes.value.data || null);
-    } catch (e: any) {
-      setError(
-        e?.response?.data?.message || e?.message || "Gagal memuat beranda",
-      );
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [isVerified]);
+  const {
+    data: summaryRes,
+    isLoading: isLoadingSummary,
+    error: summaryError,
+    refetch: refetchSummary,
+  } = useQuery({
+    queryKey: ['owner', 'summary'],
+    queryFn: () => ownerService.getOwnerReportSummary(),
+    enabled: isVerified,
+  });
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  const {
+    data: ordersRes,
+    isLoading: isLoadingOrders,
+    error: ordersError,
+    refetch: refetchOrders,
+  } = useQuery({
+    queryKey: ['owner', 'orders'],
+    queryFn: () => ownerService.getOwnerOrders(),
+    enabled: isVerified,
+  });
+
+  const {
+    data: walletRes,
+    isLoading: isLoadingWallet,
+    error: walletError,
+    refetch: refetchWallet,
+  } = useQuery({
+    queryKey: ['owner', 'wallet'],
+    queryFn: () => walletService.getMyWallet(),
+    enabled: isVerified,
+  });
+
+  const loading = isVerified && (isLoadingSummary || isLoadingOrders || isLoadingWallet);
+  const error = (summaryError || ordersError || walletError) ? "Gagal memuat beranda" : "";
+  const summary = summaryRes?.success ? summaryRes.data : null;
+  const orders = ordersRes?.success && Array.isArray(ordersRes.data) ? ordersRes.data : [];
+  const wallet = walletRes?.success ? walletRes.data : null;
 
   useEffect(() => {
     Animated.parallel([
@@ -98,10 +95,15 @@ export default function OwnerBerandaScreen() {
     ]).start();
   }, [fadeAnim, slideAnim]);
 
-  const retry = () => {
+  const retry = useCallback(async () => {
     setRefreshing(true);
-    load();
-  };
+    await Promise.all([refetchSummary(), refetchOrders(), refetchWallet()]);
+    setRefreshing(false);
+  }, [refetchSummary, refetchOrders, refetchWallet]);
+
+  const navigateToOrders = useCallback(() => {
+    router.push("/(owner)/orders");
+  }, [router]);
 
   if (!isVerified) {
     return (
@@ -129,8 +131,8 @@ export default function OwnerBerandaScreen() {
   const totalOrders = summary?.total_orders ?? summary?.total_order ?? orders.length;
   const active = summary?.active_orders ?? orders.filter((order) => activeStatuses.includes(order.status)).length;
   const revenue = summary?.owner_revenue ?? summary?.owner_earning ?? summary?.total_owner_earning ?? summary?.total_revenue ?? orders.reduce((sum, order) => sum + Number(order.owner_earning || 0), 0);
-  const available = (wallet as any)?.available_balance ?? wallet?.balance ?? 0;
-  const pending = (wallet as any)?.pending_balance ?? 0;
+  const available = wallet?.available_balance ?? wallet?.balance ?? 0;
+  const pending = wallet?.pending_balance ?? 0;
 
   const quickActions = [
     {
@@ -184,13 +186,13 @@ export default function OwnerBerandaScreen() {
                 <Text style={styles.subtitle}>Selamat datang di LaundryKu Mitra</Text>
               </View>
             </View>
-            <TouchableOpacity
+            <InteractiveButton
               style={styles.notifButton}
               onPress={() => router.push("/(owner)/profile")}
             >
               <Ionicons name="notifications-outline" size={24} color={LaundryColors.textPrimary} />
               <View style={styles.notifBadge} />
-            </TouchableOpacity>
+            </InteractiveButton>
           </View>
         </View>
 
@@ -220,12 +222,12 @@ export default function OwnerBerandaScreen() {
           <Text style={styles.sectionTitle}>Aksi Cepat</Text>
           <View style={styles.quickActionsContainer}>
             {quickActions.map((action, index) => (
-              <TouchableOpacity key={index} style={styles.actionItem} onPress={action.onPress}>
+              <InteractiveButton key={index} style={styles.actionItem} onPress={action.onPress}>
                 <View style={[styles.actionIconContainer, { backgroundColor: action.bg }]}>
                   <Ionicons name={action.icon} size={28} color={action.color} />
                 </View>
                 <Text style={styles.actionLabel}>{action.label}</Text>
-              </TouchableOpacity>
+              </InteractiveButton>
             ))}
           </View>
 
@@ -238,7 +240,7 @@ export default function OwnerBerandaScreen() {
               <Text style={styles.emptyText}>Order terbaru akan muncul di sini</Text>
             </View>
           ) : (
-            orders.slice(0, 5).map((order) => <OrderCard key={order.order_id} order={order} onPress={() => router.push("/(owner)/orders")} />)
+            orders.slice(0, 5).map((order) => <OrderCard key={order.order_id} order={order} onPress={navigateToOrders} />)
           )}
         </Animated.View>
       </ScrollView>
@@ -246,62 +248,7 @@ export default function OwnerBerandaScreen() {
   );
 }
 
-function MetricBox({ title, value, icon, color, bg }: { title: string; value: string; icon: any; color: string; bg: string }) {
-  const { colors: LaundryColors } = useTheme();
-  const styles = useAppStyles(createStyles);
-  return (
-    <View style={styles.metricBox}>
-      <View style={styles.metricBoxHeader}>
-        <View style={[styles.metricIconSmBg, { backgroundColor: bg }]}>
-          <Ionicons name={icon} size={16} color={color} />
-        </View>
-      </View>
-      <Text style={styles.metricBoxValue} numberOfLines={1}>{value}</Text>
-      <Text style={styles.metricBoxTitle}>{title}</Text>
-    </View>
-  );
-}
-
-function Badge({ status }: { status: string }) {
-  const { colors: LaundryColors } = useTheme();
-  const styles = useAppStyles(createStyles);
-  return (
-    <View style={[styles.badge, { backgroundColor: getStatusBgColor(status) }]}>
-      <Text style={[styles.badgeText, { color: getStatusColor(status) }]}>{getStatusLabel(status)}</Text>
-    </View>
-  );
-}
-
-function OrderCard({ order, onPress }: { order: Order; onPress: () => void }) {
-  const { colors: LaundryColors } = useTheme();
-  const styles = useAppStyles(createStyles);
-  return (
-    <TouchableOpacity style={styles.orderCard} onPress={onPress} activeOpacity={0.8}>
-      <View style={styles.orderHeader}>
-        <View style={styles.orderTitleContainer}>
-          <Ionicons name="basket" size={20} color={LaundryColors.roleMitraIcon} />
-          <Text style={styles.orderIdText} numberOfLines={1} ellipsizeMode="middle">{order.order_id}</Text>
-        </View>
-        <Badge status={order.status} />
-      </View>
-      <View style={styles.orderDivider} />
-      <View style={styles.orderContent}>
-        <Text style={styles.orderCustomer}>{order.customer_name || "Customer"}</Text>
-        <Text style={styles.orderService}>{order.service_name || order.service?.name || "Layanan Reguler"}</Text>
-        <View style={styles.orderMeta}>
-          <Ionicons name="calendar-outline" size={14} color={LaundryColors.textSecondary} />
-          <Text style={styles.orderDate}>{date(order.pickup_scheduled_at || order.created_at)}</Text>
-        </View>
-      </View>
-      <View style={styles.orderFooter}>
-        <Text style={styles.orderPriceLabel}>Total Pembayaran</Text>
-        <Text style={styles.orderPriceValue}>{money(order.total_amount ?? order.total_price)}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-}
-
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   loadingContainer: {
     flex: 1,
@@ -423,39 +370,6 @@ const createStyles = (LaundryColors: any) => StyleSheet.create({
     flexDirection: "row",
     gap: 12,
   },
-  metricBox: {
-    flex: 1,
-    backgroundColor: LaundryColors.backgroundWhite,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: LaundryColors.inputBorder,
-  },
-  metricBoxHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  metricIconSmBg: {
-    width: 32,
-    height: 32,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  metricBoxValue: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: LaundryColors.textPrimary,
-  },
-  metricBoxTitle: {
-    fontSize: 12,
-    color: LaundryColors.textSecondary,
-    fontWeight: "500",
-    marginTop: 2,
-  },
-
   sectionTitle: {
     fontSize: 18,
     fontWeight: "700",
@@ -506,80 +420,5 @@ const createStyles = (LaundryColors: any) => StyleSheet.create({
     fontSize: 14,
     color: LaundryColors.textSecondary,
     marginTop: 4,
-  },
-
-  orderCard: {
-    backgroundColor: LaundryColors.backgroundWhite,
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: LaundryColors.inputBorder,
-  },
-  orderHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  orderTitleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    flex: 1,
-    marginRight: 8,
-  },
-  orderIdText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: LaundryColors.textPrimary,
-  },
-  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  badgeText: { fontSize: 12, fontWeight: "700" },
-  orderDivider: {
-    height: 1,
-    backgroundColor: LaundryColors.inputBorder,
-    marginVertical: 12,
-  },
-  orderContent: {
-    marginBottom: 16,
-  },
-  orderCustomer: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: LaundryColors.textPrimary,
-  },
-  orderService: {
-    fontSize: 14,
-    color: LaundryColors.textSecondary,
-    marginTop: 4,
-  },
-  orderMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginTop: 8,
-  },
-  orderDate: {
-    fontSize: 14,
-    color: LaundryColors.textSecondary,
-  },
-  orderFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: LaundryColors.inputBorder,
-  },
-  orderPriceLabel: {
-    fontSize: 14,
-    color: LaundryColors.textSecondary,
-    fontWeight: "600",
-  },
-  orderPriceValue: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: LaundryColors.roleMitraIcon,
   },
 });

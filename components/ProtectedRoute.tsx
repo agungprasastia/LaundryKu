@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
+import { ThemeColors } from '@/constants/colors';
 import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
@@ -80,7 +81,7 @@ const redirectToRoleDashboard = useCallback((role: UserRole) => {
   return <>{children}</>;
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   loadingContainer: {
     flex: 1,
     alignItems: 'center',

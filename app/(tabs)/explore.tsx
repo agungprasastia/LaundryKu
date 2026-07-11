@@ -1,10 +1,9 @@
+import { ThemeColors } from '@/constants/colors';
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
 
 export default function ExploreScreen() {
-  const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   return (
     <View style={styles.container}>
@@ -14,7 +13,7 @@ export default function ExploreScreen() {
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',

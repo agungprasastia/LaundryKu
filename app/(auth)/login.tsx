@@ -118,7 +118,7 @@ export default function LoginScreen() {
     } catch (error: any) {
       // Extract error message from backend or axios error
       const msg =
-        error?.response?.data?.message ||
+        (error as import("axios").AxiosError<{message: string}>)?.response?.data?.message ||
         error?.message ||
         'Login gagal. Periksa email dan password Anda.';
       setErrorMessage(msg);

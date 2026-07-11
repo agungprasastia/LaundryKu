@@ -27,6 +27,7 @@ import {
   LoadingState,
   OwnerScreen,
 } from "@/components/owner/roleComponents";
+import { ThemeColors } from '@/constants/colors';
 
 export default function OwnerProfileScreen() {
   const { colors: LaundryColors } = useTheme();
@@ -43,9 +44,9 @@ export default function OwnerProfileScreen() {
   const [helpModal, setHelpModal] = useState(false);
   const [aboutModal, setAboutModal] = useState(false);
 
-  const handleUnavailableFeature = () => {
+  const handleUnavailableFeature = useCallback(() => {
     crossAlert('Fitur Belum Tersedia', 'Fitur ini belum tersedia.', [{ text: 'OK' }]);
-  };
+  }, []);
   
   const [editModal, setEditModal] = useState(false);
   const [form, setForm] = useState({
@@ -60,7 +61,7 @@ export default function OwnerProfileScreen() {
       setError("");
       const r = await notificationService.getNotifications();
       setItems(r.success && Array.isArray(r.data) ? r.data : []);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(getErrorMessage(e, "Gagal memuat notifikasi"));
     } finally {
       setLoading(false);
@@ -72,7 +73,7 @@ export default function OwnerProfileScreen() {
     load();
   }, [load]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     crossAlert("Logout", "Yakin ingin keluar dari akun Anda?", [
       { text: "Batal", style: "cancel" },
       {
@@ -84,32 +85,32 @@ export default function OwnerProfileScreen() {
         },
       },
     ]);
-  };
+  }, [logout, router]);
 
-  const read = async (n: Notification) => {
+  const read = useCallback(async (n: Notification) => {
     try {
       if (!n.is_read) {
         await notificationService.markAsRead(n.notification_id);
         load();
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       crossAlert("Error", getErrorMessage(e, "Error"));
     }
-  };
+  }, [load]);
 
-  const handleEditProfile = () => {
+  const handleEditProfile = useCallback(() => {
     setForm({
       address: user?.address || "",
       lat: user?.lat ? String(user.lat) : "",
       lng: user?.lng ? String(user.lng) : "",
     });
     setEditModal(true);
-  };
+  }, [user]);
 
-  const saveProfile = async () => {
+  const saveProfile = useCallback(async () => {
     setSaving(true);
     try {
-      const payload: any = { address: form.address };
+      const payload: { address: string; lat?: number; lng?: number } = { address: form.address };
       if (form.lat && form.lng) {
         payload.lat = Number(form.lat);
         payload.lng = Number(form.lng);
@@ -117,16 +118,16 @@ export default function OwnerProfileScreen() {
       await updateProfile(payload);
       crossAlert("Berhasil", "Profil diperbarui");
       setEditModal(false);
-    } catch (e: any) {
+    } catch (e: unknown) {
       crossAlert("Error", getErrorMessage(e, "Gagal memperbarui profil"));
     } finally {
       setSaving(false);
     }
-  };
+  }, [form, updateProfile]);
 
   const [gettingLocation, setGettingLocation] = useState(false);
 
-  const getLocation = async () => {
+  const getLocation = useCallback(async () => {
     setGettingLocation(true);
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -140,12 +141,12 @@ export default function OwnerProfileScreen() {
         lat: String(location.coords.latitude),
         lng: String(location.coords.longitude)
       }));
-    } catch (e: any) {
+    } catch (e: unknown) {
       crossAlert("Gagal", getErrorMessage(e, "Tidak dapat mengambil lokasi GPS"));
     } finally {
       setGettingLocation(false);
     }
-  };
+  }, []);
 
   const latLng =
     user?.lat != null && user?.lng != null
@@ -211,7 +212,7 @@ export default function OwnerProfileScreen() {
             activeOpacity={0.7}
           >
             <View style={[styles.menuIcon, { backgroundColor: `${item.color}15` }]}>
-              <Ionicons name={item.icon as any} size={20} color={item.color} />
+              <Ionicons name={item.icon as React.ComponentProps<typeof Ionicons>["name"]} size={20} color={item.color} />
             </View>
             <Text style={styles.menuLabel}>{item.label}</Text>
             {item.label === 'Notifikasi' && unreadCount > 0 && (
@@ -369,7 +370,7 @@ export default function OwnerProfileScreen() {
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(15,23,42,.4)",

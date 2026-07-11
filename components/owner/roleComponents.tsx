@@ -1,3 +1,4 @@
+import { ThemeColors } from '@/constants/colors';
 import React from "react";
 import {
   ActivityIndicator,
@@ -12,27 +13,24 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAppStyles } from '@/hooks/useAppStyles';
-
-export const formatMoney = (value?: number | null) => {
-  if (value == null) return "-";
-  return `Rp ${Number(value).toLocaleString("id-ID")}`;
-};
-
-export const formatDate = (value?: string | null) => {
-  if (!value) return "-";
-  return new Date(value).toLocaleString("id-ID");
-};
+import { getErrorMessage } from '@/utils/helpers';
+import { formatMoney as baseFormatMoney, formatDate as baseFormatDate } from '@/utils/formatters';
 
 export const isVerified = (value: unknown) => value === true || value === 1;
+export { getErrorMessage };
 
-export const getErrorMessage = (error: any, fallback: string) =>
-  error?.response?.data?.message || error?.message || fallback;
+export const formatMoney = (value?: number | null) =>
+  value == null ? "-" : baseFormatMoney(value);
+
+export const formatDate = (value?: string | null) =>
+  value ? baseFormatDate(value) : "-";
 
 type ScreenProps = {
   title: string;
   subtitle?: string;
   children: React.ReactNode;
   refreshControl?: React.ReactElement<RefreshControlProps>;
+  noScroll?: boolean;
 };
 
 export function OwnerScreen({
@@ -41,7 +39,6 @@ export function OwnerScreen({
   children,
   refreshControl,
 }: ScreenProps) {
-  const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   return (
     <View style={styles.container}>
@@ -101,7 +98,7 @@ export function EmptyState({
 }: {
   title: string;
   message?: string;
-  icon?: any;
+  icon?: keyof typeof import("@expo/vector-icons").Ionicons.glyphMap;
 }) {
   const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
@@ -140,7 +137,6 @@ export function InfoRow({
   label: string;
   value?: React.ReactNode;
 }) {
-  const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   return (
     <View style={styles.infoRow}>
@@ -159,7 +155,6 @@ export function PrimaryButton({
   onPress: () => void;
   disabled?: boolean;
 }) {
-  const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   return (
     <TouchableOpacity
@@ -180,7 +175,6 @@ export function SecondaryButton({
   text: string;
   onPress: () => void;
 }) {
-  const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   return (
     <TouchableOpacity
@@ -200,7 +194,6 @@ export function DangerButton({
   text: string;
   onPress: () => void;
 }) {
-  const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   return (
     <TouchableOpacity
@@ -213,7 +206,7 @@ export function DangerButton({
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
     paddingTop: Platform.OS === "ios" ? 20 : 10,

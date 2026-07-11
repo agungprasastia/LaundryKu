@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { ThemeColors } from '@/constants/colors';
 import {
   View,
   Text,
@@ -73,8 +74,8 @@ export default function CustomerOrdersScreen() {
       } else {
         setHistoryOrders([]);
       }
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || 'Gagal memuat pesanan';
+    } catch (err: unknown) {
+      const msg = (err as import("axios").AxiosError<{message: string}>)?.response?.data?.message || (err as Error)?.message || 'Gagal memuat pesanan';
       setError(msg);
     } finally {
       setLoading(false);
@@ -134,7 +135,7 @@ export default function CustomerOrdersScreen() {
       if (resolvedOrder.invoice_id) {
         await fetchInvoice(resolvedOrder.invoice_id);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Don't crash — keep showing whatever data we got
       console.warn('Error loading order detail:', err);
     } finally {
@@ -150,7 +151,7 @@ export default function CustomerOrdersScreen() {
       if (res.success && res.data) {
         setInvoice(res.data);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.warn('Error loading invoice:', err);
     } finally {
       setInvoiceLoading(false);
@@ -188,14 +189,14 @@ export default function CustomerOrdersScreen() {
         if (res.data?.payment_id) {
           setLastPaymentId(res.data.payment_id);
         }
-        crossAlert('Gagal', res.message || 'Gagal membuat payment');
+        crossAlert('Gagal', (res as any).message || 'Gagal membuat payment');
       }
-    } catch (err: any) {
-      // Handle 409 response with existing payment_id
-      if (err?.response?.status === 409 && err?.response?.data?.data?.payment_id) {
-        setLastPaymentId(err.response.data.data.payment_id);
+    } catch (err: unknown) {
+      const axiosErr = err as import("axios").AxiosError<{data?: {payment_id: string}, message?: string}>;
+      if (axiosErr?.response?.status === 409 && axiosErr?.response?.data?.data?.payment_id) {
+        setLastPaymentId(axiosErr.response.data.data.payment_id);
       }
-      const msg = err?.response?.data?.message || err?.message || 'Gagal membuat payment';
+      const msg = axiosErr?.response?.data?.message || (err as Error)?.message || 'Gagal membuat payment';
       crossAlert('Error', msg);
     } finally {
       setPaymentLoading(false);
@@ -222,10 +223,10 @@ export default function CustomerOrdersScreen() {
         }
         fetchOrders();
       } else {
-        crossAlert('Gagal', res.message || 'Simulasi payment gagal');
+        crossAlert('Gagal', (res as any).message || 'Simulasi payment gagal');
       }
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || 'Simulasi payment gagal';
+    } catch (err: unknown) {
+      const msg = (err as import("axios").AxiosError<{message: string}>)?.response?.data?.message || (err as Error)?.message || 'Simulasi payment gagal';
       crossAlert('Error', msg);
     } finally {
       setCallbackLoading(false);
@@ -251,10 +252,10 @@ export default function CustomerOrdersScreen() {
                 setShowDetail(false);
                 fetchOrders();
               } else {
-                crossAlert('Gagal', res.message || 'Gagal menyelesaikan pesanan');
+                crossAlert('Gagal', (res as any).message || 'Gagal menyelesaikan pesanan');
               }
-            } catch (err: any) {
-              const msg = err?.response?.data?.message || err?.message || 'Gagal menyelesaikan pesanan';
+            } catch (err: unknown) {
+              const msg = (err as import("axios").AxiosError<{message: string}>)?.response?.data?.message || (err as Error)?.message || 'Gagal menyelesaikan pesanan';
               crossAlert('Error', msg);
             } finally {
               setCompleteLoading(false);
@@ -637,7 +638,7 @@ export default function CustomerOrdersScreen() {
 }
 
 // ─── Main Styles ───
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: LaundryColors.background },
   header: {
     backgroundColor: LaundryColors.backgroundWhite,

@@ -1,3 +1,4 @@
+import { ThemeColors } from '@/constants/colors';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Modal,
@@ -5,10 +6,10 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import * as Location from "expo-location";
+import InteractiveButton from '@/components/ui/InteractiveButton';
 import { Ionicons } from "@expo/vector-icons";
 import { crossAlert } from "@/utils/crossAlert";
 import { useTheme } from '@/contexts/ThemeContext';
@@ -263,22 +264,21 @@ function TabButton({
 }: {
   active: boolean;
   text: string;
-  icon: any;
+  icon: keyof typeof import("@expo/vector-icons").Ionicons.glyphMap;
   onPress: () => void;
 }) {
   const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   return (
-    <TouchableOpacity
+    <InteractiveButton
       style={[styles.tabButton, active && styles.tabButtonActive]}
       onPress={onPress}
-      activeOpacity={0.8}
     >
       <Ionicons name={icon} size={18} color={active ? LaundryColors.roleKurirIcon : LaundryColors.textSecondary} />
       <Text style={[styles.tabButtonText, active && styles.tabButtonTextActive]}>
         {text}
       </Text>
-    </TouchableOpacity>
+    </InteractiveButton>
   );
 }
 
@@ -294,10 +294,9 @@ function TaskCard({
   const isPickup = task.type === "pickup" || task.current_phase === "pickup";
   
   return (
-    <TouchableOpacity
+    <InteractiveButton
       style={styles.taskCard}
       onPress={onPress}
-      activeOpacity={0.85}
     >
       <View style={styles.taskCardHeader}>
         <View style={styles.taskTitleRow}>
@@ -331,7 +330,7 @@ function TaskCard({
         </Text>
         <Ionicons name="chevron-forward" size={18} color={LaundryColors.textMuted} />
       </View>
-    </TouchableOpacity>
+    </InteractiveButton>
   );
 }
 
@@ -368,9 +367,9 @@ function TaskDetailModal({
         <View style={styles.sheet}>
           <View style={styles.sheetHeader}>
             <Text style={styles.sheetTitle}>Detail Tugas</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            <InteractiveButton onPress={onClose} style={styles.closeBtn}>
               <Ionicons name="close" size={24} color={LaundryColors.textSecondary} />
-            </TouchableOpacity>
+            </InteractiveButton>
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
@@ -398,16 +397,16 @@ function TaskDetailModal({
             <View style={styles.locationControlsBox}>
               <Text style={styles.locationControlsTitle}>Kontrol Lokasi</Text>
               <View style={{ flexDirection: "row", gap: 8 }}>
-                <TouchableOpacity 
+                <InteractiveButton 
                   style={[styles.locationBtn, { flex: 1, backgroundColor: LaundryColors.roleKurirBg }]} 
                   onPress={() => onUpdateLocation(task)}
                   disabled={submitting}
                 >
                   <Ionicons name="locate" size={18} color={LaundryColors.roleKurirIcon} />
                   <Text style={styles.locationBtnText}>Update Sekali</Text>
-                </TouchableOpacity>
+                </InteractiveButton>
                 
-                <TouchableOpacity 
+                <InteractiveButton 
                   style={[styles.locationBtn, { flex: 1, backgroundColor: autoTaskId === task.assignment_id ? "#FEE2E2" : "#ECFDF5" }]} 
                   onPress={() => autoTaskId === task.assignment_id ? onStopAutoLocation() : onStartAutoLocation(task)}
                   disabled={submitting}
@@ -416,7 +415,7 @@ function TaskDetailModal({
                   <Text style={[styles.locationBtnText, { color: autoTaskId === task.assignment_id ? "#EF4444" : "#10B981" }]}>
                     {autoTaskId === task.assignment_id ? "Stop Auto" : "Auto Update"}
                   </Text>
-                </TouchableOpacity>
+                </InteractiveButton>
               </View>
             </View>
 
@@ -461,7 +460,6 @@ function TaskDetailModal({
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {
-  const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   return (
     <View style={styles.detailRow}>
@@ -493,7 +491,6 @@ function getTaskActions(task: CourierTask) {
 }
 
 function StatusBadge({ status }: { status?: string }) {
-  const { colors: LaundryColors } = useTheme();
   const styles = useAppStyles(createStyles);
   if (!status) return null;
   return (
@@ -505,7 +502,7 @@ function StatusBadge({ status }: { status?: string }) {
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   tabsContainer: {
     flexDirection: "row",
     backgroundColor: LaundryColors.surfaceSlate,

@@ -1,3 +1,4 @@
+import { ThemeColors } from '@/constants/colors';
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { RefreshControl, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -165,7 +166,7 @@ export default function CourierEarningsScreen() {
   );
 }
 
-const createStyles = (LaundryColors: any) => StyleSheet.create({
+const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
   totalEarningsCard: {
     backgroundColor: LaundryColors.roleKurirIcon,
     borderRadius: 24,
