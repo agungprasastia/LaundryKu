@@ -14,11 +14,12 @@ import {
 } from 'react-native';
 import { crossAlert } from '@/utils/crossAlert';
 import { useRouter } from 'expo-router';
-import { LaundryColors } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
+import { LaundryColors } from '@/constants/colors';
 import { useAuth } from '@/contexts/AuthContext';
 import * as notificationService from '@/services/notificationService';
 import { Notification } from '@/types/notification';
+import { SettingsModal, HelpModal, AboutModal } from '@/components/ProfileModals';
 
 export default function CustomerProfileScreen() {
   const router = useRouter();
@@ -29,6 +30,15 @@ export default function CustomerProfileScreen() {
   const [notifError, setNotifError] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [markingRead, setMarkingRead] = useState<string | null>(null);
+
+  const [notifModal, setNotifModal] = useState(false);
+  const [settingsModal, setSettingsModal] = useState(false);
+  const [helpModal, setHelpModal] = useState(false);
+  const [aboutModal, setAboutModal] = useState(false);
+
+  const handleUnavailableFeature = () => {
+    crossAlert('Fitur Belum Tersedia', 'Fitur ini belum tersedia.', [{ text: 'OK' }]);
+  };
 
   const [editModal, setEditModal] = useState(false);
   const [form, setForm] = useState({
@@ -132,6 +142,14 @@ export default function CustomerProfileScreen() {
 
   const unreadCount = notifications.filter((n) => !n.is_read || n.is_read === 0).length;
 
+  const menuItems = [
+    { icon: 'person-outline', label: 'Edit Profil', color: LaundryColors.primary, action: handleEditProfile },
+    { icon: 'notifications-outline', label: 'Notifikasi', color: LaundryColors.warning, action: () => setNotifModal(true) },
+    { icon: 'settings-outline', label: 'Pengaturan', color: '#8B5CF6', action: () => setSettingsModal(true) },
+    { icon: 'help-circle-outline', label: 'Bantuan', color: LaundryColors.success, action: () => setHelpModal(true) },
+    { icon: 'information-circle-outline', label: 'Tentang Aplikasi', color: LaundryColors.textSecondary, action: () => setAboutModal(true) },
+  ];
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -147,9 +165,6 @@ export default function CustomerProfileScreen() {
       >
         {/* ─── Profile Card ─── */}
         <View style={styles.profileCard}>
-          <TouchableOpacity onPress={handleEditProfile} style={styles.editButton}>
-            <Ionicons name="pencil" size={16} color={LaundryColors.primary} />
-          </TouchableOpacity>
           <View style={styles.avatar}>
             <Ionicons name="person" size={36} color={LaundryColors.textWhite} />
           </View>
@@ -158,7 +173,7 @@ export default function CustomerProfileScreen() {
 
           <View style={styles.infoBadgeRow}>
             <View style={styles.roleBadge}>
-              <Ionicons name="shield-checkmark" size={12} color={LaundryColors.primary} />
+               <Ionicons name="shield-checkmark" size={12} color={LaundryColors.primary} />
               <Text style={styles.roleBadgeText}>Pelanggan</Text>
             </View>
             {user?.is_verified ? (
@@ -168,103 +183,30 @@ export default function CustomerProfileScreen() {
               </View>
             ) : null}
           </View>
+        </View>
 
-          {/* Account Details */}
-          <View style={styles.detailsList}>
-            {user?.address ? (
-              <View style={styles.detailItem}>
-                <Ionicons name="location-outline" size={16} color={LaundryColors.textMuted} />
-                <View style={styles.detailContent}>
-                  <Text style={styles.detailLabel}>Alamat</Text>
-                  <Text style={styles.detailValue}>{user.address}</Text>
+        {/* ─── Menu Items ─── */}
+        <View style={styles.menuCard}>
+          {menuItems.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[styles.menuItem, index < menuItems.length - 1 && styles.menuItemBorder]}
+              onPress={item.action}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.menuIcon, { backgroundColor: `${item.color}15` }]}>
+                <Ionicons name={item.icon as any} size={20} color={item.color} />
+              </View>
+              <Text style={styles.menuLabel}>{item.label}</Text>
+              {item.label === 'Notifikasi' && unreadCount > 0 && (
+                <View style={{ backgroundColor: LaundryColors.error, borderRadius: 10, paddingHorizontal: 6, paddingVertical: 2, marginRight: 8 }}>
+                  <Text style={{ color: 'white', fontSize: 10, fontWeight: 'bold' }}>{unreadCount}</Text>
                 </View>
-              </View>
-            ) : null}
-            <View style={styles.detailItem}>
-              <Ionicons name="mail-outline" size={16} color={LaundryColors.textMuted} />
-              <View style={styles.detailContent}>
-                <Text style={styles.detailLabel}>Email</Text>
-                <Text style={styles.detailValue}>{user?.email || '-'}</Text>
-              </View>
-            </View>
-            <View style={styles.detailItem}>
-              <Ionicons name="calendar-outline" size={16} color={LaundryColors.textMuted} />
-              <View style={styles.detailContent}>
-                <Text style={styles.detailLabel}>Bergabung</Text>
-                <Text style={styles.detailValue}>{formatDate(user?.created_at)}</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* ─── Notifications Section ─── */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>
-            Notifikasi {unreadCount > 0 ? `(${unreadCount} belum dibaca)` : ''}
-          </Text>
-        </View>
-
-        {notifLoading ? (
-          <View style={styles.notifLoadingWrap}>
-            <ActivityIndicator size="small" color={LaundryColors.primary} />
-            <Text style={styles.notifLoadingText}>Memuat notifikasi...</Text>
-          </View>
-        ) : notifError ? (
-          <View style={styles.errorBanner}>
-            <Ionicons name="alert-circle" size={16} color={LaundryColors.error} />
-            <Text style={styles.errorText}>{notifError}</Text>
-            <TouchableOpacity onPress={onRefresh}>
-              <Text style={styles.retryText}>Coba Lagi</Text>
+              )}
+              <Ionicons name="chevron-forward" size={18} color={LaundryColors.textMuted} />
             </TouchableOpacity>
-          </View>
-        ) : notifications.length === 0 ? (
-          <View style={styles.emptyNotif}>
-            <Ionicons name="notifications-off-outline" size={32} color={LaundryColors.textMuted} />
-            <Text style={styles.emptyNotifText}>Belum ada notifikasi</Text>
-          </View>
-        ) : (
-          notifications.map((notif) => {
-            const isRead = !!notif.is_read && notif.is_read !== 0;
-            return (
-              <View
-                key={notif.notification_id}
-                style={[styles.notifCard, !isRead && styles.notifCardUnread]}
-              >
-                <View style={styles.notifCardHeader}>
-                  <View style={[
-                    styles.notifDot,
-                    isRead && { backgroundColor: 'transparent', borderColor: LaundryColors.textMuted },
-                  ]} />
-                  <View style={styles.notifContent}>
-                    {notif.title ? (
-                      <Text style={styles.notifTitle}>{notif.title}</Text>
-                    ) : null}
-                    <Text style={styles.notifMessage}>{notif.body || notif.message}</Text>
-                    <Text style={styles.notifDate}>{formatDate(notif.created_at)}</Text>
-                  </View>
-                </View>
-
-                {!isRead ? (
-                  <TouchableOpacity
-                    style={styles.markReadButton}
-                    onPress={() => handleMarkAsRead(notif.notification_id)}
-                    disabled={markingRead === notif.notification_id}
-                    activeOpacity={0.7}
-                  >
-                    {markingRead === notif.notification_id ? (
-                      <ActivityIndicator size="small" color={LaundryColors.primary} />
-                    ) : (
-                      <>
-                        <Ionicons name="checkmark" size={14} color={LaundryColors.primary} />
-                        <Text style={styles.markReadText}>Tandai Dibaca</Text>
-                      </>
-                    )}
-                  </TouchableOpacity>
-                ) : null}
-              </View>
-            );
-          })
-        )}
+          ))}
+        </View>
 
         {/* ─── Logout ─── */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.8}>
@@ -274,6 +216,88 @@ export default function CustomerProfileScreen() {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
+
+      {/* NOTIFICATIONS MODAL */}
+      <Modal visible={notifModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContainer, { height: '80%' }]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Notifikasi</Text>
+              <TouchableOpacity onPress={() => setNotifModal(false)}>
+                <Ionicons name="close" size={24} color={LaundryColors.textPrimary} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {notifLoading ? (
+                <View style={styles.notifLoadingWrap}>
+                  <ActivityIndicator size="small" color={LaundryColors.primary} />
+                  <Text style={styles.notifLoadingText}>Memuat notifikasi...</Text>
+                </View>
+              ) : notifError ? (
+                <View style={styles.errorBanner}>
+                  <Ionicons name="alert-circle" size={16} color={LaundryColors.error} />
+                  <Text style={styles.errorText}>{notifError}</Text>
+                  <TouchableOpacity onPress={onRefresh}>
+                    <Text style={styles.retryText}>Coba Lagi</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : notifications.length === 0 ? (
+                <View style={styles.emptyNotif}>
+                  <Ionicons name="notifications-off-outline" size={32} color={LaundryColors.textMuted} />
+                  <Text style={styles.emptyNotifText}>Belum ada notifikasi</Text>
+                </View>
+              ) : (
+                notifications.map((notif) => {
+                  const isRead = !!notif.is_read && notif.is_read !== 0;
+                  return (
+                    <View
+                      key={notif.notification_id}
+                      style={[styles.notifCard, !isRead && styles.notifCardUnread]}
+                    >
+                      <View style={styles.notifCardHeader}>
+                        <View style={[
+                          styles.notifDot,
+                          isRead && { backgroundColor: 'transparent', borderColor: LaundryColors.textMuted },
+                        ]} />
+                        <View style={styles.notifContent}>
+                          {notif.title ? (
+                            <Text style={styles.notifTitle}>{notif.title}</Text>
+                          ) : null}
+                          <Text style={styles.notifMessage}>{notif.body || notif.message}</Text>
+                          <Text style={styles.notifDate}>{formatDate(notif.created_at)}</Text>
+                        </View>
+                      </View>
+
+                      {!isRead ? (
+                        <TouchableOpacity
+                          style={styles.markReadButton}
+                          onPress={() => handleMarkAsRead(notif.notification_id)}
+                          disabled={markingRead === notif.notification_id}
+                          activeOpacity={0.7}
+                        >
+                          {markingRead === notif.notification_id ? (
+                            <ActivityIndicator size="small" color={LaundryColors.primary} />
+                          ) : (
+                            <>
+                              <Ionicons name="checkmark" size={14} color={LaundryColors.primary} />
+                              <Text style={styles.markReadText}>Tandai Dibaca</Text>
+                            </>
+                          )}
+                        </TouchableOpacity>
+                      ) : null}
+                    </View>
+                  );
+                })
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      <SettingsModal visible={settingsModal} onClose={() => setSettingsModal(false)} />
+      <HelpModal visible={helpModal} onClose={() => setHelpModal(false)} />
+      <AboutModal visible={aboutModal} onClose={() => setAboutModal(false)} />
 
       {/* EDIT PROFILE MODAL */}
       <Modal visible={editModal} transparent animationType="slide">
@@ -342,6 +366,7 @@ const styles = StyleSheet.create({
   profileCard: {
     backgroundColor: LaundryColors.backgroundWhite, borderRadius: 20, padding: 24,
     alignItems: 'center', borderWidth: 1, borderColor: LaundryColors.inputBorder,
+    marginBottom: 16,
   },
   avatar: {
     width: 72, height: 72, borderRadius: 9999,
@@ -358,14 +383,23 @@ const styles = StyleSheet.create({
   },
   roleBadgeText: { fontSize: 12, fontWeight: '700', color: LaundryColors.primary },
 
-  detailsList: {
-    width: '100%', marginTop: 20, paddingTop: 16,
-    borderTopWidth: 1, borderTopColor: LaundryColors.inputBorder, gap: 16,
+  // Menu
+  menuCard: {
+    backgroundColor: LaundryColors.textWhite, borderRadius: 16,
+    borderWidth: 1, borderColor: LaundryColors.inputBorder, marginBottom: 16,
+    overflow: 'hidden',
   },
-  detailItem: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  detailContent: { flex: 1 },
-  detailLabel: { fontSize: 10, color: LaundryColors.textMuted, fontWeight: '500' },
-  detailValue: { fontSize: 14, color: LaundryColors.textPrimary, fontWeight: '500', marginTop: 1 },
+  menuItem: {
+    flexDirection: 'row', alignItems: 'center', padding: 16, gap: 12,
+  },
+  menuItemBorder: {
+    borderBottomWidth: 1, borderBottomColor: LaundryColors.inputBorder,
+  },
+  menuIcon: {
+    width: 36, height: 36, borderRadius: 12,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  menuLabel: { flex: 1, fontSize: 14, fontWeight: '600', color: LaundryColors.textPrimary },
 
   /* Section */
   sectionHeader: { marginTop: 24, marginBottom: 12 },

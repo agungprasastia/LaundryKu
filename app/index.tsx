@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,8 @@ import {
   StatusBar,
   Platform,
   ScrollView,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -29,6 +31,42 @@ export default function WelcomeScreen() {
   const buttonSlide = useRef(new Animated.Value(20)).current;
   const masukScale = useRef(new Animated.Value(1)).current;
   const daftarScale = useRef(new Animated.Value(1)).current;
+
+  // Carousel state
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  const features = [
+    {
+      id: '1',
+      title: 'Pickup Mudah',
+      desc: 'Jemput cucian langsung dari lokasi Anda.',
+      icon: 'truck-delivery-outline',
+      iconFamily: 'MaterialCommunityIcons',
+    },
+    {
+      id: '2',
+      title: 'Tracking Real-Time',
+      desc: 'Pantau status cucian Anda secara langsung dan transparan.',
+      icon: 'location',
+      iconFamily: 'Ionicons',
+    },
+    {
+      id: '3',
+      title: 'Delivery Cepat',
+      desc: 'Cucian bersih diantar kembali tepat waktu ke rumah Anda.',
+      icon: 'truck-fast-outline',
+      iconFamily: 'MaterialCommunityIcons',
+    },
+  ];
+
+  const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const slideSize = SCREEN_WIDTH;
+    const index = event.nativeEvent.contentOffset.x / slideSize;
+    const roundIndex = Math.round(index);
+    if (activeSlide !== roundIndex && roundIndex >= 0 && roundIndex < features.length) {
+      setActiveSlide(roundIndex);
+    }
+  };
 
   // Floating bubbles
   const bubble1 = useRef(new Animated.Value(0)).current;
@@ -154,38 +192,31 @@ export default function WelcomeScreen() {
             Praktis, cepat, dan terpercaya.
           </Text>
 
-          {/* Feature cards row */}
-          <View style={styles.featuresRow}>
-            <View style={styles.featureCard}>
-              <View style={[styles.featureIconWrap, { backgroundColor: LaundryColors.rolePelangganBg }]}>
-                <MaterialCommunityIcons name="truck-delivery-outline" size={24} color={LaundryColors.primary} />
+          {/* Feature cards carousel */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            pagingEnabled
+            onScroll={onScroll}
+            scrollEventThrottle={16}
+            style={styles.featuresScroll}
+          >
+            {features.map((item) => (
+              <View key={item.id} style={styles.featureCardWrap}>
+                <View style={styles.featureCard}>
+                  <View style={[styles.featureIconWrap, { backgroundColor: LaundryColors.rolePelangganBg }]}>
+                    {item.iconFamily === 'Ionicons' ? (
+                      <Ionicons name={item.icon as any} size={36} color={LaundryColors.primary} />
+                    ) : (
+                      <MaterialCommunityIcons name={item.icon as any} size={36} color={LaundryColors.primary} />
+                    )}
+                  </View>
+                  <Text style={styles.featureTitleBig}>{item.title}</Text>
+                  <Text style={styles.featureDescBig}>{item.desc}</Text>
+                </View>
               </View>
-              <Text style={styles.featureTitle}>Pickup Mudah</Text>
-              <Text style={styles.featureDesc}>
-                Jemput cucian langsung dari lokasi Anda.
-              </Text>
-            </View>
-
-            <View style={styles.featureCard}>
-              <View style={[styles.featureIconWrap, { backgroundColor: LaundryColors.rolePelangganBg }]}>
-                <Ionicons name="location" size={24} color={LaundryColors.primary} />
-              </View>
-              <Text style={styles.featureTitle}>Tracking Real-Time</Text>
-              <Text style={styles.featureDesc}>
-                Pantau status cucian Anda secara langsung dan transparan.
-              </Text>
-            </View>
-
-            <View style={styles.featureCard}>
-              <View style={[styles.featureIconWrap, { backgroundColor: LaundryColors.rolePelangganBg }]}>
-                <MaterialCommunityIcons name="truck-fast-outline" size={24} color={LaundryColors.primary} />
-              </View>
-              <Text style={styles.featureTitle}>Delivery Cepat</Text>
-              <Text style={styles.featureDesc}>
-                Cucian bersih diantar kembali tepat waktu ke rumah Anda.
-              </Text>
-            </View>
-          </View>
+            ))}
+          </ScrollView>
 
           {/* Buttons */}
           <Animated.View style={[styles.buttonsArea, { opacity: buttonFade, transform: [{ translateY: buttonSlide }] }]}>
@@ -219,9 +250,12 @@ export default function WelcomeScreen() {
 
             {/* Pagination dots */}
             <View style={styles.dotsRow}>
-              <View style={[styles.dot, styles.dotActive]} />
-              <View style={styles.dot} />
-              <View style={styles.dot} />
+              {features.map((_, index) => (
+                <View
+                  key={index}
+                  style={[styles.dot, activeSlide === index && styles.dotActive]}
+                />
+              ))}
             </View>
           </Animated.View>
         </Animated.View>
@@ -413,42 +447,46 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
 
-  /* Features row */
-  featuresRow: {
-    flexDirection: 'row',
-    gap: 10,
+  /* Features */
+  featuresScroll: {
+    marginHorizontal: -24,
     marginBottom: 26,
+  },
+  featureCardWrap: {
+    width: SCREEN_WIDTH,
+    paddingHorizontal: 24,
   },
   featureCard: {
     flex: 1,
     backgroundColor: LaundryColors.backgroundWhite,
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: LaundryColors.inputBorder,
-    paddingVertical: 16,
-    paddingHorizontal: 10,
+    paddingVertical: 24,
+    paddingHorizontal: 20,
     alignItems: 'center',
   },
   featureIconWrap: {
-    width: 46,
-    height: 46,
-    borderRadius: 16,
+    width: 64,
+    height: 64,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: 16,
   },
-  featureTitle: {
-    fontSize: 12,
+  featureTitleBig: {
+    fontSize: 18,
     fontWeight: '700',
     color: LaundryColors.textPrimary,
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 8,
   },
-  featureDesc: {
-    fontSize: 10,
+  featureDescBig: {
+    fontSize: 14,
     color: LaundryColors.textSecondary,
     textAlign: 'center',
-    lineHeight: 14,
+    lineHeight: 22,
+    paddingHorizontal: 10,
   },
 
   /* Buttons */

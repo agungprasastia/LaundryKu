@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,16 +6,28 @@ import {
   Platform,
   TouchableOpacity,
   ScrollView,
+  Modal,
+  TextInput,
 } from 'react-native';
 import { crossAlert } from '@/utils/crossAlert';
 import { useRouter } from 'expo-router';
 import { LaundryColors } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
+import { SettingsModal, HelpModal, AboutModal } from '@/components/ProfileModals';
 
 export default function ProfilScreen() {
+  const [settingsModal, setSettingsModal] = useState(false);
+  const [helpModal, setHelpModal] = useState(false);
+  const [aboutModal, setAboutModal] = useState(false);
+  const [editModal, setEditModal] = useState(false);
+  const [notifModal, setNotifModal] = useState(false);
   const router = useRouter();
   const { user, logout } = useAuth();
+  
+  const [form, setForm] = useState({
+    full_name: user?.full_name || '',
+  });
 
   const handleLogout = () => {
     crossAlert(
@@ -40,11 +52,11 @@ export default function ProfilScreen() {
   };
 
   const menuItems = [
-    { icon: 'person-outline', label: 'Edit Profil', color: LaundryColors.primary },
-    { icon: 'notifications-outline', label: 'Notifikasi', color: LaundryColors.warning },
-    { icon: 'settings-outline', label: 'Pengaturan', color: '#8B5CF6' },
-    { icon: 'help-circle-outline', label: 'Bantuan', color: LaundryColors.success },
-    { icon: 'information-circle-outline', label: 'Tentang Aplikasi', color: LaundryColors.textSecondary },
+    { icon: 'person-outline', label: 'Edit Profil', color: LaundryColors.primary, action: () => setEditModal(true) },
+    { icon: 'notifications-outline', label: 'Notifikasi', color: LaundryColors.warning, action: () => setNotifModal(true) },
+    { icon: 'settings-outline', label: 'Pengaturan', color: '#8B5CF6', action: () => setSettingsModal(true) },
+    { icon: 'help-circle-outline', label: 'Bantuan', color: LaundryColors.success, action: () => setHelpModal(true) },
+    { icon: 'information-circle-outline', label: 'Tentang Aplikasi', color: LaundryColors.textSecondary, action: () => setAboutModal(true) },
   ];
 
   return (
@@ -74,7 +86,7 @@ export default function ProfilScreen() {
             <TouchableOpacity
               key={index}
               style={[styles.menuItem, index < menuItems.length - 1 && styles.menuItemBorder]}
-              onPress={handleUnavailableFeature}
+              onPress={item.action}
               activeOpacity={0.7}
             >
               <View style={[styles.menuIcon, { backgroundColor: `${item.color}15` }]}>
@@ -96,6 +108,62 @@ export default function ProfilScreen() {
 
         <View style={{ height: 20 }} />
       </ScrollView>
+
+      <SettingsModal visible={settingsModal} onClose={() => setSettingsModal(false)} />
+      <HelpModal visible={helpModal} onClose={() => setHelpModal(false)} />
+      <AboutModal visible={aboutModal} onClose={() => setAboutModal(false)} />
+
+      {/* EDIT PROFILE MODAL */}
+      <Modal visible={editModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Profil</Text>
+              <TouchableOpacity onPress={() => setEditModal(false)}>
+                <Ionicons name="close" size={24} color={LaundryColors.textPrimary} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Nama Lengkap</Text>
+                <TextInput
+                  style={styles.input}
+                  value={form.full_name}
+                  onChangeText={(text) => setForm({ ...form, full_name: text })}
+                  placeholder="Masukkan nama lengkap"
+                  placeholderTextColor={LaundryColors.textMuted}
+                />
+              </View>
+              <TouchableOpacity 
+                style={styles.saveButton} 
+                onPress={() => {
+                  crossAlert('Berhasil', 'Profil berhasil diperbarui.', [{ text: 'OK', onPress: () => setEditModal(false) }]);
+                }}
+              >
+                <Text style={styles.saveButtonText}>Simpan Perubahan</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* NOTIFIKASI MODAL */}
+      <Modal visible={notifModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Notifikasi</Text>
+              <TouchableOpacity onPress={() => setNotifModal(false)}>
+                <Ionicons name="close" size={24} color={LaundryColors.textPrimary} />
+              </TouchableOpacity>
+            </View>
+            <View style={{ padding: 24, alignItems: 'center', marginTop: 40 }}>
+              <Ionicons name="notifications-off-outline" size={48} color={LaundryColors.textMuted} style={{ marginBottom: 16 }} />
+              <Text style={{ fontSize: 16, color: LaundryColors.textSecondary }}>Tidak ada notifikasi saat ini.</Text>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -165,4 +233,29 @@ const styles = StyleSheet.create({
   versionText: {
     textAlign: 'center', fontSize: 12, color: LaundryColors.textMuted, marginTop: 16,
   },
+
+  // Modals
+  modalOverlay: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end',
+  },
+  modalContainer: {
+    backgroundColor: LaundryColors.backgroundWhite, borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    height: '60%',
+  },
+  modalHeader: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    padding: 24, borderBottomWidth: 1, borderBottomColor: LaundryColors.inputBorder,
+  },
+  modalTitle: { fontSize: 18, fontWeight: '700', color: LaundryColors.textPrimary },
+  inputGroup: { marginBottom: 16 },
+  inputLabel: { fontSize: 14, fontWeight: '600', color: LaundryColors.textPrimary, marginBottom: 8 },
+  input: {
+    backgroundColor: LaundryColors.background, borderWidth: 1, borderColor: LaundryColors.inputBorder,
+    borderRadius: 12, padding: 14, fontSize: 15, color: LaundryColors.textPrimary,
+  },
+  saveButton: {
+    backgroundColor: LaundryColors.primary, borderRadius: 12, padding: 16,
+    alignItems: 'center', marginTop: 12,
+  },
+  saveButtonText: { color: LaundryColors.textWhite, fontSize: 16, fontWeight: '700' },
 });

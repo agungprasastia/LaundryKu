@@ -7,6 +7,7 @@ import { LaundryColors } from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
 import * as notificationService from "@/services/notificationService";
 import { Notification } from "@/types/notification";
+import { SettingsModal, HelpModal, AboutModal } from '@/components/ProfileModals';
 import {
   CourierScreen,
   EmptyState,
@@ -25,6 +26,15 @@ export default function CourierProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+
+  const [notifModal, setNotifModal] = useState(false);
+  const [settingsModal, setSettingsModal] = useState(false);
+  const [helpModal, setHelpModal] = useState(false);
+  const [aboutModal, setAboutModal] = useState(false);
+
+  const handleUnavailableFeature = () => {
+    crossAlert('Fitur Belum Tersedia', 'Fitur ini belum tersedia.', [{ text: 'OK' }]);
+  };
 
   const [editModal, setEditModal] = useState(false);
   const [form, setForm] = useState({
@@ -105,6 +115,16 @@ export default function CourierProfileScreen() {
 
   const isUserVerified = isVerified(user?.is_verified);
 
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+
+  const menuItems = [
+    { icon: 'person-outline', label: 'Edit Profil', color: LaundryColors.roleKurirIcon, action: handleEditProfile },
+    { icon: 'notifications-outline', label: 'Notifikasi', color: LaundryColors.warning, action: () => setNotifModal(true) },
+    { icon: 'settings-outline', label: 'Pengaturan', color: '#8B5CF6', action: () => setSettingsModal(true) },
+    { icon: 'help-circle-outline', label: 'Bantuan', color: LaundryColors.success, action: () => setHelpModal(true) },
+    { icon: 'information-circle-outline', label: 'Tentang Aplikasi', color: LaundryColors.textSecondary, action: () => setAboutModal(true) },
+  ];
+
   return (
     <CourierScreen
       title="Profil Kurir"
@@ -142,102 +162,93 @@ export default function CourierProfileScreen() {
         </View>
       </View>
 
-      {/* PROFILE DETAILS */}
-      <View style={styles.detailsCard}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <Text style={[styles.detailsHeading, { marginBottom: 0 }]}>Informasi Kendaraan & Akun</Text>
-          <TouchableOpacity onPress={handleEditProfile} style={{ paddingHorizontal: 12, paddingVertical: 6, backgroundColor: LaundryColors.roleKurirBg, borderRadius: 12 }}>
-            <Text style={{ color: LaundryColors.roleKurirIcon, fontWeight: '600', fontSize: 12 }}>Edit Profil</Text>
-          </TouchableOpacity>
-        </View>
-        
-        <View style={styles.detailRow}>
-          <View style={styles.detailIconBox}>
-            <Ionicons name="car-outline" size={20} color={LaundryColors.roleKurirIcon} />
-          </View>
-          <View style={styles.detailContent}>
-            <Text style={styles.detailLabel}>Kendaraan</Text>
-            <Text style={styles.detailValue}>{user?.vehicle_name || "-"}</Text>
-          </View>
-        </View>
-
-        <View style={styles.detailDivider} />
-
-        <View style={styles.detailRow}>
-          <View style={styles.detailIconBox}>
-            <Ionicons name="barcode-outline" size={20} color={LaundryColors.roleKurirIcon} />
-          </View>
-          <View style={styles.detailContent}>
-            <Text style={styles.detailLabel}>Plat Nomor</Text>
-            <Text style={styles.detailValue}>{user?.vehicle_plate_number || "-"}</Text>
-          </View>
-        </View>
-
-        <View style={styles.detailDivider} />
-
-        <View style={styles.detailRow}>
-          <View style={styles.detailIconBox}>
-            <Ionicons name="home-outline" size={20} color={LaundryColors.roleKurirIcon} />
-          </View>
-          <View style={styles.detailContent}>
-            <Text style={styles.detailLabel}>Alamat Rumah</Text>
-            <Text style={styles.detailValue}>{user?.address || "-"}</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* NOTIFICATIONS SECTION */}
-      <View style={styles.notificationsHeaderRow}>
-        <Text style={courierStyles.sectionTitle}>Notifikasi Terbaru</Text>
-        {notifications.filter(i => !i.is_read).length > 0 && (
-          <View style={styles.unreadBadge}>
-            <Text style={styles.unreadBadgeText}>{notifications.filter(i => !i.is_read).length} Baru</Text>
-          </View>
-        )}
-      </View>
-
-      {loading ? (
-        <LoadingState text="Memuat notifikasi..." />
-      ) : error ? (
-        <ErrorState message={error} onRetry={loadNotifications} />
-      ) : notifications.length === 0 ? (
-        <EmptyState title="Tidak ada notifikasi" icon="notifications-off-outline" />
-      ) : (
-        notifications.map((n) => (
+      {/* ─── Menu Items ─── */}
+      <View style={styles.menuCard}>
+        {menuItems.map((item, index) => (
           <TouchableOpacity
-            key={n.notification_id}
-            style={[styles.notificationCard, !n.is_read && styles.notificationCardUnread]}
-            onPress={() => markRead(n)}
-            activeOpacity={0.8}
+            key={index}
+            style={[styles.menuItem, index < menuItems.length - 1 && styles.menuItemBorder]}
+            onPress={item.action}
+            activeOpacity={0.7}
           >
-            <View style={[styles.notifIconBox, !n.is_read && styles.notifIconBoxUnread]}>
-              <Ionicons 
-                name={n.is_read ? "notifications-outline" : "notifications"} 
-                size={22} 
-                color={!n.is_read ? LaundryColors.roleKurirIcon : LaundryColors.textMuted} 
-              />
+            <View style={[styles.menuIcon, { backgroundColor: `${item.color}15` }]}>
+              <Ionicons name={item.icon as any} size={20} color={item.color} />
             </View>
-            <View style={styles.notifContentBox}>
-              <View style={styles.notifHeaderRow}>
-                <Text style={[styles.notifTitle, !n.is_read && styles.notifTitleUnread]} numberOfLines={1}>
-                  {n.title || n.type || "Notifikasi"}
-                </Text>
-                <Text style={styles.notifTime}>{formatDate(n.created_at)}</Text>
+            <Text style={styles.menuLabel}>{item.label}</Text>
+            {item.label === 'Notifikasi' && unreadCount > 0 && (
+              <View style={{ backgroundColor: LaundryColors.error, borderRadius: 10, paddingHorizontal: 6, paddingVertical: 2, marginRight: 8 }}>
+                <Text style={{ color: 'white', fontSize: 10, fontWeight: 'bold' }}>{unreadCount}</Text>
               </View>
-              <Text style={styles.notifMessage} numberOfLines={2}>
-                {n.body || n.message || "-"}
-              </Text>
-            </View>
-            {!n.is_read && <View style={styles.unreadDot} />}
+            )}
+            <Ionicons name="chevron-forward" size={18} color={LaundryColors.textMuted} />
           </TouchableOpacity>
-        ))
-      )}
+        ))}
+      </View>
 
       {/* LOGOUT */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.8}>
         <Ionicons name="log-out-outline" size={20} color={LaundryColors.error} />
         <Text style={styles.logoutButtonText}>Keluar Akun</Text>
       </TouchableOpacity>
+
+      {/* NOTIFICATIONS MODAL */}
+      <Modal visible={notifModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContainer, { height: '80%' }]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Notifikasi</Text>
+              <TouchableOpacity onPress={() => setNotifModal(false)}>
+                <Ionicons name="close" size={24} color={LaundryColors.textPrimary} />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={{ flex: 1 }}>
+              {loading ? (
+                <LoadingState text="Memuat notifikasi..." />
+              ) : error ? (
+                <ErrorState message={error} onRetry={loadNotifications} />
+              ) : notifications.length === 0 ? (
+                <EmptyState title="Tidak ada notifikasi" icon="notifications-off-outline" />
+              ) : (
+                <View style={{ flex: 1 }}>
+                  {notifications.map((n) => (
+                    <TouchableOpacity
+                      key={n.notification_id}
+                      style={[styles.notificationCard, !n.is_read && styles.notificationCardUnread]}
+                      onPress={() => markRead(n)}
+                      activeOpacity={0.8}
+                    >
+                      <View style={[styles.notifIconBox, !n.is_read && styles.notifIconBoxUnread]}>
+                        <Ionicons 
+                          name={n.is_read ? "notifications-outline" : "notifications"} 
+                          size={22} 
+                          color={!n.is_read ? LaundryColors.roleKurirIcon : LaundryColors.textMuted} 
+                        />
+                      </View>
+                      <View style={styles.notifContentBox}>
+                        <View style={styles.notifHeaderRow}>
+                          <Text style={[styles.notifTitle, !n.is_read && styles.notifTitleUnread]} numberOfLines={1}>
+                            {n.title || n.type || "Notifikasi"}
+                          </Text>
+                          <Text style={styles.notifTime}>{formatDate(n.created_at)}</Text>
+                        </View>
+                        <Text style={styles.notifMessage} numberOfLines={2}>
+                          {n.body || n.message || "-"}
+                        </Text>
+                      </View>
+                      {!n.is_read && <View style={styles.unreadDot} />}
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <SettingsModal visible={settingsModal} onClose={() => setSettingsModal(false)} />
+      <HelpModal visible={helpModal} onClose={() => setHelpModal(false)} />
+      <AboutModal visible={aboutModal} onClose={() => setAboutModal(false)} />
 
       {/* EDIT PROFILE MODAL */}
       <Modal visible={editModal} transparent animationType="slide">
@@ -405,53 +416,23 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  detailsCard: {
-    backgroundColor: LaundryColors.backgroundWhite,
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: LaundryColors.inputBorder,
+  // Menu
+  menuCard: {
+    backgroundColor: LaundryColors.textWhite, borderRadius: 16,
+    borderWidth: 1, borderColor: LaundryColors.inputBorder, marginBottom: 20,
+    overflow: 'hidden',
   },
-  detailsHeading: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: LaundryColors.textPrimary,
-    marginBottom: 16,
+  menuItem: {
+    flexDirection: 'row', alignItems: 'center', padding: 16, gap: 12,
   },
-  detailRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 16,
+  menuItemBorder: {
+    borderBottomWidth: 1, borderBottomColor: LaundryColors.inputBorder,
   },
-  detailIconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: LaundryColors.surfaceSlate,
-    alignItems: "center",
-    justifyContent: "center",
+  menuIcon: {
+    width: 36, height: 36, borderRadius: 12,
+    alignItems: 'center', justifyContent: 'center',
   },
-  detailContent: {
-    flex: 1,
-  },
-  detailLabel: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: LaundryColors.textSecondary,
-    marginBottom: 2,
-  },
-  detailValue: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: LaundryColors.textPrimary,
-  },
-  detailDivider: {
-    height: 1,
-    backgroundColor: LaundryColors.inputBorder,
-    marginVertical: 16,
-    marginLeft: 56,
-  },
+  menuLabel: { flex: 1, fontSize: 14, fontWeight: '600', color: LaundryColors.textPrimary },
 
   logoutButton: {
     flexDirection: "row",
