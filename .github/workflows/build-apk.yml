@@ -8,6 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      EXPO_PUBLIC_API_URL: https://laundryku-api-production-4666.up.railway.app
+      EXPO_PUBLIC_USE_DUMMY_PAYMENT: true
+      EXPO_PUBLIC_ALLOW_MANUAL_COORDS: false
 
     steps:
       - name: Checkout repository
