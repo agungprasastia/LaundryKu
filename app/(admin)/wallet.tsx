@@ -164,11 +164,6 @@ export default function AdminWalletScreen() {
                 <Text style={styles.withdrawBtnText}>Tarik Saldo</Text>
               </InteractiveButton>
             </View>
-
-            <View style={styles.walletPendingRow}>
-              <Text style={styles.walletMetaLabel}>Pending</Text>
-              <Text style={styles.walletMetaValue}>{formatMoney(pendingBalance)}</Text>
-            </View>
           </View>
         </View>
 
@@ -454,12 +449,6 @@ const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
     fontSize: LaundryTypography.size.base,
     color: LaundryColors.textSecondary,
     textAlign: "center",
-  },
-  walletPendingRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 12,
   },
   withdrawBtn: {
     flexDirection: "row",
