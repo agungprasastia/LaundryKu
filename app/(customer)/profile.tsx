@@ -319,6 +319,7 @@ export default function CustomerProfileScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Masukkan nama lengkap..."
+                  placeholderTextColor={LaundryColors.textMuted}
                   value={form.full_name}
                   onChangeText={(t) => setForm({ ...form, full_name: t })}
                 />
@@ -328,6 +329,7 @@ export default function CustomerProfileScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Masukkan alamat lengkap..."
+                  placeholderTextColor={LaundryColors.textMuted}
                   value={form.address}
                   onChangeText={(t) => setForm({ ...form, address: t })}
                   multiline

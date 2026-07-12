@@ -270,6 +270,7 @@ export default function CourierProfileScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Masukkan tipe kendaraan..."
+                  placeholderTextColor={LaundryColors.textMuted}
                   value={form.vehicle_name}
                   onChangeText={(t) => setForm({ ...form, vehicle_name: t })}
                 />
@@ -279,6 +280,7 @@ export default function CourierProfileScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Masukkan plat nomor..."
+                  placeholderTextColor={LaundryColors.textMuted}
                   value={form.vehicle_plate_number}
                   onChangeText={(t) => setForm({ ...form, vehicle_plate_number: t })}
                 />
@@ -288,6 +290,7 @@ export default function CourierProfileScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Masukkan alamat lengkap..."
+                  placeholderTextColor={LaundryColors.textMuted}
                   value={form.address}
                   onChangeText={(t) => setForm({ ...form, address: t })}
                   multiline
