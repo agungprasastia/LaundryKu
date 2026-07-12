@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   Modal,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -245,7 +246,7 @@ export default function OwnerProfileScreen() {
               ) : items.length === 0 ? (
                 <EmptyState title="Tidak ada notifikasi" icon="notifications-off-outline" />
               ) : (
-                <View style={{ flex: 1 }}>
+                <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
                   {items.map((n) => (
                     <TouchableOpacity
                       key={n.notification_id}
@@ -274,7 +275,7 @@ export default function OwnerProfileScreen() {
                       {!n.is_read && <View style={styles.unreadDot} />}
                     </TouchableOpacity>
                   ))}
-                </View>
+                </ScrollView>
               )}
             </View>
           </View>

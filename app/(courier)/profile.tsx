@@ -1,6 +1,6 @@
 import { ThemeColors } from '@/constants/colors';
 import React, { useCallback, useEffect, useState } from "react";
-import { RefreshControl, StyleSheet, Text, TouchableOpacity, View, Modal, TextInput } from "react-native";
+import { RefreshControl, StyleSheet, Text, TouchableOpacity, View, Modal, TextInput, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { crossAlert } from "@/utils/crossAlert";
@@ -213,7 +213,7 @@ export default function CourierProfileScreen() {
               ) : notifications.length === 0 ? (
                 <EmptyState title="Tidak ada notifikasi" icon="notifications-off-outline" />
               ) : (
-                <View style={{ flex: 1 }}>
+                <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
                   {notifications.map((n) => (
                     <TouchableOpacity
                       key={n.notification_id}
@@ -242,7 +242,7 @@ export default function CourierProfileScreen() {
                       {!n.is_read && <View style={styles.unreadDot} />}
                     </TouchableOpacity>
                   ))}
-                </View>
+                </ScrollView>
               )}
             </View>
           </View>
