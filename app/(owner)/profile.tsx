@@ -302,6 +302,7 @@ export default function OwnerProfileScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Masukkan alamat lengkap..."
+                  placeholderTextColor={LaundryColors.textMuted}
                   value={form.address}
                   onChangeText={(t) => setForm({ ...form, address: t })}
                   multiline
