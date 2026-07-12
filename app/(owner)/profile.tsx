@@ -308,43 +308,47 @@ export default function OwnerProfileScreen() {
                 />
               </View>
 
-              <View style={{ flexDirection: 'row', gap: 12 }}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 14, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Latitude</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="-6.200000"
-                    value={form.lat}
-                    onChangeText={(t) => setForm({ ...form, lat: t })}
-                    keyboardType="numeric"
-                  />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 14, fontWeight: "500", color: LaundryColors.textSecondary, marginBottom: 6 }}>Longitude</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="106.816666"
-                    value={form.lng}
-                    onChangeText={(t) => setForm({ ...form, lng: t })}
-                    keyboardType="numeric"
-                  />
-                </View>
+              {/* Modern GPS Action Card */}
+              <View style={styles.locationContainer}>
+                {form.lat && form.lng ? (
+                  <View style={styles.locationSuccessCard}>
+                    <View style={styles.locationIconWrapper}>
+                      <Ionicons name="location" size={24} color="#166534" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.locationSuccessTitle}>Lokasi GPS Tersemat</Text>
+                      <Text style={styles.locationSuccessSub}>Latitude/Longitude berhasil direkam.</Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={getLocation}
+                      disabled={gettingLocation}
+                      style={styles.reselectBtn}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.reselectBtnText}>
+                        {gettingLocation ? "..." : "Ubah"}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.locationButton}
+                    onPress={getLocation}
+                    disabled={gettingLocation}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="navigate-circle-outline" size={28} color="#0284C7" />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.locationButtonTitle}>
+                        {gettingLocation ? "Mengambil GPS..." : "Deteksi Lokasi GPS Outlet"}
+                      </Text>
+                      <Text style={styles.locationButtonSub}>
+                        Klik untuk mencatat koordinat lokasi outlet secara otomatis
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
               </View>
-              
-              <TouchableOpacity
-                onPress={getLocation}
-                disabled={gettingLocation}
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingVertical: 4 }}
-              >
-                <Ionicons name="location" size={16} color={LaundryColors.primary} />
-                <Text style={{ fontSize: 14, fontWeight: "600", color: LaundryColors.primary }}>
-                  {gettingLocation ? "Mengambil lokasi..." : "Ambil dari GPS Saat Ini"}
-                </Text>
-              </TouchableOpacity>
-              
-              <Text style={{ fontSize: 12, color: LaundryColors.textMuted }}>
-                * Kosongkan Latitude & Longitude jika tidak ingin diubah.
-              </Text>
             </View>
 
             <View style={styles.modalFooter}>
@@ -505,6 +509,69 @@ const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: LaundryColors.error,
+  },
+
+  locationContainer: {
+    marginBottom: 8,
+  },
+  locationButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F0F9FF",
+    borderColor: "#B9E6FE",
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 16,
+    gap: 12,
+  },
+  locationButtonTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#0284C7",
+  },
+  locationButtonSub: {
+    fontSize: 12,
+    color: "#0369A1",
+    marginTop: 2,
+  },
+  locationSuccessCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F0FDF4",
+    borderColor: "#DCFCE7",
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 16,
+    gap: 12,
+  },
+  locationIconWrapper: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#DCFCE7",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  locationSuccessTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#166534",
+  },
+  locationSuccessSub: {
+    fontSize: 12,
+    color: "#15803D",
+    marginTop: 2,
+  },
+  reselectBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: "#DCFCE7",
+  },
+  reselectBtnText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#166534",
   },
 
   notificationsHeaderRow: {
