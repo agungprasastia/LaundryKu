@@ -54,7 +54,9 @@
           "locationAlwaysAndWhenInUsePermission": "LaundryKu membutuhkan akses lokasi untuk menentukan titik pickup laundry Anda.",
           "locationWhenInUsePermission": "LaundryKu membutuhkan akses lokasi untuk menentukan titik pickup laundry Anda."
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,
