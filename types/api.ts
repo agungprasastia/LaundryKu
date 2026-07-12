@@ -50,6 +50,7 @@ export interface AdminAnalytics {
   total_orders?: number;
   total_commission?: number;
   platform_commission?: number;
+  total_admin_commission?: number;
   total_users?: number;
   active_couriers?: number;
   completed_orders?: number;

@@ -118,7 +118,7 @@ export default function LaporanScreen() {
                 </View>
                 <Text style={styles.statLabel}>Total Komisi</Text>
                 <Text style={styles.statValue}>
-                  {formatCurrency(analytics.total_commission || analytics.platform_commission)}
+                  {formatCurrency(analytics.total_commission || analytics.platform_commission || analytics.total_admin_commission)}
                 </Text>
               </View>
 
