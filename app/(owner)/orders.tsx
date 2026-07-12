@@ -493,7 +493,7 @@ function Info({ k, v, bold, highlight }: { k: string; v: React.ReactNode; bold?:
 }
 
 const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
-  title: { fontSize: 16, fontWeight: "700", color: LaundryColors.textPrimary },
+  title: { fontSize: 16, fontWeight: "700", color: LaundryColors.textPrimary, flex: 1 },
   customerName: { fontSize: 16, fontWeight: "700", color: LaundryColors.textPrimary, marginTop: 4 },
   serviceName: { fontSize: 14, color: LaundryColors.textSecondary, marginTop: 2 },
   price: { fontSize: 16, fontWeight: "700", color: LaundryColors.roleMitraIcon },

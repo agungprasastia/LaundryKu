@@ -137,6 +137,7 @@ const createStyles = (LaundryColors: ThemeColors) => StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: LaundryColors.textPrimary,
+    flex: 1,
   },
   orderDivider: {
     height: 1,
