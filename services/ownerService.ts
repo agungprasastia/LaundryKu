@@ -8,6 +8,7 @@ export interface OwnerReportSummary {
   total_revenue?: number;
   owner_revenue?: number;
   owner_earning?: number;
+  owner_net_earning?: number;
   total_owner_earning?: number;
   active_orders?: number;
   pending_orders?: number;

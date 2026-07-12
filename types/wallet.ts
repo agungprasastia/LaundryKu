@@ -7,6 +7,7 @@ export interface Wallet {
   balance: number;
   available_balance?: number;
   pending_balance?: number;
+  total_earned?: number;
   created_at?: string;
   updated_at?: string;
 }

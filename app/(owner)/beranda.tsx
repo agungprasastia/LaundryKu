@@ -139,7 +139,7 @@ export default function OwnerBerandaScreen() {
 
   const totalOrders = summary?.total_orders ?? summary?.total_order ?? orders.length;
   const active = summary?.active_orders ?? orders.filter((order) => activeStatuses.includes(order.status)).length;
-  const revenue = summary?.owner_revenue ?? summary?.owner_earning ?? summary?.total_owner_earning ?? summary?.total_revenue ?? orders.reduce((sum, order) => sum + Number(order.owner_earning || 0), 0);
+  const revenue = summary?.owner_net_earning ?? wallet?.total_earned ?? summary?.owner_revenue ?? summary?.owner_earning ?? summary?.total_owner_earning ?? summary?.total_revenue ?? orders.reduce((sum, order) => sum + Number(order.owner_earning || 0), 0);
   const available = wallet?.available_balance ?? wallet?.balance ?? 0;
   const pending = wallet?.pending_balance ?? 0;
 
